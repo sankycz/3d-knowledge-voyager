@@ -345,149 +345,149 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
             )}
           </div>
 
-          {/* READER OVERLAY (Full-screen for focused reading) */}
-          <AnimatePresence>
-            {activeArticle && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className="absolute inset-0 z-[110] bg-[#050505] flex flex-col overflow-hidden"
-              >
-                {/* Reader Header */}
-                <div className="sticky top-0 z-20 p-8 backdrop-blur-3xl bg-black/40 border-b border-white/5 flex justify-between items-center">
-                  <button 
-                    onClick={() => setActiveArticle(null)}
-                    className="flex items-center gap-2 text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
-                  >
-                    <X size={18} /> Zavřít čtečku
-                  </button>
-                  
-                  <div className="flex items-center gap-6">
-                     {/* AI Voice Toggle */}
-                     {activeArticle.isAnalyzed && (
-                       <button 
-                         onClick={() => speak(`${activeArticle.title}. ${activeArticle.summary}`)}
-                         className={`flex items-center gap-3 px-6 py-2 rounded-full border transition-all duration-500 ${
-                           isSpeaking 
-                             ? "bg-[#00d1ff]/20 border-[#00d1ff] text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.4)]" 
-                             : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/30"
-                         }`}
-                       >
-                         {isSpeaking ? (
-                           <>
-                             <VolumeX size={16} className="animate-pulse" />
-                             <div className="flex gap-1 items-center h-4">
-                               {[1,2,3,4,5,6].map(i => (
-                                 <motion.div 
-                                   key={i}
-                                   animate={{ height: [4, 14, 4, 10, 4] }}
-                                   transition={{ 
-                                     repeat: Infinity, 
-                                     duration: 0.8 + (i * 0.1), 
-                                     delay: i * 0.1,
-                                     ease: "easeInOut"
-                                   }}
-                                   className="w-1 bg-[#00d1ff] rounded-full opacity-80"
-                                 />
-                               ))}
-                             </div>
-                             <span className="text-[10px] font-black uppercase tracking-widest">Ztlumit AI</span>
-                           </>
-                         ) : (
-                           <>
-                             <Volume2 size={16} />
-                             <span className="text-[10px] font-black uppercase tracking-widest">Přečíst analýzu</span>
-                           </>
-                         )}
-                       </button>
-                     )}
-                     
-                     <div className="h-6 w-px bg-white/10 hidden md:block"></div>
-                     
-                     <div className="flex items-center gap-4">
-                        <button onClick={(e) => handleSave(e, activeArticle.id)} className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all">
-                          <Bookmark size={16} fill={savedIds.includes(activeArticle.id) ? "#00d1ff" : "none"} className={savedIds.includes(activeArticle.id) ? "text-[#00d1ff]" : "text-white"} />
-                        </button>
-                        <a href={activeArticle.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all text-white">
-                          <ExternalLink size={16} />
-                        </a>
-                     </div>
-                  </div>
-                </div>
-
-                {/* Reader Content */}
-                <div className="flex-1 overflow-y-auto no-scrollbar">
-                  <div className="w-[94vw] md:w-[90vw] max-w-7xl mx-auto px-4 md:px-12 py-20">
-                    {/* Cover Image */}
-                    {activeArticle.image && (
-                      <div className="relative w-full h-[400px] mb-12 rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
-                        <img src={activeArticle.image} alt={activeArticle.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-4 mb-8">
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00d1ff] bg-[#00d1ff]/10 px-4 py-1.5 rounded-full border border-[#00d1ff]/20">
-                        {activeArticle.source || "Intelligence Paper"}
-                      </span>
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">
-                        {activeArticle.date ? new Date(activeArticle.date).toLocaleDateString() : "Aktuální"}
-                      </span>
-                    </div>
-
-                    <h1 className="text-5xl font-display font-black tracking-tighter leading-[1.05] text-white mb-10">
-                      {activeArticle.title}
-                    </h1>
-
-                    {/* AI Highlight Block */}
-                    <div className="mb-16 p-8 rounded-[32px] bg-white/[0.03] border border-white/10 shadow-2xl relative overflow-hidden group">
-                      <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#9d00ff]/10 blur-[60px] group-hover:bg-[#9d00ff]/20 transition-all"></div>
-                      <h4 className="flex items-center gap-2 text-[10px] font-black text-[#9d00ff] uppercase tracking-[0.4em] mb-6">
-                        <Sparkles size={14} className="fill-[#9d00ff]/20" /> 
-                        VOYAGER ANALÝZA
-                      </h4>
-                      <div className="space-y-4 mb-8">
-                        {activeArticle.summary.split("\n").map((p, i) => (
-                           <p key={i} className="text-lg text-white/90 font-medium leading-relaxed">{p}</p>
-                        ))}
-                      </div>
-                      {activeArticle.insight && (
-                        <div className="pt-6 border-t border-white/5">
-                          <p className="text-sm font-bold text-[#00d1ff] italic">" {activeArticle.insight} "</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Full Content Stream */}
-                    <div className="text-xl text-neutral-300 leading-[1.8] font-medium space-y-8 pb-32">
-                      {activeArticle.fullContent ? (
-                        activeArticle.fullContent.split("\n\n").map((para, idx) => (
-                          <p key={idx}>{para}</p>
-                        ))
-                      ) : (
-                        <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[32px]">
-                           <Loader2 size={32} className="animate-spin text-[#00d1ff] mx-auto mb-4" />
-                           <p className="text-sm font-black uppercase tracking-widest text-neutral-600">Rekonstruuji původní data...</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Reader Footer Utility */}
-                <div className="p-8 bg-black/80 border-t border-white/5 text-center">
-                   <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">KONEC STREAMU &copy; 2026</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* Footer */}
           <div className="p-8 bg-black/40 border-t border-white/5 text-[10px] font-black text-neutral-600 uppercase tracking-[0.3em] text-center">
             MODERNÍ ZPRAVODAJSTVÍ POHÁNĚNÉ VIZÍ
           </div>
         </motion.div>
+
+        {/* READER OVERLAY (Full-screen for focused reading) */}
+        <AnimatePresence>
+          {activeArticle && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="fixed inset-0 z-[110] bg-[#050505] flex flex-col overflow-hidden"
+            >
+              {/* Reader Header */}
+              <div className="sticky top-0 z-20 p-8 backdrop-blur-3xl bg-black/40 border-b border-white/5 flex justify-between items-center">
+                <button 
+                  onClick={() => setActiveArticle(null)}
+                  className="flex items-center gap-2 text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
+                >
+                  <X size={18} /> Zavřít čtečku
+                </button>
+                
+                <div className="flex items-center gap-6">
+                   {/* AI Voice Toggle */}
+                   {activeArticle.isAnalyzed && (
+                     <button 
+                       onClick={() => speak(`${activeArticle.title}. ${activeArticle.summary}`)}
+                       className={`flex items-center gap-3 px-6 py-2 rounded-full border transition-all duration-500 ${
+                         isSpeaking 
+                           ? "bg-[#00d1ff]/20 border-[#00d1ff] text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.4)]" 
+                           : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/30"
+                       }`}
+                     >
+                       {isSpeaking ? (
+                         <>
+                           <VolumeX size={16} className="animate-pulse" />
+                           <div className="flex gap-1 items-center h-4">
+                             {[1,2,3,4,5,6].map(i => (
+                               <motion.div 
+                                 key={i}
+                                 animate={{ height: [4, 14, 4, 10, 4] }}
+                                 transition={{ 
+                                   repeat: Infinity, 
+                                   duration: 0.8 + (i * 0.1), 
+                                   delay: i * 0.1,
+                                   ease: "easeInOut"
+                                 }}
+                                 className="w-1 bg-[#00d1ff] rounded-full opacity-80"
+                               />
+                             ))}
+                           </div>
+                           <span className="text-[10px] font-black uppercase tracking-widest">Ztlumit AI</span>
+                         </>
+                       ) : (
+                         <>
+                           <Volume2 size={16} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Přečíst analýzu</span>
+                         </>
+                       )}
+                     </button>
+                   )}
+                   
+                   <div className="h-6 w-px bg-white/10 hidden md:block"></div>
+                   
+                   <div className="flex items-center gap-4">
+                      <button onClick={(e) => handleSave(e, activeArticle.id)} className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all">
+                        <Bookmark size={16} fill={savedIds.includes(activeArticle.id) ? "#00d1ff" : "none"} className={savedIds.includes(activeArticle.id) ? "text-[#00d1ff]" : "text-white"} />
+                      </button>
+                      <a href={activeArticle.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all text-white">
+                        <ExternalLink size={16} />
+                      </a>
+                   </div>
+                </div>
+              </div>
+
+              {/* Reader Content */}
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                <div className="w-full px-6 md:px-16 lg:px-32 py-20">
+                  {/* Cover Image */}
+                  {activeArticle.image && (
+                    <div className="relative w-full h-[50vh] mb-12 rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
+                      <img src={activeArticle.image} alt={activeArticle.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 mb-8">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00d1ff] bg-[#00d1ff]/10 px-4 py-1.5 rounded-full border border-[#00d1ff]/20">
+                      {activeArticle.source || "Intelligence Paper"}
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">
+                      {activeArticle.date ? new Date(activeArticle.date).toLocaleDateString() : "Aktuální"}
+                    </span>
+                  </div>
+
+                  <h1 className="text-5xl font-display font-black tracking-tighter leading-[1.05] text-white mb-10">
+                    {activeArticle.title}
+                  </h1>
+
+                  {/* AI Highlight Block */}
+                  <div className="mb-16 p-8 rounded-[32px] bg-white/[0.03] border border-white/10 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#9d00ff]/10 blur-[60px] group-hover:bg-[#9d00ff]/20 transition-all"></div>
+                    <h4 className="flex items-center gap-2 text-[10px] font-black text-[#9d00ff] uppercase tracking-[0.4em] mb-6">
+                      <Sparkles size={14} className="fill-[#9d00ff]/20" /> 
+                      VOYAGER ANALÝZA
+                    </h4>
+                    <div className="space-y-4 mb-8">
+                      {activeArticle.summary.split("\n").map((p, i) => (
+                         <p key={i} className="text-lg text-white/90 font-medium leading-relaxed">{p}</p>
+                      ))}
+                    </div>
+                    {activeArticle.insight && (
+                      <div className="pt-6 border-t border-white/5">
+                        <p className="text-sm font-bold text-[#00d1ff] italic">" {activeArticle.insight} "</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Full Content Stream */}
+                  <div className="text-xl text-neutral-300 leading-[1.8] font-medium space-y-8 pb-32">
+                    {activeArticle.fullContent ? (
+                      activeArticle.fullContent.split("\n\n").map((para, idx) => (
+                        <p key={idx}>{para}</p>
+                      ))
+                    ) : (
+                      <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[32px]">
+                         <Loader2 size={32} className="animate-spin text-[#00d1ff] mx-auto mb-4" />
+                         <p className="text-sm font-black uppercase tracking-widest text-neutral-600">Rekonstruuji původní data...</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Reader Footer Utility */}
+              <div className="p-8 bg-black/80 border-t border-white/5 text-center">
+                 <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">KONEC STREAMU &copy; 2026</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </>
     )}
   </AnimatePresence>
