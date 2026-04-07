@@ -360,7 +360,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                     onClick={() => setActiveArticle(null)}
                     className="flex items-center gap-2 text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
                   >
-                    <X size={18} /> Close Reader
+                    <X size={18} /> Zavřít čtečku
                   </button>
                   
                   <div className="flex items-center gap-6">
@@ -392,12 +392,12 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                                  />
                                ))}
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-widest">Mute AI</span>
+                             <span className="text-[10px] font-black uppercase tracking-widest">Ztlumit AI</span>
                            </>
                          ) : (
                            <>
                              <Volume2 size={16} />
-                             <span className="text-[10px] font-black uppercase tracking-widest">Listen to Analysis</span>
+                             <span className="text-[10px] font-black uppercase tracking-widest">Přečíst analýzu</span>
                            </>
                          )}
                        </button>
@@ -418,7 +418,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
 
                 {/* Reader Content */}
                 <div className="flex-1 overflow-y-auto no-scrollbar">
-                  <div className="max-w-3xl mx-auto px-8 py-20">
+                  <div className="w-[94vw] md:w-[90vw] max-w-7xl mx-auto px-4 md:px-12 py-20">
                     {/* Cover Image */}
                     {activeArticle.image && (
                       <div className="relative w-full h-[400px] mb-12 rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
@@ -445,7 +445,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                       <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#9d00ff]/10 blur-[60px] group-hover:bg-[#9d00ff]/20 transition-all"></div>
                       <h4 className="flex items-center gap-2 text-[10px] font-black text-[#9d00ff] uppercase tracking-[0.4em] mb-6">
                         <Sparkles size={14} className="fill-[#9d00ff]/20" /> 
-                        VOYAGER ANALYSIS
+                        VOYAGER ANALÝZA
                       </h4>
                       <div className="space-y-4 mb-8">
                         {activeArticle.summary.split("\n").map((p, i) => (
@@ -468,7 +468,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                       ) : (
                         <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[32px]">
                            <Loader2 size={32} className="animate-spin text-[#00d1ff] mx-auto mb-4" />
-                           <p className="text-sm font-black uppercase tracking-widest text-neutral-600">Reconstructing raw intelligence data...</p>
+                           <p className="text-sm font-black uppercase tracking-widest text-neutral-600">Rekonstruuji původní data...</p>
                         </div>
                       )}
                     </div>
@@ -477,7 +477,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
 
                 {/* Reader Footer Utility */}
                 <div className="p-8 bg-black/80 border-t border-white/5 text-center">
-                   <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">END OF STREAM &copy; 2026</p>
+                   <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">KONEC STREAMU &copy; 2026</p>
                 </div>
               </motion.div>
             )}

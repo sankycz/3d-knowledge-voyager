@@ -9,11 +9,16 @@ interface ScrapedData {
 
 export async function scrapeArticle(url: string): Promise<ScrapedData | null> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
       }
     });
+    clearTimeout(timeoutId);
     
     if (!response.ok) throw new Error(`Failed to fetch ${url}`);
     

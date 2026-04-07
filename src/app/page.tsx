@@ -46,7 +46,7 @@ export default function Home() {
       <div className="sticky top-0 left-0 right-0 z-[30] flex justify-between items-center px-16 py-10 pointer-events-none">
         <div className="flex items-center gap-3 bg-white/[0.03] backdrop-blur-md border border-white/10 px-6 py-2 rounded-full text-[#00d1ff] shadow-xl pointer-events-auto transition-all hover:bg-white/5 cursor-default">
           <Sparkles size={14} className="animate-pulse" />
-          <span className="text-[10px] font-black tracking-[0.3em] uppercase">VOYAGER INTELLIGENCE v2.0</span>
+          <span className="text-[10px] font-black tracking-[0.3em] uppercase">VOYAGER INTELIGENCE v3.0</span>
         </div>
         
         <button 
@@ -54,7 +54,7 @@ export default function Home() {
           onClick={() => setIsPanelOpen(true)}
           className="pointer-events-auto flex items-center gap-3 px-8 py-3 rounded-full bg-[#00d1ff]/10 hover:bg-[#00d1ff]/20 border border-[#00d1ff]/30 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 group shadow-[0_0_30px_rgba(0,209,255,0.2)] hover:shadow-[0_0_40px_rgba(0,209,255,0.4)]"
         >
-          EXPLORE HUB
+          CENTRUM ZNALOSTÍ
           <Globe size={16} className="group-hover:rotate-[30deg] transition-transform duration-500 text-[#00d1ff]" />
         </button>
       </div>
@@ -66,11 +66,11 @@ export default function Home() {
             VOYAGER
           </h1>
           <h2 className="text-6xl font-display font-bold leading-[0.9] tracking-tighter mb-4 text-white">
-            LATEST <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d1ff] to-[#9d00ff]">INTELLIGENCE</span>
+            NEJNOVĚJŠÍ <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d1ff] to-[#9d00ff]">INTELIGENCE</span>
           </h2>
           <p className="text-sm text-neutral-500 font-medium tracking-widest uppercase opacity-60">
-            Real-time AI analysis & knowledge exploration
+            Reálném čase AI analýza & průzkum znalostí
           </p>
         </div>
 
@@ -85,9 +85,9 @@ export default function Home() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="bg-[#00d1ff]/10 text-[#00d1ff] px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-[#00d1ff]/20">
-                  {idx === 0 ? "FEATURED" : "LATEST"}
+                  {idx === 0 ? "HLAVNÍ" : "NEJNOVĚJŠÍ"}
                 </div>
-                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest">AI NEWS</span>
+                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest">AI NOVINKY</span>
               </div>
               <h3 className="text-lg font-display font-bold text-white mb-3 line-clamp-2 leading-tight group-hover/card:text-[#00d1ff] transition-colors">
                 {item.title}
@@ -97,7 +97,7 @@ export default function Home() {
               </p>
               
               <div className="flex items-center justify-between text-[8px] font-black text-neutral-500 uppercase tracking-[0.2em]">
-                <span>Analysis Pending</span>
+                <span>Čeká na zpracování</span>
                 <Zap size={10} className="text-[#00d1ff] opacity-40 group-hover/card:opacity-100 transition-opacity" />
               </div>
 
@@ -122,12 +122,12 @@ export default function Home() {
               setSearchQuery(e.target.value);
               if (e.target.value.length > 1) setIsPanelOpen(true);
             }}
-            placeholder="Search AI trends..."
+            placeholder="Hledat trendy v AI..."
             className="w-full bg-transparent border-none py-5 px-16 text-xl focus:ring-0 outline-none placeholder:text-neutral-600 font-medium"
           />
           <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-[10px] font-black text-neutral-400 uppercase tracking-widest">
             <Zap size={12} className="text-[#00d1ff]" />
-            REAL-TIME AI
+            AI V R. ČASE
           </div>
         </div>
       </div>
