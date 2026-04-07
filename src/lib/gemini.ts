@@ -18,7 +18,7 @@ const safetySettings = [
 ];
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-pro",
+  model: "gemini-1.5-flash",
 });
 
 export async function generateDeepSummary(title: string, rawContent: string) {
@@ -37,12 +37,14 @@ export async function generateDeepSummary(title: string, rawContent: string) {
     1. "title": Úderný, bulvární ale seriózní český titulek (Cyberpunk/Tech styl).
     2. "summary": 3-5 klíčových bodů (odrážek) vysvětlujících PODSTATU sdělení. Žádná omáčka.
     3. "strategic_insight": Jedna věta o tom, jaký to má DŮSLEDREK pro budoucnost nebo trh (tzv. "The Big Picture").
+    4. "translated_content": Profesionální ZCELA KOMPLETNÍ překlad celého dodaného těla článku do češtiny.
 
     ODPOVÍDEJ POUZE ČISTÝM JSON FORMÁTEM, BEZ MARKDOWNU:
     {
       "title": "...",
       "summary": "...",
-      "strategic_insight": "..."
+      "strategic_insight": "...",
+      "translated_content": "..."
     }
   `;
 
@@ -63,7 +65,8 @@ export async function generateDeepSummary(title: string, rawContent: string) {
       return {
         title: parsed.title || title,
         summary: parsed.summary || "Shrnutí nebylo vygenerováno.",
-        strategic_insight: parsed.strategic_insight || null
+        strategic_insight: parsed.strategic_insight || null,
+        translated_content: parsed.translated_content || null
       };
     } catch (parseError) {
       console.error("JSON Parse Error on text:", jsonMatch[0]);
@@ -73,8 +76,9 @@ export async function generateDeepSummary(title: string, rawContent: string) {
     console.error("Gemini Deep Summary Error:", error);
     return {
       title: title || "Analýza nedostupná",
-      summary: "Nepodařilo se vygenerovat AI rozbor. Důvodem může být ochrana autorských práv na straně zdroje nebo přetížení API. Zkuste to prosím znovu za chvíli.",
-      strategic_insight: null
+      summary: "Nepodařilo se vygenerovat AI rozbor. API je patrně přetíženo nebo klíč expiruje.",
+      strategic_insight: null,
+      translated_content: null
     };
   }
 }

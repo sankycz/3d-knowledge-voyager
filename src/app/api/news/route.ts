@@ -90,7 +90,7 @@ export async function GET() {
       link: item.link,
       date: item.pubDate || item.isoDate,
       source: item.sourceName || "AI Hub",
-      isAnalyzed: true // Pro aktivaci AI hlasu v Readeru
+      isAnalyzed: false // Set to false to trigger the analyze endpoint on click or preload
     }));
 
     return NextResponse.json(processedItems);

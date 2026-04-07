@@ -17,6 +17,7 @@ interface NewsItem {
   date?: string;
   isAnalyzed?: boolean;
   isLoading?: boolean;
+  translated_content?: string;
 }
 
 interface NewsFeedProps {
@@ -24,9 +25,10 @@ interface NewsFeedProps {
   onClose: () => void;
   items: NewsItem[];
   searchQuery: string;
+  selectedArticleId?: number | null;
 }
 
-export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQuery }: NewsFeedProps) {
+export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQuery, selectedArticleId }: NewsFeedProps) {
   const [localItems, setLocalItems] = useState<NewsItem[]>([]);
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
@@ -76,6 +78,19 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
     }
   }, [initialItems, localItems.length]);
 
+  // Handle auto-opening from hero section
+  useEffect(() => {
+    if (isOpen && selectedArticleId !== undefined && selectedArticleId !== null && localItems.length > selectedArticleId) {
+      const item = localItems[selectedArticleId];
+      if (activeArticle?.id !== item.id) {
+        setActiveArticle(item);
+        if (!item.isAnalyzed && !item.isLoading) {
+          analyzeItem(selectedArticleId);
+        }
+      }
+    }
+  }, [isOpen, selectedArticleId, localItems.length]);
+
   // Toast auto-hide
   useEffect(() => {
     if (toast) {
@@ -102,15 +117,26 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
       });
       const data = await res.json();
       
-      // Aktualizovat kartu s výsledky AI výcucu a obrázkem
-      setLocalItems(prev => prev.map((it, idx) => 
-        idx === index ? { ...it, ...data, isLoading: false, isAnalyzed: true } : it
-      ));
+      setLocalItems(prev => {
+        const next = [...prev];
+        next[index] = { ...next[index], ...data, isLoading: false, isAnalyzed: true };
+        setActiveArticle(currentActive => {
+          if (currentActive && currentActive.id === next[index].id) return next[index];
+          return currentActive;
+        });
+        return next;
+      });
     } catch (err) {
       console.error("AI Analysis Failed:", err);
-      setLocalItems(prev => prev.map((it, idx) => 
-        idx === index ? { ...it, isLoading: false, summary: "Analýza selhala. Zkuste to znovu." } : it
-      ));
+      setLocalItems(prev => {
+        const next = [...prev];
+        next[index] = { ...next[index], isLoading: false, summary: "Analýza selhala. Zkuste to znovu." };
+        setActiveArticle(currentActive => {
+          if (currentActive && currentActive.id === next[index].id) return next[index];
+          return currentActive;
+        });
+        return next;
+      });
     }
   }, [localItems]);
 
@@ -232,9 +258,8 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                   key={`${item.id}-${index}`}
                   layout
                   onClick={() => {
-                    if (item.isAnalyzed) {
-                      setActiveArticle(item);
-                    } else {
+                    setActiveArticle(item);
+                    if (!item.isAnalyzed && !item.isLoading) {
                       analyzeItem(index);
                     }
                   }}
@@ -467,10 +492,16 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
 
                   {/* Full Content Stream */}
                   <div className="text-xl text-neutral-300 leading-[1.8] font-medium space-y-8 pb-32">
-                    {activeArticle.fullContent ? (
-                      activeArticle.fullContent.split("\n\n").map((para, idx) => (
+                    {activeArticle.translated_content ? (
+                      activeArticle.translated_content.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
                       ))
+                    ) : activeArticle.fullContent ? (
+                      <div>
+                        {activeArticle.fullContent.split("\n\n").map((para, idx) => (
+                           <p key={idx} className="opacity-70">{para}</p>
+                        ))}
+                      </div>
                     ) : (
                       <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[32px]">
                          <Loader2 size={32} className="animate-spin text-[#00d1ff] mx-auto mb-4" />

@@ -16,6 +16,7 @@ interface NewsItem {
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
 
   // Centrální načítání dat
@@ -51,7 +52,10 @@ export default function Home() {
         
         <button 
           id="explore-btn"
-          onClick={() => setIsPanelOpen(true)}
+          onClick={() => {
+            setSelectedArticleId(null);
+            setIsPanelOpen(true);
+          }}
           className="pointer-events-auto flex items-center gap-3 px-8 py-3 rounded-full bg-[#00d1ff]/10 hover:bg-[#00d1ff]/20 border border-[#00d1ff]/30 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 group shadow-[0_0_30px_rgba(0,209,255,0.2)] hover:shadow-[0_0_40px_rgba(0,209,255,0.4)]"
         >
           CENTRUM ZNALOSTÍ
@@ -79,7 +83,10 @@ export default function Home() {
           {news.slice(0, 6).map((item, idx) => (
             <div 
               key={item.id}
-              onClick={() => setIsPanelOpen(true)}
+              onClick={() => {
+                setSelectedArticleId(idx);
+                setIsPanelOpen(true);
+              }}
               className={`group/card relative cyber-glass rounded-[32px] p-6 border border-white/5 transition-all duration-500 hover:border-[#00d1ff]/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] cursor-pointer animate-float ${idx % 2 === 0 ? '' : 'sm:translate-y-6'}`}
               style={{ animationDelay: `${idx * 0.2}s` }}
             >
@@ -132,12 +139,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* News Feed Panel */}
+      {/* Postranní lišta (NewsFeed & Reader) */}
       <NewsFeed 
         isOpen={isPanelOpen} 
         onClose={() => setIsPanelOpen(false)} 
         items={news} 
         searchQuery={searchQuery}
+        selectedArticleId={selectedArticleId}
       />
 
       {/* Side HUD Stats - FIXED at top right */}

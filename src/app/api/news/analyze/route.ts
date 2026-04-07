@@ -29,6 +29,7 @@ export async function POST(request: Request) {
       title: deepAnalysis.title || title,
       summary: deepAnalysis.summary || "Analýza proběhla s omezenými daty.",
       insight: deepAnalysis.strategic_insight || null,
+      translated_content: deepAnalysis.translated_content || null,
       image: scrapedData?.image || null,
       fullContent: scrapedData?.fullContent || null,
       isAnalyzed: true
