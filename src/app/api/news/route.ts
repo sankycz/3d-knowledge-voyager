@@ -41,61 +41,61 @@ const FEEDS_MAP: Record<string, string> = {
   "https://www.artificialintelligence-news.com/feed/": "AI News Hub"
 };
 
-const FEED_URLS = Object.keys(FEEDS_MAP);
-
 export async function GET() {
   try {
-    const allItems: (Parser.Item & { sourceName?: string })[] = [];
+    // Paralelní načítání všech feedů s ošetřením chyb a timeoutem
+    const feedPromises = Object.entries(FEEDS_MAP).map(async ([url, sourceName]) => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
+        
+        const feed = await parser.parseURL(url);
+        clearTimeout(timeoutId);
 
-    const feedPromises = FEED_URLS.map(url => 
-      parser.parseURL(url).catch(e => {
-        console.error(`RSS Error ${url}:`, e.message);
-        return { items: [] };
-      })
-    );
-    
-    const feeds = await Promise.all(feedPromises);
-
-    feeds.forEach((feed, idx) => {
-      const sourceName = FEEDS_MAP[FEED_URLS[idx]];
-      if (feed.items && feed.items.length > 0) {
-        feed.items.slice(0, 2).forEach(item => {
-          (item as any).sourceName = sourceName;
-          allItems.push(item);
-        });
+        return (feed.items || []).slice(0, 3).map(item => ({
+          ...item,
+          sourceName
+        }));
+      } catch (err) {
+        console.error(`RSS Fetch Fail [${url}]:`, err);
+        return [];
       }
     });
 
-    const sortedItems = allItems.sort((a, b) => 
-      new Date(b.pubDate || "").getTime() - new Date(a.pubDate || "").getTime()
+    const results = await Promise.all(feedPromises);
+    const allItems = results.flat();
+
+    // Seřazení a limit
+    const sortedItems = allItems.sort((a: any, b: any) => 
+      new Date(b.pubDate || b.isoDate || "").getTime() - new Date(a.pubDate || a.isoDate || "").getTime()
     ).slice(0, 30);
 
-    // HROMADNÝ PŘEKLAD TITULKŮ (Blesková AI operace)
+    // HROMADNÝ PŘEKLAD (Blesková operace)
     const titlesToTranslate = sortedItems.map(it => it.title).join("\n---\n");
-    const prompt = `Přelož tyto technologické titulky článků do ČEŠTINY. Zachovej pořadí a formát (oddělovat pomocí '---'). Odpověz POUZE přeloženými titulky na nové řádky.\n\nTITULKY:\n${titlesToTranslate}`;
+    const prompt = `Přelož tyto technologické titulky článků do ČEŠTINY. Zachovej pořadí. Odděluj '---'. Pouze překlady.\n\nTITULKY:\n${titlesToTranslate}`;
     
     let translatedTitles: string[] = [];
     try {
         const translationResult = await model.generateContent(prompt);
-        const translationText = translationResult.response.text();
-        translatedTitles = translationText.split("---").map(t => t.trim());
+        const text = translationResult.response.text();
+        translatedTitles = text.split("---").map(t => t.trim());
     } catch (err) {
-        console.error("Hromadný překlad selhal:", err);
+        console.error("Překlad selhal:", err);
     }
 
-    const processedItems = sortedItems.map((item, index) => ({
+    const processedItems = sortedItems.map((item: any, index: number) => ({
       id: index,
-      title: translatedTitles[index] || item.title, // Použije překlad nebo původní titulek
-      summary: "Načítám AI analýzu...",
+      title: translatedTitles[index] || item.title,
+      summary: "Analýza Voyager 3.0 k dispozici...",
       link: item.link,
-      date: item.pubDate,
-      source: (item as any).sourceName || "AI Novinka",
-      isAnalyzed: false
+      date: item.pubDate || item.isoDate,
+      source: item.sourceName || "AI Hub",
+      isAnalyzed: true // Pro aktivaci AI hlasu v Readeru
     }));
 
     return NextResponse.json(processedItems);
-  } catch (error) {
-    console.error("Chyba v API novinek (Fast List):", error);
-    return NextResponse.json({ error: "Nepodařilo se načíst seznam novinek" }, { status: 500 });
+  } catch (err) {
+    console.error("Critical API Error:", err);
+    return NextResponse.json({ error: "Intelligence Hub is temporarily offline" }, { status: 500 });
   }
 }

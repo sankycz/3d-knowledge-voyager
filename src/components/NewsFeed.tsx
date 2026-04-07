@@ -378,12 +378,17 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                            <>
                              <VolumeX size={16} className="animate-pulse" />
                              <div className="flex gap-1 items-center h-4">
-                               {[1,2,3].map(i => (
+                               {[1,2,3,4,5,6].map(i => (
                                  <motion.div 
                                    key={i}
-                                   animate={{ height: [4, 12, 4] }}
-                                   transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.2 }}
-                                   className="w-1 bg-[#00d1ff] rounded-full"
+                                   animate={{ height: [4, 14, 4, 10, 4] }}
+                                   transition={{ 
+                                     repeat: Infinity, 
+                                     duration: 0.8 + (i * 0.1), 
+                                     delay: i * 0.1,
+                                     ease: "easeInOut"
+                                   }}
+                                   className="w-1 bg-[#00d1ff] rounded-full opacity-80"
                                  />
                                ))}
                              </div>

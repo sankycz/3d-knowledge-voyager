@@ -143,7 +143,7 @@ export default function Home() {
       {/* Side HUD Stats - FIXED at top right */}
       <div className="fixed top-32 right-16 z-20 flex flex-col gap-6 pointer-events-none">
         <div className="pointer-events-auto">
-          <StatCard label="Zdroje" value="20+" icon={<Database size={14} />} color="#00d1ff" />
+          <StatCard label="Zdroje" value="32+" icon={<Database size={14} />} color="#00d1ff" />
         </div>
         <div className="pointer-events-auto">
           <StatCard label="Analýza" value="Aktivní" icon={<Activity size={14} />} color="#9d00ff" />
