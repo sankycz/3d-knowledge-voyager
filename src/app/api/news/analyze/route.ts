@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateDeepSummary } from "@/lib/gemini";
+import { generateDeepSummary } from "@/lib/groq";
 import { scrapeArticle } from "@/lib/scraper";
 
 export async function POST(request: Request) {

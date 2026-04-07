@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import Parser from "rss-parser";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 const parser = new Parser();
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || "" });
 
 const FEEDS_MAP: Record<string, string> = {
   "https://asociace.ai/feed/": "Česká asociace AI",
@@ -76,8 +75,13 @@ export async function GET() {
     
     let translatedTitles: string[] = [];
     try {
-        const translationResult = await model.generateContent(prompt);
-        const text = translationResult.response.text();
+        const completion = await groq.chat.completions.create({
+          messages: [{ role: "user", content: prompt }],
+          model: "llama3-70b-8192",
+          temperature: 0.3,
+          max_tokens: 2048
+        });
+        const text = completion.choices[0]?.message?.content || "";
         translatedTitles = text.split("---").map(t => t.trim());
     } catch (err) {
         console.error("Překlad selhal:", err);
