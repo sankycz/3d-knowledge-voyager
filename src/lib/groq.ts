@@ -28,8 +28,7 @@ export async function generateDeepSummary(title: string, rawContent: string) {
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama3-70b-8192", // Groq's fast large model
-      temperature: 0.7,
+      model: "llama-3.3-70b-versatile", // Groq's fast large model
       max_tokens: 4096,
       top_p: 1,
       response_format: { type: "json_object" }
@@ -41,10 +40,11 @@ export async function generateDeepSummary(title: string, rawContent: string) {
     }
 
     const parsed = JSON.parse(responseContent);
+    const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
 
     return {
       title: parsed.title || title,
-      summary: parsed.summary || "Shrnutí nebylo vygenerováno.",
+      summary: summaryText,
       strategic_insight: parsed.strategic_insight || null,
       translated_content: parsed.translated_content || null
     };
