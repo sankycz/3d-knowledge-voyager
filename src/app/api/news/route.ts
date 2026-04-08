@@ -45,6 +45,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const extraFeedsParam = searchParams.get("extraFeeds");
+    const limit = parseInt(searchParams.get("limit") || "30");
+    const offset = parseInt(searchParams.get("offset") || "0");
     
     // Sestavení mapy všech feedů
     const allFeedsMap = { ...FEEDS_MAP };
@@ -63,6 +65,7 @@ export async function GET(request: Request) {
     }
 
     // Paralelní načítání všech feedů s ošetřením chyb a timeoutem
+    // Navýšeno na 10 položek na zdroj pro lepší paginaci
     const feedPromises = Object.entries(allFeedsMap).map(async ([url, sourceName]) => {
       try {
         const controller = new AbortController();
@@ -70,41 +73,44 @@ export async function GET(request: Request) {
         
         // Zkusíme nejprve RSS
         try {
-          const feed = await parser.parseURL(url);
-          clearTimeout(timeoutId);
-          return (feed.items || []).slice(0, 3).map(item => ({
-            title: item.title,
-            link: item.link,
-            pubDate: item.pubDate || item.isoDate,
-            sourceName
-          }));
+          const feed = await parser.parseURL(url).catch(() => null);
+          if (feed) {
+            clearTimeout(timeoutId);
+            return (feed.items || []).slice(0, 10).map(item => ({
+              title: item.title,
+              link: item.link,
+              pubDate: item.pubDate || item.isoDate,
+              sourceName
+            }));
+          }
         } catch (rssErr) {
-          // Pokud selže RSS, zkusíme scraping (pokud je to web)
-          const response = await fetch(url, { signal: controller.signal });
-          const html = await response.text();
-          const $ = cheerio.load(html);
-          
-          // Velmi jednoduchá heuristika pro "nejnovější články" (hledáme linky s h1/h2/h3)
-          const scrapedItems: any[] = [];
-          $("article, .post, .entry").slice(0, 3).each((_, el) => {
-            const titleEl = $(el).find("h1, h2, h3, .title").first();
-            const linkEl = $(el).find("a").first();
-            const title = titleEl.text().trim();
-            const link = linkEl.attr("href");
-            
-            if (title && link) {
-              scrapedItems.push({
-                title,
-                link: new URL(link, url).toString(),
-                pubDate: new Date().toISOString(), // Webové stránky často nemají datum v meta pro každý článek v listu
-                sourceName
-              });
-            }
-          });
-          
-          clearTimeout(timeoutId);
-          return scrapedItems;
+          // Fallback to fetch
         }
+
+        // Pokud selže RSS nebo vrátí null, zkusíme scraping
+        const response = await fetch(url, { signal: controller.signal });
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        
+        const scrapedItems: any[] = [];
+        $("article, .post, .entry").slice(0, 10).each((_, el) => {
+          const titleEl = $(el).find("h1, h2, h3, .title").first();
+          const linkEl = $(el).find("a").first();
+          const title = titleEl.text().trim();
+          const link = linkEl.attr("href");
+          
+          if (title && link) {
+            scrapedItems.push({
+              title,
+              link: new URL(link, url).toString(),
+              pubDate: new Date().toISOString(),
+              sourceName
+            });
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        return scrapedItems;
       } catch (err) {
         console.error(`Fetch Fail [${url}]:`, err);
         return [];
@@ -114,13 +120,20 @@ export async function GET(request: Request) {
     const results = await Promise.all(feedPromises);
     const allItems = results.flat();
 
-    // Seřazení a limit
+    // Seřazení podle data
     const sortedItems = allItems.sort((a: any, b: any) => 
       new Date(b.pubDate || b.isoDate || "").getTime() - new Date(a.pubDate || a.isoDate || "").getTime()
-    ).slice(0, 30);
+    );
 
-    // HROMADNÝ PŘEKLAD (Blesková operace)
-    const titlesToTranslate = sortedItems.map(it => it.title).join("\n---\n");
+    // Výběr položek pro aktuální stránku
+    const paginatedItems = sortedItems.slice(offset, offset + limit);
+
+    if (paginatedItems.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // HROMADNÝ PŘEKLAD pouze pro položky na stránce
+    const titlesToTranslate = paginatedItems.map(it => it.title).join("\n---\n");
     const prompt = `Přelož tyto technologické titulky článků do ČEŠTINY. Zachovej pořadí. Odděluj '---'. Pouze překlady.\n\nTITULKY:\n${titlesToTranslate}`;
     
     let translatedTitles: string[] = [];
@@ -137,14 +150,14 @@ export async function GET(request: Request) {
         console.error("Překlad selhal:", err);
     }
 
-    const processedItems = sortedItems.map((item: any, index: number) => ({
-      id: index,
-      title: translatedTitles[index] || item.title,
+    const processedItems = paginatedItems.map((item: any, index: number) => ({
+      id: offset + index, // Unikátní ID i při paginaci
+      title: (translatedTitles[index] && translatedTitles[index].length > 5) ? translatedTitles[index] : item.title,
       summary: "Analýza Voyager 3.0 k dispozici...",
       link: item.link,
       date: item.pubDate || item.isoDate,
       source: item.sourceName || "AI Hub",
-      isAnalyzed: false // Set to false to trigger the analyze endpoint on click or preload
+      isAnalyzed: false
     }));
 
     return NextResponse.json(processedItems);

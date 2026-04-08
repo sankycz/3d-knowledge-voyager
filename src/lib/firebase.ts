@@ -41,10 +41,16 @@ export const firebase = { app, auth, db, googleProvider };
 
 export const signInWithGoogle = async (): Promise<User | null> => {
   try {
+    if (!auth || typeof auth.signInWithPopup !== "function" || !googleProvider) {
+      alert("⚠️ Chyba přihlášení: Chybí nebo nejsou správně nakonfigurovány klíče pro Firebase v produkčním prostředí. Zkontrolujte nastavení na Vercelu.");
+      console.error("Firebase Auth is not properly initialized. Check environment variables.");
+      return null;
+    }
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
     console.error("Google sign‑in failed", error);
+    alert("Přihlášení přes Google se nezdařilo.");
     return null;
   }
 };
@@ -57,6 +63,10 @@ export const onAuthStateChangedListener = (callback: (user: User | null) => void
   if (auth && typeof auth.onAuthStateChanged === 'function') {
     return onAuthStateChanged(auth, callback);
   }
+  // Pokud Firebase není správně nainicializován (např. chybí proměnné prostředí na Vercelu),
+  // musíme okamžitě oznámit aplikaci, že nikdo není přihlášený.
+  // Jinak by AuthProvider čekal věčně a svítilo by jen prázdné kolečko loginu.
+  setTimeout(() => callback(null), 0);
   return () => {}; // No-op unsubscribe for build/missing-keys
 };
 

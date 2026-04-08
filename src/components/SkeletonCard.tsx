@@ -27,7 +27,7 @@ export default function SkeletonCard({ index }: { index: number }) {
       
       <div className="flex items-center justify-between text-[8px] font-black text-neutral-700 uppercase tracking-[0.2em]">
         <span className="flex items-center gap-2">
-          SCANNING DATA STREAM...
+          PROHLEDÁVÁM DATOVÝ TOK...
         </span>
         <Zap size={10} className="text-neutral-700 animate-pulse" />
       </div>

@@ -178,7 +178,7 @@ export default function SourceManager({ isOpen, onClose, onSourcesChange }: Sour
             {/* Tab Toggle */}
             <div className="flex bg-white/[0.03] rounded-2xl p-1 mb-6 border border-white/5">
               {([
-                { key: "rss", label: "RSS Feed", icon: <Rss size={12} /> },
+                { key: "rss", label: "RSS kanál", icon: <Rss size={12} /> },
                 { key: "web", label: "Webová stránka", icon: <Globe size={12} /> },
               ] as const).map(({ key, label, icon }) => (
                 <button
@@ -212,7 +212,7 @@ export default function SourceManager({ isOpen, onClose, onSourcesChange }: Sour
             {activeTab === "rss" && user && (
               <div className="space-y-4 mb-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-2">RSS URL</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-2">RSS adresa</label>
                   <input
                     type="url"
                     value={rssUrl}
@@ -350,7 +350,7 @@ export default function SourceManager({ isOpen, onClose, onSourcesChange }: Sour
             </div>
 
             <div className="mt-6 pt-5 border-t border-white/5 text-center">
-              <p className="text-[9px] font-black text-neutral-700 uppercase tracking-[0.3em]">VOYAGER INTELLIGENCE CUSTOMIZER</p>
+              <p className="text-[9px] font-black text-neutral-700 uppercase tracking-[0.3em]">NASTAVENÍ VOYAGER INTELIGENCE</p>
             </div>
           </motion.div>
         </>

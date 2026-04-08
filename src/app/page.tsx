@@ -8,7 +8,7 @@ import SkeletonCard from "@/components/SkeletonCard";
 import { Globe, Search, Sparkles, Zap, Settings, RefreshCw } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const REFRESH_INTERVAL_MS = 30 * 60 * 1000; // 30 minut
+const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minut
 
 function useInterval(callback: () => void, delay: number) {
   const savedCallback = useRef(callback);
@@ -38,6 +38,8 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const fingerprintRef = useRef<string>("");
 
   useEffect(() => {
@@ -45,20 +47,38 @@ export default function Home() {
   }, []);
 
   // Centrální načítání dat
-  const fetchNews = useCallback(async (silent = false) => {
-    if (!silent) setIsLoading(true);
-    else setIsRefreshing(true);
+  const fetchNews = useCallback(async (silent = false, isLoadMore = false) => {
+    if (!silent && !isLoadMore) setIsLoading(true);
+    else if (silent) setIsRefreshing(true);
+    
     try {
       const extraFeeds = customSources.map(s => s.url).join(",");
-      const url = extraFeeds ? `/api/news?extraFeeds=${encodeURIComponent(extraFeeds)}` : "/api/news";
+      const currentOffset = isLoadMore ? offset + 30 : 0;
+      
+      let url = `/api/news?limit=30&offset=${currentOffset}`;
+      if (extraFeeds) url += `&extraFeeds=${encodeURIComponent(extraFeeds)}`;
+      
       const res = await fetch(url);
       const data = await res.json();
-      // Fingerprint = hash prvních 8 titulků
-      const newFingerprint = (data as NewsItem[]).slice(0, 8).map((i: NewsItem) => i.title).join("|");
-      if (newFingerprint !== fingerprintRef.current || !silent) {
-        fingerprintRef.current = newFingerprint;
-        setNews(data);
-        setLastUpdated(new Date());
+      
+      if (!Array.isArray(data) || data.length < 30) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+      }
+
+      if (isLoadMore) {
+        setNews(prev => [...prev, ...data]);
+        setOffset(currentOffset);
+      } else {
+        // Fingerprint = hash prvních 8 titulků
+        const newFingerprint = (data as NewsItem[]).slice(0, 8).map((i: NewsItem) => i.title).join("|");
+        if (newFingerprint !== fingerprintRef.current || !silent) {
+          fingerprintRef.current = newFingerprint;
+          setNews(data);
+          setLastUpdated(new Date());
+          setOffset(0);
+        }
       }
     } catch (err) {
       console.error("Chyba při načítání novinek:", err);
@@ -66,7 +86,7 @@ export default function Home() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [customSources]);
+  }, [customSources, offset]);
 
   useEffect(() => { fetchNews(false); }, [customSources]);
 
@@ -85,18 +105,9 @@ export default function Home() {
 
       {/* Top HUD Controls */}
       <div className="sticky top-0 left-0 right-0 z-[30] flex justify-between items-center px-16 py-10 pointer-events-none">
-        <div className="flex items-center gap-3 bg-white/[0.03] backdrop-blur-md border border-white/10 px-6 py-2 rounded-full text-[#00d1ff] shadow-xl pointer-events-auto transition-all hover:bg-white/5 cursor-default">
-          <Sparkles size={14} className="animate-pulse" />
-          <span className="text-[10px] font-black tracking-[0.3em] uppercase">VOYAGER INTELIGENCE v3.0</span>
-        </div>
-        {/* Last Updated + Manual Refresh */}
-        <div className="hidden lg:flex items-center gap-2">
-          {isMounted && lastUpdated && (
-            <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 px-4 py-2 rounded-full text-neutral-600 text-[9px] font-black uppercase tracking-widest pointer-events-auto" suppressHydrationWarning>
-              <RefreshCw size={10} className={isRefreshing ? "animate-spin text-[#00d1ff]" : ""} />
-              {isRefreshing ? "Aktualizuji..." : `Aktuál.: ${lastUpdated.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })}`}
-            </div>
-          )}
+        <div className="flex items-center gap-3 bg-white/[0.04] backdrop-blur-xl border border-white/10 px-6 py-2.5 rounded-full text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.1)] pointer-events-auto transition-all hover:bg-white/10 cursor-default group">
+          <Sparkles size={14} className="animate-pulse group-hover:scale-110 transition-transform" />
+          <span className="text-[10px] font-black tracking-[0.4em] uppercase">VOYAGER INTELIGENCE</span>
         </div>
         
         <div className="flex items-center gap-6 pointer-events-auto">
@@ -150,7 +161,7 @@ export default function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d1ff] to-[#9d00ff]">INTELIGENCE</span>
           </h2>
           <p className="text-sm text-neutral-500 font-medium tracking-widest uppercase opacity-60">
-            Reálném čase AI analýza & průzkum znalostí
+            AI analýza & průzkum znalostí v reálném čase
           </p>
         </div>
 
@@ -195,6 +206,20 @@ export default function Home() {
             ))
           )}
         </div>
+
+        {/* Load More Button for Hero Grid */}
+        {!isLoading && news.length > 0 && hasMore && (
+          <div className="flex justify-center mt-24 mb-20 pointer-events-auto">
+            <button 
+              onClick={() => fetchNews(false, true)}
+              disabled={isLoading}
+              className="flex items-center gap-3 px-10 py-4 rounded-full bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-black text-[10px] uppercase tracking-[0.3em] transition-all group hover:scale-105 active:scale-95 disabled:opacity-50 shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
+            >
+              Načíst starší zprávy
+              <RefreshCw size={14} className={`group-hover:rotate-180 transition-transform duration-700 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Postranní lišta (NewsFeed & Reader) */}
@@ -204,14 +229,20 @@ export default function Home() {
         items={news} 
         searchQuery={searchQuery}
         selectedArticleId={selectedArticleId}
+        onLoadMore={() => fetchNews(false, true)}
+        hasMore={hasMore}
+        activeSources={customSources}
+        onRemoveSource={(url: string) => {
+          const updated = customSources.filter(s => s.url !== url);
+          setCustomSources(updated);
+          localStorage.setItem('voyager_custom_sources', JSON.stringify(updated));
+        }}
       />
-
-      {/* Side HUD Stats - FIXED at top right */}
-
 
       {/* Ambient Glass Border */}
       <div className="absolute inset-0 pointer-events-none border-[1px] border-white/[0.03] rounded-[48px] m-6"></div>
     </main>
+
   );
 }
 

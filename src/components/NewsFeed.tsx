@@ -28,9 +28,23 @@ interface NewsFeedProps {
   items: NewsItem[];
   searchQuery: string;
   selectedArticleId?: number | null;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  activeSources?: { url: string; name: string }[];
+  onRemoveSource?: (url: string) => void;
 }
 
-export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQuery, selectedArticleId }: NewsFeedProps) {
+export default function NewsFeed({ 
+  isOpen, 
+  onClose, 
+  items: initialItems, 
+  searchQuery, 
+  selectedArticleId,
+  onLoadMore,
+  hasMore = false,
+  activeSources = [],
+  onRemoveSource
+}: NewsFeedProps) {
   const [localItems, setLocalItems] = useState<NewsItem[]>([]);
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
@@ -86,10 +100,10 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
 
   // Synchronizace s úvodním seznamem
   useEffect(() => {
-    if (initialItems.length > 0 && localItems.length === 0) {
+    if (initialItems.length > 0) {
       setLocalItems(initialItems);
     }
-  }, [initialItems, localItems.length]);
+  }, [initialItems]);
 
   // Handle auto-opening from hero section
   useEffect(() => {
@@ -256,7 +270,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
               <div className="flex items-center gap-3 mt-3">
                 <div className="w-2 h-2 rounded-full bg-[#00ffa3] animate-pulse shadow-[0_0_10px_#00ffa3]"></div>
                 <span className="text-[12px] font-black text-neutral-500 uppercase tracking-[0.4em]">
-                  INTELLIGENCE STREAM v2.0
+                  PROUD INFORMACÍ v2.0
                 </span>
               </div>
             </div>
@@ -318,7 +332,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                           ? "bg-[#9d00ff]/30 text-[#dfb7ff] border border-[#9d00ff]/40 shadow-[0_0_20px_rgba(157,0,255,0.3)]" 
                           : "bg-white/5 text-neutral-500 border border-white/10"
                       }`}>
-                        {item.isLoading ? "Analyzing Architecture..." : item.isAnalyzed ? "Deep Insight Ready" : "Unfiltered Stream"}
+                        {item.isLoading ? "Analyzuji architekturu..." : item.isAnalyzed ? "Hloubková analýza připravena" : "Nefiltrovaný proud"}
                       </div>
                     </div>
 
@@ -384,6 +398,51 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
               <div className="h-64 flex flex-col items-center justify-center text-neutral-600 text-center">
                 <Search size={48} className="mb-4 opacity-10" />
                 <p className="font-bold uppercase tracking-widest text-[10px] opacity-40">Nebyla nalezena žádná data</p>
+              </div>
+            )}
+
+            {/* Load More Button in Sidebar */}
+            {filteredItems.length > 0 && hasMore && onLoadMore && (
+              <div className="pt-8 pb-4 flex justify-center">
+                <button 
+                  onClick={onLoadMore}
+                  className="flex items-center gap-3 px-8 py-3 rounded-full bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all group"
+                >
+                  Načíst starší zprávy
+                  <Clock size={14} className="group-hover:rotate-12 transition-transform" />
+                </button>
+              </div>
+            )}
+
+            {/* Active Sources Section */}
+            {activeSources.length > 0 && (
+              <div className="pt-20 pb-12 border-t border-white/5">
+                <h4 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.4em] mb-10 flex items-center gap-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00d1ff] animate-pulse"></span>
+                  Moje aktivní zdroje
+                </h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {activeSources.map((source, idx) => (
+                    <motion.div 
+                      key={`${source.url}-${idx}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center justify-between p-6 rounded-[24px] bg-white/[0.02] border border-white/5 group/source hover:border-[#00d1ff]/30 transition-all shadow-xl"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="text-white font-bold text-sm tracking-tight">{source.name}</span>
+                        <span className="text-[9px] text-neutral-600 truncate max-w-[280px] font-medium tracking-wider">{source.url}</span>
+                      </div>
+                      <button 
+                        onClick={() => onRemoveSource?.(source.url)}
+                        className="p-3 rounded-full bg-red-500/0 hover:bg-red-500/10 text-neutral-600 hover:text-red-500 border border-transparent hover:border-red-500/20 transition-all opacity-0 group/source:hover:opacity-100"
+                        title="Odstranit zdroj"
+                      >
+                        <X size={14} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -478,7 +537,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
 
                   <div className="flex items-center gap-4 mb-8">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00d1ff] bg-[#00d1ff]/10 px-4 py-1.5 rounded-full border border-[#00d1ff]/20">
-                      {activeArticle.source || "Intelligence Paper"}
+                      {activeArticle.source || "DATOVÝ LIST"}
                     </span>
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">
                       {activeArticle.date ? new Date(activeArticle.date).toLocaleDateString() : "Aktuální"}
