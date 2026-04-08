@@ -6,6 +6,13 @@ import * as cheerio from "cheerio";
 const parser = new Parser();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || "" });
 
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+type LLMResponse = {
+  title: string;
+  summary: string;
+}
+
 const FEEDS_MAP: Record<string, string> = {
   "https://asociace.ai/feed/": "Česká asociace AI",
   "https://www.lupa.cz/rss/rubriky/umela-inteligence/": "Lupa.cz",
@@ -78,6 +85,7 @@ export async function GET(request: Request) {
             clearTimeout(timeoutId);
             return (feed.items || []).slice(0, 10).map(item => ({
               title: item.title,
+              summary: item.contentSnippet || item.summary || item.content || "",
               link: item.link,
               pubDate: item.pubDate || item.isoDate,
               sourceName
@@ -132,33 +140,116 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    // HROMADNÝ PŘEKLAD pouze pro položky na stránce
-    const titlesToTranslate = paginatedItems.map(it => it.title).join("\n---\n");
-    const prompt = `Přelož tyto technologické titulky článků do ČEŠTINY. Zachovej pořadí. Odděluj '---'. Pouze překlady.\n\nTITULKY:\n${titlesToTranslate}`;
+    // HROMADNÝ PŘEKLAD (Titulky + Shrnutí)
+    // Přeložíme pole pro 30 článků. Budeme posílat JSON pole pro stabilitu.
+    const itemsToTranslate = paginatedItems.map(it => ({
+      originalTitle: it.title,
+      originalSummary: (it.summary || "").substring(0, 300) // Omezíme délku pro překlad
+    }));
+
+    const systemPrompt = `Jsi profesionální technologický překladatel. Přelož titulky a shrnutí článků do ČEŠTINY.
+        - Titulky musí být úderné a atraktivní.
+        - Shrnutí musí být plynulé a srozumitelné.
+        - Vrať POUZE validní JSON objekt s klíčem "articles", který obsahuje pole objektů: {"articles": [{"title": "...", "summary": "..."}]}`;
+
+    const userPrompt = `Přelož následující články:\n${JSON.stringify(itemsToTranslate)}`;
     
-    let translatedTitles: string[] = [];
-    try {
+    let translatedData: LLMResponse[] = [];
+    let usedModel = "Groq (Llama 3.3 70B)";
+
+    async function callLLM() {
+      try {
+        // 1. Zkusíme Groq
         const completion = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
           model: "llama-3.3-70b-versatile",
-          temperature: 0.3,
-          max_tokens: 2048
+          temperature: 0.1,
+          response_format: { type: "json_object" }
         });
-        const text = completion.choices[0]?.message?.content || "";
-        translatedTitles = text.split("---").map(t => t.trim());
-    } catch (err) {
-        console.error("Překlad selhal:", err);
+        
+        const content = completion.choices[0]?.message?.content || "[]";
+        // Ošetření různých formátů JSON výstupu (někdy vrací {"articles": [...]}, jindy jen [...])
+        try {
+          const parsed = JSON.parse(content);
+          if (Array.isArray(parsed)) return parsed;
+          if (parsed.articles && Array.isArray(parsed.articles)) return parsed.articles;
+          if (parsed.items && Array.isArray(parsed.items)) return parsed.items;
+          if (parsed.translations && Array.isArray(parsed.translations)) return parsed.translations;
+          // Pokud je to objekt, ale nenašli jsme pole, zkusíme najít jakékoli pole v objektu
+          const firstArray = Object.values(parsed).find(val => Array.isArray(val));
+          if (firstArray) return firstArray;
+          return [];
+        } catch (e) {
+          console.error("JSON Parse Error (Groq):", e);
+          return [];
+        }
+      } catch (err: any) {
+        console.warn("Groq Error or Rate Limit, switching to OpenRouter:", err.message);
+        
+        // 2. Fallback na OpenRouter
+        if (!OPENROUTER_API_KEY) throw new Error("OpenRouter API key is missing");
+        
+        usedModel = "OpenRouter (Llama 3.3 70B)";
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://voyager.ai",
+            "X-Title": "Voyager News Hub"
+          },
+          body: JSON.stringify({
+            model: "meta-llama/llama-3.3-70b-instruct",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt }
+            ],
+            temperature: 0.1,
+            response_format: { type: "json_object" }
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(`OpenRouter Error: ${data.error.message}`);
+        
+        const content = data.choices[0]?.message?.content || "[]";
+        try {
+          const parsed = JSON.parse(content);
+          if (Array.isArray(parsed)) return parsed;
+          if (parsed.articles && Array.isArray(parsed.articles)) return parsed.articles;
+          if (parsed.items && Array.isArray(parsed.items)) return parsed.items;
+          const firstArray = Object.values(parsed).find(val => Array.isArray(val));
+          return firstArray || [];
+        } catch (e) {
+          console.error("JSON Parse Error (OpenRouter):", e);
+          return [];
+        }
+      }
     }
 
-    const processedItems = paginatedItems.map((item: any, index: number) => ({
-      id: offset + index, // Unikátní ID i při paginaci
-      title: (translatedTitles[index] && translatedTitles[index].length > 5) ? translatedTitles[index] : item.title,
-      summary: "Analýza Voyager 3.0 k dispozici...",
-      link: item.link,
-      date: item.pubDate || item.isoDate,
-      source: item.sourceName || "AI Hub",
-      isAnalyzed: false
-    }));
+    try {
+      translatedData = await callLLM();
+    } catch (err) {
+      console.error("Všechny překladatelské služby selhaly:", err);
+      usedModel = "None (Original English)";
+    }
+
+    const processedItems = paginatedItems.map((item: any, index: number) => {
+      const translated = translatedData[index];
+      return {
+        id: offset + index,
+        title: (translated?.title && translated.title.length > 5) ? translated.title : item.title,
+        summary: (translated?.summary && translated.summary.length > 10) ? translated.summary : (item.summary || "Analýza nedostupná..."),
+        link: item.link,
+        date: item.pubDate || item.isoDate,
+        source: item.sourceName || "AI Hub",
+        isAnalyzed: !!translated?.summary,
+        llmSource: usedModel
+      };
+    });
 
     return NextResponse.json(processedItems);
   } catch (err) {

@@ -4,6 +4,8 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || ""
 });
 
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
 export async function generateDeepSummary(title: string, rawContent: string) {
   if (!rawContent || rawContent.length < 50) {
     return { title: title, summary: "Obsah článku je příliš krátký pro hloubkovou analýzu." };
@@ -28,16 +30,14 @@ export async function generateDeepSummary(title: string, rawContent: string) {
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile", // Groq's fast large model
+      model: "llama-3.3-70b-versatile",
       max_tokens: 4096,
       top_p: 1,
       response_format: { type: "json_object" }
     });
 
     const responseContent = chatCompletion.choices[0]?.message?.content;
-    if (!responseContent) {
-      throw new Error("Empty response from Groq");
-    }
+    if (!responseContent) throw new Error("Empty response from Groq");
 
     const parsed = JSON.parse(responseContent);
     const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
@@ -49,24 +49,49 @@ export async function generateDeepSummary(title: string, rawContent: string) {
       translated_content: parsed.translated_content || null
     };
   } catch (error: any) {
-    console.error("Groq Deep Summary Error Profile:", {
-      status: error?.status,
-      message: error?.message,
-      title
-    });
+    console.warn("Groq Deep Summary Error, trying OpenRouter fallback...", error.message);
 
-    if (error?.status === 429) {
-      return {
-        title: title || "Analýza nedostupná",
-        summary: "Dosaženo limitu AI (TPM limit). Počkejte prosím 1-2 minuty a zkuste to znovu.",
-        strategic_insight: "POZNÁMKA: Voyager využívá Groq Free Tier s limitem 12k TPM.",
-        translated_content: null
-      };
+    if (OPENROUTER_API_KEY) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://voyager.ai",
+            "X-Title": "Voyager News Hub"
+          },
+          body: JSON.stringify({
+            model: "meta-llama/llama-3.3-70b-instruct",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 4096,
+            temperature: 0.1,
+            response_format: { type: "json_object" }
+          })
+        });
+
+        const data = await response.json();
+        const content = data.choices[0]?.message?.content;
+        if (!content) throw new Error("Empty response from OpenRouter");
+
+        const parsed = JSON.parse(content);
+        const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
+
+        return {
+          title: parsed.title || title,
+          summary: summaryText,
+          strategic_insight: parsed.strategic_insight || null,
+          translated_content: parsed.translated_content || null,
+          llmSource: "OpenRouter (Fallback)"
+        };
+      } catch (fallbackError: any) {
+        console.error("OpenRouter Fallback also failed:", fallbackError.message);
+      }
     }
 
     return {
       title: title || "Analýza nedostupná",
-      summary: "Nepodařilo se vygenerovat AI rozbor. API je patrně přetíženo nebo klíč expiruje.",
+      summary: "Nepodařilo se vygenerovat AI rozbor. Všechny služby (Groq i OpenRouter) jsou dočasně přetížené.",
       strategic_insight: null,
       translated_content: null
     };

@@ -329,10 +329,10 @@ export default function NewsFeed({
                     <div className="flex items-center gap-4 mb-8">
                       <div className={`px-4 py-1.5 rounded-full text-[11px] font-black tracking-[0.2em] uppercase ${
                         item.isAnalyzed 
-                          ? "bg-[#9d00ff]/30 text-[#dfb7ff] border border-[#9d00ff]/40 shadow-[0_0_20px_rgba(157,0,255,0.3)]" 
+                          ? "bg-[#00d1ff]/20 text-[#00d1ff] border border-[#00d1ff]/40 shadow-[0_0_20px_rgba(0,209,255,0.2)]" 
                           : "bg-white/5 text-neutral-500 border border-white/10"
                       }`}>
-                        {item.isLoading ? "Analyzuji architekturu..." : item.isAnalyzed ? "Hloubková analýza připravena" : "Nefiltrovaný proud"}
+                        {item.isLoading ? "Analyzuji architekturu..." : item.isAnalyzed ? "Lokalizovaný obsah" : "Nefiltrovaný proud"}
                       </div>
                     </div>
 

@@ -196,7 +196,7 @@ export default function Home() {
                 </p>
                 
                 <div className="flex items-center justify-between text-[8px] font-black text-neutral-500 uppercase tracking-[0.2em]">
-                  <span>Čeká na zpracování</span>
+                  <span>{item.summary ? "Lokalizováno" : "Čeká na zpracování"}</span>
                   <Zap size={10} className="text-[#00d1ff] opacity-40 group-hover/card:opacity-100 transition-opacity" />
                 </div>
 
