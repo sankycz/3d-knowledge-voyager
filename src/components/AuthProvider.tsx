@@ -19,11 +19,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
+    // Safety timeout in case Firebase is blocked by adblockers or fails silently
+    const timeoutId = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 2000);
+
     const unsubscribe = onAuthStateChangedListener((u) => {
-      setUser(u);
-      setLoading(false);
+      if (isMounted) {
+        setUser(u);
+        setLoading(false);
+        clearTimeout(timeoutId);
+      }
     });
-    return () => unsubscribe();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, []);
 
   const signIn = async () => {
