@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 export default function SkeletonCard({ index }: { index: number }) {
   return (
     <div 
-      className={`relative cyber-glass rounded-[32px] p-6 border border-white/5 animate-shimmer ${index % 2 === 0 ? '' : 'sm:translate-y-6'}`}
+      className="relative cyber-glass rounded-[32px] p-6 border border-white/5 animate-shimmer"
       style={{ animationDelay: `${index * 0.15}s` }}
     >
       <div className="flex items-center gap-3 mb-4">

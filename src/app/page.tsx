@@ -179,7 +179,7 @@ export default function Home() {
                   setSelectedArticleId(idx);
                   setIsPanelOpen(true);
                 }}
-                className={`group/card relative cyber-glass rounded-[32px] p-6 border border-white/5 transition-all duration-500 hover:border-[#00d1ff]/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] cursor-pointer animate-float ${idx % 2 === 0 ? '' : 'sm:translate-y-6'}`}
+                className="group/card relative cyber-glass rounded-[32px] p-6 border border-white/5 transition-all duration-500 hover:border-[#00d1ff]/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] cursor-pointer animate-float"
                 style={{ animationDelay: `${idx * 0.2}s` }}
               >
                 <div className="flex items-center gap-3 mb-4">
