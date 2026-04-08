@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Sparkles, MessageSquare, Search, Clock, Zap, Loader2, Share2, Bookmark, Volume2, VolumeX } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import { addFavorite, removeFavorite, getFavorites } from "@/lib/favorites";
 
 interface NewsItem {
   id: number;
@@ -34,6 +36,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
   const [activeArticle, setActiveArticle] = useState<NewsItem | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const { user } = useAuth();
 
   // Funkce pro hlasovou narraci
   const speak = (text: string) => {
@@ -70,6 +73,16 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
     const saved = localStorage.getItem("voyager_saved_ids");
     if (saved) setSavedIds(JSON.parse(saved));
   }, []);
+
+  // Load favorites when auth state changes
+  useEffect(() => {
+    if (user) {
+      getFavorites(user).then(favs => {
+        const ids = favs.map(f => f.id);
+        setSavedIds(ids);
+      });
+    }
+  }, [user]);
 
   // Synchronizace s úvodním seznamem
   useEffect(() => {
@@ -163,20 +176,25 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
     return () => clearTimeout(timeoutId);
   }, [isOpen, localItems.length]);
 
-  // Akce: Uložit
-  const handleSave = (e: React.MouseEvent, id: number) => {
+  // Akce: Uložit (Firebase + fallback)
+  const handleSave = async (e: React.MouseEvent, article: NewsItem) => {
     e.stopPropagation();
-    const isSaved = savedIds.includes(id);
-    const newSaved = isSaved 
-      ? savedIds.filter(sid => sid !== id)
-      : [...savedIds, id];
-    
-    setLocalItems(prev => prev.map(it => it.id === id ? { ...it } : it)); // trigger re-render
+    const isSaved = savedIds.includes(article.id);
+    if (user) {
+      // Persist in Firestore
+      if (isSaved) {
+        await removeFavorite(user, article.id);
+      } else {
+        await addFavorite(user, article);
+      }
+    }
+    // Update local state / fallback storage
+    const newSaved = isSaved ? savedIds.filter(id => id !== article.id) : [...savedIds, article.id];
     setSavedIds(newSaved);
     localStorage.setItem("voyager_saved_ids", JSON.stringify(newSaved));
-    setToast({ 
-      message: isSaved ? "Záložka odstraněna" : "Článek uložen do Voyageru", 
-      type: "success" 
+    setToast({
+      message: isSaved ? "Záložka odstraněna" : "Článek uložen do Voyageru",
+      type: "success",
     });
   };
 
@@ -337,7 +355,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                         >
                           <div className="flex gap-4">
                              <button 
-                               onClick={(e) => handleSave(e, item.id)}
+                               onClick={(e) => handleSave(e, item)}
                                className={`p-2.5 rounded-full transition-all border border-white/5 hover:scale-110 active:scale-95 pointer-events-auto ${
                                  savedIds.includes(item.id) 
                                    ? "bg-[#00d1ff]/20 text-[#00d1ff] border-[#00d1ff]/30" 
@@ -437,7 +455,7 @@ export default function NewsFeed({ isOpen, onClose, items: initialItems, searchQ
                    <div className="h-6 w-px bg-white/10 hidden md:block"></div>
                    
                    <div className="flex items-center gap-4">
-                      <button onClick={(e) => handleSave(e, activeArticle.id)} className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all">
+                      <button onClick={(e) => handleSave(e, activeArticle)} className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all">
                         <Bookmark size={16} fill={savedIds.includes(activeArticle.id) ? "#00d1ff" : "none"} className={savedIds.includes(activeArticle.id) ? "text-[#00d1ff]" : "text-white"} />
                       </button>
                       <a href={activeArticle.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-all text-white">

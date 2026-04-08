@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
+import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -27,11 +28,14 @@ export default function RootLayout({
   return (
     <html
       lang="cs"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+      <AuthProvider>
         {children}
-      </body>
+      </AuthProvider>
+    </body>
     </html>
   );
 }

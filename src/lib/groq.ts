@@ -13,7 +13,7 @@ export async function generateDeepSummary(title: string, rawContent: string) {
     Jsi špičkový technologický analytik a futurista. Tvým úkolem je vytvořit hloubkový, ale bleskově čitelný rozbor z dodaného textu článku.
     
     ORIGINÁLNÍ TITULEK: ${title}
-    OBSAH ČLÁNKU: ${rawContent.substring(0, 15000)}
+    OBSAH ČLÁNKU: ${rawContent.substring(0, 10000)}
 
     POŽADAVKY NA VÝSTUP (V ČEŠTINĚ):
     1. "title": Úderný, bulvární ale seriózní český titulek (Cyberpunk/Tech styl).
@@ -48,8 +48,22 @@ export async function generateDeepSummary(title: string, rawContent: string) {
       strategic_insight: parsed.strategic_insight || null,
       translated_content: parsed.translated_content || null
     };
-  } catch (error) {
-    console.error("Groq Deep Summary Error:", error);
+  } catch (error: any) {
+    console.error("Groq Deep Summary Error Profile:", {
+      status: error?.status,
+      message: error?.message,
+      title
+    });
+
+    if (error?.status === 429) {
+      return {
+        title: title || "Analýza nedostupná",
+        summary: "Dosaženo limitu AI (TPM limit). Počkejte prosím 1-2 minuty a zkuste to znovu.",
+        strategic_insight: "POZNÁMKA: Voyager využívá Groq Free Tier s limitem 12k TPM.",
+        translated_content: null
+      };
+    }
+
     return {
       title: title || "Analýza nedostupná",
       summary: "Nepodařilo se vygenerovat AI rozbor. API je patrně přetíženo nebo klíč expiruje.",

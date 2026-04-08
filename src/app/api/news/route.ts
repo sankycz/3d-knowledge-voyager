@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Parser from "rss-parser";
 import Groq from "groq-sdk";
+import * as cheerio from "cheerio";
 
 const parser = new Parser();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || "" });
@@ -40,23 +41,72 @@ const FEEDS_MAP: Record<string, string> = {
   "https://www.artificialintelligence-news.com/feed/": "AI News Hub"
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const extraFeedsParam = searchParams.get("extraFeeds");
+    
+    // Sestavení mapy všech feedů
+    const allFeedsMap = { ...FEEDS_MAP };
+    if (extraFeedsParam) {
+      const extraFeeds = extraFeedsParam.split(",");
+      extraFeeds.forEach(url => {
+        if (url && !allFeedsMap[url]) {
+          try {
+            const hostname = new URL(url).hostname;
+            allFeedsMap[url] = hostname;
+          } catch (e) {
+            console.error(`Invalid extra URL: ${url}`);
+          }
+        }
+      });
+    }
+
     // Paralelní načítání všech feedů s ošetřením chyb a timeoutem
-    const feedPromises = Object.entries(FEEDS_MAP).map(async ([url, sourceName]) => {
+    const feedPromises = Object.entries(allFeedsMap).map(async ([url, sourceName]) => {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
         
-        const feed = await parser.parseURL(url);
-        clearTimeout(timeoutId);
-
-        return (feed.items || []).slice(0, 3).map(item => ({
-          ...item,
-          sourceName
-        }));
+        // Zkusíme nejprve RSS
+        try {
+          const feed = await parser.parseURL(url);
+          clearTimeout(timeoutId);
+          return (feed.items || []).slice(0, 3).map(item => ({
+            title: item.title,
+            link: item.link,
+            pubDate: item.pubDate || item.isoDate,
+            sourceName
+          }));
+        } catch (rssErr) {
+          // Pokud selže RSS, zkusíme scraping (pokud je to web)
+          const response = await fetch(url, { signal: controller.signal });
+          const html = await response.text();
+          const $ = cheerio.load(html);
+          
+          // Velmi jednoduchá heuristika pro "nejnovější články" (hledáme linky s h1/h2/h3)
+          const scrapedItems: any[] = [];
+          $("article, .post, .entry").slice(0, 3).each((_, el) => {
+            const titleEl = $(el).find("h1, h2, h3, .title").first();
+            const linkEl = $(el).find("a").first();
+            const title = titleEl.text().trim();
+            const link = linkEl.attr("href");
+            
+            if (title && link) {
+              scrapedItems.push({
+                title,
+                link: new URL(link, url).toString(),
+                pubDate: new Date().toISOString(), // Webové stránky často nemají datum v meta pro každý článek v listu
+                sourceName
+              });
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          return scrapedItems;
+        }
       } catch (err) {
-        console.error(`RSS Fetch Fail [${url}]:`, err);
+        console.error(`Fetch Fail [${url}]:`, err);
         return [];
       }
     });
