@@ -197,30 +197,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Modern Search Control - FIXED at bottom of viewport */}
-      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[40] w-full max-w-3xl px-8 pointer-events-auto">
-        <div className="relative group cyber-glass rounded-[32px] p-2 transition-all hover:scale-[1.02] duration-500 shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/5 hover:border-[#00d1ff]/20">
-          <div className="absolute inset-y-0 left-8 flex items-center pointer-events-none text-neutral-500 group-focus-within:text-[#00d1ff] transition-colors">
-            <Search size={24} />
-          </div>
-          <input
-            id="ai-search-input"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              if (e.target.value.length > 1) setIsPanelOpen(true);
-            }}
-            placeholder="Hledat trendy v AI..."
-            className="w-full bg-transparent border-none py-5 px-16 text-xl focus:ring-0 outline-none placeholder:text-neutral-600 font-medium"
-          />
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-[10px] font-black text-neutral-400 uppercase tracking-widest">
-            <Zap size={12} className="text-[#00d1ff]" />
-            AI V R. ČASE
-          </div>
-        </div>
-      </div>
-
       {/* Postranní lišta (NewsFeed & Reader) */}
       <NewsFeed 
         isOpen={isPanelOpen} 
