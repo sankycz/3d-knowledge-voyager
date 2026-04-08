@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { User, LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import AuthModal from "./AuthModal";
+import { FaGoogle } from "react-icons/fa";
 
 export default function AccountButton() {
-  const { user, loading, signOut } = useAuth();
-  const [modalOpen, setModalOpen] = useState(false);
+  const { user, loading, signIn, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -18,20 +16,19 @@ export default function AccountButton() {
   return (
     <>
       {!user ? (
-        // Extrémně jednoduché, explicitní html tlačítko bez zanořování do mnoha gridů apod. z důvodu zabránění blokace eventu
         <button 
           id="auth-login-trigger"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            setModalOpen(true);
+            await signIn();
           }}
           style={{ pointerEvents: 'auto', zIndex: 9999, cursor: 'pointer' }}
-          className="group relative flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#00d1ff]/20 to-[#9d00ff]/20 hover:from-[#00d1ff]/40 hover:to-[#9d00ff]/40 border border-white/20 hover:border-white/50 text-white font-bold tracking-widest text-[10px] uppercase shadow-[0_0_20px_rgba(0,209,255,0.3)] transition-all pointer-events-auto"
+          className="group relative flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-white/5 to-white/10 hover:from-white/10 hover:to-white/20 border border-white/20 hover:border-[#ea4335]/50 text-white font-bold tracking-widest text-[10px] uppercase shadow-lg transition-all pointer-events-auto"
         >
-          <div className="absolute inset-0 rounded-full bg-white/10 blur-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <User size={16} className="text-[#00d1ff] pointer-events-none" />
-          <span className="pointer-events-none">Přihlásit se</span>
+          <div className="absolute inset-0 rounded-full bg-[#ea4335]/10 blur-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <FaGoogle size={14} className="text-[#ea4335] pointer-events-none" />
+          <span className="pointer-events-none">Přihlásit přes Google</span>
         </button>
       ) : (
         <div className="flex items-center gap-4 pointer-events-auto">
@@ -46,12 +43,12 @@ export default function AccountButton() {
             <span className="text-[10px] font-black uppercase tracking-widest text-white/90">{user.displayName || "Uživatel"}</span>
           </div>
           <button 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            signOut();
-          }}
-          style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              signOut();
+            }}
+            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
             className="p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/50 text-white transition-all hover:scale-110 shadow-lg pointer-events-auto"
             title="Odhlásit"
           >
@@ -59,8 +56,6 @@ export default function AccountButton() {
           </button>
         </div>
       )}
-
-      <AuthModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
 }
