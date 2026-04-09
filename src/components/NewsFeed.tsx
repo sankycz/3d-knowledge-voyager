@@ -300,7 +300,10 @@ export default function NewsFeed({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              setActiveArticle(null);
+            }}
             className="fixed inset-0 bg-black/80 backdrop-blur-md z-[90] cursor-pointer"
           />
 
@@ -328,7 +331,10 @@ export default function NewsFeed({
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                  setActiveArticle(null);
+                }}
                 className="p-3 sm:p-5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-neutral-400 hover:text-white hover:scale-110 active:scale-95"
               >
                 <X size={20} className="sm:w-[24px] sm:h-[24px]" />
@@ -518,10 +524,13 @@ export default function NewsFeed({
               {/* Reader Header */}
               <div className="sticky top-0 z-20 p-4 sm:p-8 backdrop-blur-3xl bg-black/40 border-b border-white/5 flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                 <button 
-                  onClick={() => setActiveArticle(null)}
+                  onClick={() => {
+                    onClose();
+                    setActiveArticle(null);
+                  }}
                   className="flex items-center gap-2 text-[10px] sm:text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
                 >
-                  <X size={18} /> Zavřít čtečku
+                  <X size={18} /> Zavřít čtečku a zpět domů
                 </button>
                 
                 <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6">
