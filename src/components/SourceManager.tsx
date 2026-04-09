@@ -162,7 +162,7 @@ export default function SourceManager({ isOpen, onClose, onSourcesChange }: Sour
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 16 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-[130] cyber-glass p-8 rounded-[32px] border border-white/10 shadow-2xl"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-full sm:max-w-lg z-[130] cyber-glass p-6 sm:p-8 rounded-[32px] border border-white/10 shadow-2xl"
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-6">

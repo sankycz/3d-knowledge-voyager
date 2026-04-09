@@ -14,8 +14,8 @@ export const addFavorite = async (user: User, article: any) => {
 /**
  * Remove article from favorites.
  */
-export const removeFavorite = async (user: User, articleId: number) => {
-  const favRef = doc(firestore.db, "users", user.uid, "favorites", articleId.toString());
+export const removeFavorite = async (user: User, articleId: string) => {
+  const favRef = doc(firestore.db, "users", user.uid, "favorites", articleId);
   await deleteDoc(favRef);
 };
 
@@ -26,6 +26,6 @@ export const getFavorites = async (user: User) => {
   const favCol = collection(firestore.db, "users", user.uid, "favorites");
   const snapshot = await getDocs(favCol);
   const favs: any[] = [];
-  snapshot.forEach((doc) => favs.push({ id: Number(doc.id), ...doc.data() }));
+  snapshot.forEach((doc) => favs.push({ id: doc.id, ...doc.data() }));
   return favs;
 };

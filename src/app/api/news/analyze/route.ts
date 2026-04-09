@@ -1,37 +1,61 @@
 import { NextResponse } from "next/server";
-import { generateDeepSummary } from "@/lib/groq";
+import { generateDeepSummary, generateStreamingAnalysis } from "@/lib/groq";
 import { scrapeArticle } from "@/lib/scraper";
 
 export async function POST(request: Request) {
   try {
-    const { url, title } = await request.json();
+    const { url, title, stream: shouldStream } = await request.json();
 
     if (!url) {
       return NextResponse.json({ error: "Chybí URL pro analýzu" }, { status: 400 });
     }
 
-    // Provede hloubkové scrapování v reálném čase (On-Demand)
-    console.log(`Analyzing: ${title} (${url})`);
+    // Scrape article content
     const scrapedData = await scrapeArticle(url);
-    
-    if (!scrapedData?.fullContent || scrapedData.fullContent.length < 200) {
-      console.warn(`Extracted content too short (${scrapedData?.fullContent?.length} chars) for ${url}`);
+    const content = scrapedData?.fullContent || "Bez obsahu - analyzujte pouze z titulku.";
+
+    if (shouldStream) {
+      console.log(`Streaming Analysis: ${title}`);
+      const stream = await generateStreamingAnalysis(title || "", content);
+      
+      const encoder = new TextEncoder();
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of stream) {
+              const text = chunk.choices[0]?.delta?.content || "";
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+            }
+          } catch (err) {
+            console.error("Stream error:", err);
+          } finally {
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(readableStream, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+        },
+      });
     }
 
-    const deepAnalysis = await generateDeepSummary(
-      title || "", 
-      scrapedData?.fullContent || "Bez obsahu - analyzujte pouze z titulku."
-    );
+    // Standard non-streaming analysis (JSON)
+    const deepAnalysis = await generateDeepSummary(title || "", content, url);
     
-    console.log(`Deep Analysis complete for: ${title}`);
-
     return NextResponse.json({
       title: deepAnalysis.title || title,
-      summary: deepAnalysis.summary || "Analýza proběhla s omezenými daty.",
+      summary: deepAnalysis.summary || "Analýza proběhla.",
       insight: deepAnalysis.strategic_insight || null,
-      translated_content: deepAnalysis.translated_content || null,
+      deep_analysis: deepAnalysis.deep_analysis || null,
+      practical_tips: deepAnalysis.practical_tips || [],
       image: scrapedData?.image || null,
-      fullContent: scrapedData?.fullContent || null,
+      fullContent: content,
       isAnalyzed: true
     });
   } catch (error) {

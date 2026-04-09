@@ -7,19 +7,20 @@ import { useAuth } from "@/components/AuthProvider";
 import { addFavorite, removeFavorite, getFavorites } from "@/lib/favorites";
 
 interface NewsItem {
-  id: number;
+  id: string;
   title: string;
   summary: string;
-  content?: string;
-  link?: string;
-  image?: string | null;
-  fullContent?: string | null;
-  insight?: string | null;
-  source?: string;
+  link: string;
   date?: string;
+  source: string;
   isAnalyzed?: boolean;
   isLoading?: boolean;
-  translated_content?: string;
+  strategic_insight?: string;
+  deep_analysis?: string;
+  practical_tips?: string[];
+  fullContent?: string;
+  image?: string;
+  insight?: string;
 }
 
 interface NewsFeedProps {
@@ -27,9 +28,10 @@ interface NewsFeedProps {
   onClose: () => void;
   items: NewsItem[];
   searchQuery: string;
-  selectedArticleId?: number | null;
+  selectedArticleId?: string | null;
   onLoadMore?: () => void;
   hasMore?: boolean;
+  isMoreLoading?: boolean;
   activeSources?: { url: string; name: string }[];
   onRemoveSource?: (url: string) => void;
 }
@@ -42,11 +44,12 @@ export default function NewsFeed({
   selectedArticleId,
   onLoadMore,
   hasMore = false,
+  isMoreLoading = false,
   activeSources = [],
   onRemoveSource
 }: NewsFeedProps) {
   const [localItems, setLocalItems] = useState<NewsItem[]>([]);
-  const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
   const [activeArticle, setActiveArticle] = useState<NewsItem | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -107,13 +110,16 @@ export default function NewsFeed({
 
   // Handle auto-opening from hero section
   useEffect(() => {
-    if (isOpen && selectedArticleId !== undefined && selectedArticleId !== null && localItems.length > selectedArticleId) {
-      const item = localItems[selectedArticleId];
-      if (activeArticle?.id !== item.id) {
-        setActiveArticle(item);
-        if (!item.isAnalyzed && !item.isLoading) {
-          analyzeItem(selectedArticleId);
-        }
+    if (isOpen && selectedArticleId !== undefined && selectedArticleId !== null) {
+      const index = localItems.findIndex(it => it.id === selectedArticleId);
+      if (index !== -1) {
+        const item = localItems[index];
+          if (activeArticle?.id !== item.id) {
+            setActiveArticle(item);
+            if (!item.isLoading) {
+              analyzeItem(index, true);
+            }
+          }
       }
     }
   }, [isOpen, selectedArticleId, localItems.length]);
@@ -127,11 +133,11 @@ export default function NewsFeed({
   }, [toast]);
 
   // Funkce pro analýzu konkrétního článku (On-Demand)
-  const analyzeItem = useCallback(async (index: number) => {
+  const analyzeItem = useCallback(async (index: number, useStreaming: boolean = false) => {
     const item = localItems[index];
-    if (!item || item.isAnalyzed || item.isLoading) return;
+    if (!item || (item.isAnalyzed && !useStreaming) || item.isLoading) return;
 
-    // Nastavit stav načítání pro konkrétní kartu
+    // Nastavit stav načítání
     setLocalItems(prev => prev.map((it, idx) => 
       idx === index ? { ...it, isLoading: true } : it
     ));
@@ -140,19 +146,66 @@ export default function NewsFeed({
       const res = await fetch("/api/news/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: item.link, title: item.title })
+        body: JSON.stringify({ 
+          url: item.link, 
+          title: item.title,
+          stream: useStreaming 
+        })
       });
-      const data = await res.json();
-      
-      setLocalItems(prev => {
-        const next = [...prev];
-        next[index] = { ...next[index], ...data, isLoading: false, isAnalyzed: true };
-        setActiveArticle(currentActive => {
-          if (currentActive && currentActive.id === next[index].id) return next[index];
-          return currentActive;
+
+      if (useStreaming && res.body) {
+        setLocalItems(prev => prev.map((it, idx) => 
+          idx === index ? { ...it, isLoading: false, isAnalyzed: true, deep_analysis: "" } : it
+        ));
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let cumulativeText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          cumulativeText += chunk;
+
+          // Rozdělení na sekce podle markerů
+          const [deepPart, rest] = cumulativeText.split("[STRATEGIC_INSIGHT]");
+          const [insightPart, tipsPart] = rest ? rest.split("[TIPS]") : ["", ""];
+
+          setLocalItems(prev => {
+            const next = [...prev];
+            next[index] = { 
+              ...next[index], 
+              deep_analysis: deepPart.trim(),
+              strategic_insight: insightPart.trim() || next[index].strategic_insight,
+              practical_tips: tipsPart 
+                ? tipsPart.split("\n").map(t => t.replace(/^[-*]\s*/, "").trim()).filter(t => t.length > 3)
+                : next[index].practical_tips,
+              isAnalyzed: true
+            };
+            
+            // Sync with active article if it's the same
+            setActiveArticle(current => {
+              if (current && current.id === next[index].id) return next[index];
+              return current;
+            });
+            
+            return next;
+          });
+        }
+      } else {
+        const data = await res.json();
+        setLocalItems(prev => {
+          const next = [...prev];
+          next[index] = { ...next[index], ...data, isLoading: false, isAnalyzed: true };
+          setActiveArticle(currentActive => {
+            if (currentActive && currentActive.id === next[index].id) return next[index];
+            return currentActive;
+          });
+          return next;
         });
-        return next;
-      });
+      }
     } catch (err) {
       console.error("AI Analysis Failed:", err);
       setLocalItems(prev => {
@@ -257,33 +310,33 @@ export default function NewsFeed({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 30, stiffness: 150 }}
-            className="fixed top-0 right-0 h-screen w-[600px] z-[100] cyber-glass flex flex-col shadow-[-40px_0_100px_rgba(0,0,0,0.9)] border-l border-white/10"
+            className="fixed top-0 right-0 h-screen w-full sm:w-[500px] lg:w-[600px] z-[100] cyber-glass flex flex-col shadow-[-40px_0_100px_rgba(0,0,0,0.9)] border-l border-white/10"
           >
-          {/* Header */}
-          <div className="p-12 border-b border-white/5 flex justify-between items-center relative overflow-hidden bg-white/[0.02]">
-             <div className="absolute top-0 right-0 w-96 h-96 bg-[#00d1ff]/5 blur-[120px] -z-10 animate-glow"></div>
-            <div>
-              <h2 className="text-4xl font-display font-black tracking-tighter text-white flex items-center gap-4">
-                VOYAGER HUB
-                <Zap size={28} className="text-[#00d1ff] fill-[#00d1ff]/20 animate-pulse" />
-              </h2>
-              <div className="flex items-center gap-3 mt-3">
-                <div className="w-2 h-2 rounded-full bg-[#00ffa3] animate-pulse shadow-[0_0_10px_#00ffa3]"></div>
-                <span className="text-[12px] font-black text-neutral-500 uppercase tracking-[0.4em]">
-                  PROUD INFORMACÍ v2.0
-                </span>
+            {/* Header */}
+            <div className="p-6 sm:p-12 border-b border-white/5 flex justify-between items-center relative overflow-hidden bg-white/[0.02]">
+               <div className="absolute top-0 right-0 w-96 h-96 bg-[#00d1ff]/5 blur-[120px] -z-10 animate-glow"></div>
+              <div>
+                <h2 className="text-2xl sm:text-4xl font-display font-black tracking-tighter text-white flex items-center gap-4">
+                  VOYAGER HUB
+                  <Zap size={22} className="text-[#00d1ff] fill-[#00d1ff]/20 animate-pulse sm:w-[28px] sm:h-[28px]" />
+                </h2>
+                <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-3">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#00ffa3] animate-pulse shadow-[0_0_10px_#00ffa3]"></div>
+                  <span className="text-[10px] sm:text-[12px] font-black text-neutral-500 uppercase tracking-[0.2em] sm:tracking-[0.4em]">
+                    PROUD INFORMACÍ
+                  </span>
+                </div>
               </div>
+              <button
+                onClick={onClose}
+                className="p-3 sm:p-5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-neutral-400 hover:text-white hover:scale-110 active:scale-95"
+              >
+                <X size={20} className="sm:w-[24px] sm:h-[24px]" />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-neutral-400 hover:text-white hover:scale-110 active:scale-95"
-            >
-              <X size={24} />
-            </button>
-          </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-12 space-y-16 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-12 space-y-6 sm:space-y-16 no-scrollbar">
             {filteredItems.length > 0 ? (
               filteredItems.map((item, index) => (
                 <motion.div
@@ -291,8 +344,8 @@ export default function NewsFeed({
                   layout
                   onClick={() => {
                     setActiveArticle(item);
-                    if (!item.isAnalyzed && !item.isLoading) {
-                      analyzeItem(index);
+                    if (!item.isLoading) {
+                      analyzeItem(index, true); // Vynutit streaming pro reader
                     }
                   }}
                   className={`group relative neon-border rounded-[40px] transition-all cursor-pointer ${
@@ -302,7 +355,7 @@ export default function NewsFeed({
                   }`}
                 >
                   {/* Thumbnail */}
-                  <div className="relative h-64 bg-neutral-900 rounded-t-[40px] overflow-hidden border-b border-white/5">
+                  <div className="relative h-48 sm:h-64 bg-neutral-900 rounded-t-[40px] overflow-hidden border-b border-white/5">
                     {item.image ? (
                       <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                     ) : (
@@ -315,17 +368,16 @@ export default function NewsFeed({
                       </div>
                     )}
                     
-                    {/* Floating Badge */}
-                    <div className="absolute top-8 left-8 flex items-center gap-3 bg-black/70 backdrop-blur-2xl border border-white/10 px-5 py-2 rounded-full z-10">
-                      <Clock size={14} className="text-[#00d1ff]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">{item.source || "Zdroj"}</span>
+                    <div className="absolute top-4 sm:top-8 left-4 sm:left-8 flex items-center gap-3 bg-black/70 backdrop-blur-2xl border border-white/10 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full z-10">
+                      <Clock size={12} className="text-[#00d1ff] sm:w-[14px] sm:h-[14px]" />
+                      <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-white/90 truncate max-w-[120px] sm:max-w-none">{item.source || "Zdroj"}</span>
                     </div>
 
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80"></div>
                   </div>
 
-                  <div className="p-10">
+                  <div className="p-6 sm:p-10">
                     <div className="flex items-center gap-4 mb-8">
                       <div className={`px-4 py-1.5 rounded-full text-[11px] font-black tracking-[0.2em] uppercase ${
                         item.isAnalyzed 
@@ -336,7 +388,7 @@ export default function NewsFeed({
                       </div>
                     </div>
 
-                    <h3 className={`text-2xl font-display font-bold leading-[1.3] mb-8 tracking-tighter transition-all ${
+                    <h3 className={`text-xl sm:text-2xl font-display font-bold leading-[1.3] mb-6 sm:mb-8 tracking-tighter transition-all ${
                       item.isAnalyzed ? "text-white" : "text-neutral-400 group-hover:text-neutral-200"
                     }`}>
                       {item.title}
@@ -348,7 +400,7 @@ export default function NewsFeed({
                       </div>
                     )}
 
-                    <div className="text-neutral-400 text-lg leading-relaxed mb-10 font-medium">
+                    <div className="text-neutral-400 text-base sm:text-lg leading-relaxed mb-6 sm:mb-10 font-medium">
                       {item.isLoading ? (
                         <div className="space-y-5 animate-pulse">
                           <div className="h-4 bg-white/5 rounded-full w-full"></div>
@@ -365,7 +417,7 @@ export default function NewsFeed({
                         <motion.div 
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex items-center justify-between mt-auto pt-8 border-t border-white/5"
+                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-auto pt-8 border-t border-white/5"
                         >
                           <div className="flex gap-4">
                              <button 
@@ -406,10 +458,11 @@ export default function NewsFeed({
               <div className="pt-8 pb-4 flex justify-center">
                 <button 
                   onClick={onLoadMore}
-                  className="flex items-center gap-3 px-8 py-3 rounded-full bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all group"
+                  disabled={isMoreLoading}
+                  className="flex items-center gap-3 px-8 py-3 rounded-full bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all group disabled:opacity-50"
                 >
-                  Načíst starší zprávy
-                  <Clock size={14} className="group-hover:rotate-12 transition-transform" />
+                  {isMoreLoading ? "Načítám další data..." : "Načíst starší zprávy"}
+                  <Clock size={14} className={`group-hover:rotate-12 transition-transform ${isMoreLoading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             )}
@@ -463,20 +516,20 @@ export default function NewsFeed({
               className="fixed inset-0 z-[110] bg-[#050505] flex flex-col overflow-hidden"
             >
               {/* Reader Header */}
-              <div className="sticky top-0 z-20 p-8 backdrop-blur-3xl bg-black/40 border-b border-white/5 flex justify-between items-center">
+              <div className="sticky top-0 z-20 p-4 sm:p-8 backdrop-blur-3xl bg-black/40 border-b border-white/5 flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                 <button 
                   onClick={() => setActiveArticle(null)}
-                  className="flex items-center gap-2 text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-[10px] sm:text-xs font-black text-[#00d1ff] uppercase tracking-[0.2em] hover:text-white transition-colors"
                 >
                   <X size={18} /> Zavřít čtečku
                 </button>
                 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6">
                    {/* AI Voice Toggle */}
                    {activeArticle.isAnalyzed && (
                      <button 
                        onClick={() => speak(`${activeArticle.title}. ${activeArticle.summary}`)}
-                       className={`flex items-center gap-3 px-6 py-2 rounded-full border transition-all duration-500 ${
+                       className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 rounded-full border transition-all duration-500 ${
                          isSpeaking 
                            ? "bg-[#00d1ff]/20 border-[#00d1ff] text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.4)]" 
                            : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/30"
@@ -484,8 +537,8 @@ export default function NewsFeed({
                      >
                        {isSpeaking ? (
                          <>
-                           <VolumeX size={16} className="animate-pulse" />
-                           <div className="flex gap-1 items-center h-4">
+                           <VolumeX size={16} className="animate-pulse flex-shrink-0" />
+                           <div className="hidden sm:flex gap-1 items-center h-4">
                              {[1,2,3,4,5,6].map(i => (
                                <motion.div 
                                  key={i}
@@ -500,12 +553,12 @@ export default function NewsFeed({
                                />
                              ))}
                            </div>
-                           <span className="text-[10px] font-black uppercase tracking-widest">Ztlumit AI</span>
+                           <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Ztlumit AI</span>
                          </>
                        ) : (
                          <>
-                           <Volume2 size={16} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Přečíst analýzu</span>
+                           <Volume2 size={16} className="flex-shrink-0" />
+                           <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Přečíst analýzu</span>
                          </>
                        )}
                      </button>
@@ -524,12 +577,11 @@ export default function NewsFeed({
                 </div>
               </div>
 
-              {/* Reader Content */}
               <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div className="w-full px-6 md:px-16 lg:px-32 py-20">
+                <div className="w-full px-6 md:px-16 lg:px-32 py-10 sm:py-20">
                   {/* Cover Image */}
                   {activeArticle.image && (
-                    <div className="relative w-full h-[50vh] mb-12 rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
+                    <div className="relative w-full h-48 sm:h-[50vh] mb-8 sm:mb-12 rounded-[24px] sm:rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
                       <img src={activeArticle.image} alt={activeArticle.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
@@ -544,46 +596,83 @@ export default function NewsFeed({
                     </span>
                   </div>
 
-                  <h1 className="text-5xl font-display font-black tracking-tighter leading-[1.05] text-white mb-10">
+                  <h1 className="text-3xl sm:text-5xl font-display font-black tracking-tighter leading-[1.05] text-white mb-10">
                     {activeArticle.title}
                   </h1>
 
-                  {/* AI Highlight Block */}
-                  <div className="mb-16 p-8 rounded-[32px] bg-white/[0.03] border border-white/10 shadow-2xl relative overflow-hidden group">
+                  {/* AI Highlight / Summary Block */}
+                  <div className="mb-12 p-8 rounded-[32px] bg-white/[0.03] border border-white/10 shadow-2xl relative overflow-hidden group">
                     <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#9d00ff]/10 blur-[60px] group-hover:bg-[#9d00ff]/20 transition-all"></div>
                     <h4 className="flex items-center gap-2 text-[10px] font-black text-[#9d00ff] uppercase tracking-[0.4em] mb-6">
                       <Sparkles size={14} className="fill-[#9d00ff]/20" /> 
-                      VOYAGER ANALÝZA
+                      VOYAGER SHRNUTÍ
                     </h4>
-                    <div className="space-y-4 mb-8">
+                    <div className="space-y-4 mb-4">
                       {activeArticle.summary.split("\n").map((p, i) => (
                          <p key={i} className="text-lg text-white/90 font-medium leading-relaxed">{p}</p>
                       ))}
                     </div>
-                    {activeArticle.insight && (
-                      <div className="pt-6 border-t border-white/5">
-                        <p className="text-sm font-bold text-[#00d1ff] italic">" {activeArticle.insight} "</p>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Full Content Stream */}
-                  <div className="text-xl text-neutral-300 leading-[1.8] font-medium space-y-8 pb-32">
-                    {activeArticle.translated_content ? (
-                      activeArticle.translated_content.split("\n\n").map((para, idx) => (
-                        <p key={idx}>{para}</p>
-                      ))
-                    ) : activeArticle.fullContent ? (
-                      <div>
-                        {activeArticle.fullContent.split("\n\n").map((para, idx) => (
-                           <p key={idx} className="opacity-70">{para}</p>
-                        ))}
+                  {/* Strategic Insight */}
+                  {activeArticle.strategic_insight && (
+                    <div className="p-6 sm:p-10 rounded-[32px] bg-[#00d1ff]/5 border border-[#00d1ff]/20 mb-12 relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-[#00d1ff]"></div>
+                      <div className="flex items-center gap-3 mb-4 text-[#00d1ff]">
+                        <Zap size={18} fill="#00d1ff" className="opacity-50" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">STRATEGICKÝ VÝHLED</span>
                       </div>
-                    ) : (
-                      <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[32px]">
-                         <Loader2 size={32} className="animate-spin text-[#00d1ff] mx-auto mb-4" />
-                         <p className="text-sm font-black uppercase tracking-widest text-neutral-600">Rekonstruuji původní data...</p>
+                      <p className="text-xl sm:text-2xl font-display font-bold text-white leading-tight">
+                        "{activeArticle.strategic_insight}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Deep Analysis & Context Section */}
+                  <div className="space-y-12 pb-20">
+                    <section>
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="h-px flex-1 bg-white/10"></div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500 whitespace-nowrap">EXPERTNÍ INTELIGENCE</h3>
+                        <div className="h-px flex-1 bg-white/10"></div>
                       </div>
+                      
+                      <div className="prose prose-invert max-w-none">
+                        {activeArticle.deep_analysis ? (
+                          <div className="text-neutral-300 text-lg leading-[1.8] font-medium space-y-6">
+                            {activeArticle.deep_analysis.split('\n\n').map((para, i) => (
+                              <p key={i}>{para}</p>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center p-12 rounded-[32px] bg-white/[0.02] border border-white/5 border-dashed">
+                            <Loader2 size={32} className="animate-spin text-neutral-700 mb-4" />
+                            <p className="text-neutral-500 font-bold uppercase tracking-widest text-[9px]">Generuji hloubkový rozbor...</p>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+
+                    {/* Practical Tips Card */}
+                    {activeArticle.practical_tips && activeArticle.practical_tips.length > 0 && (
+                      <section className="p-8 sm:p-12 rounded-[40px] bg-white/[0.03] border border-white/10 relative overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ffa3]/5 blur-[80px] -z-10"></div>
+                        <h4 className="text-[#00ffa3] text-[10px] font-black uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
+                          <Zap size={14} className="fill-[#00ffa3]/20" /> PRAKTICKÁ DOPORUČENÍ
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          {activeArticle.practical_tips.map((tip, i) => (
+                            <div key={i} className="flex gap-4">
+                              <div className="w-8 h-8 rounded-xl bg-[#00ffa3]/10 flex items-center justify-center text-[#00ffa3] font-black text-xs flex-shrink-0 border border-[#00ffa3]/20 shadow-[0_0_15px_rgba(0,255,163,0.1)]">
+                                {i + 1}
+                              </div>
+                              <p className="text-sm text-white/90 leading-relaxed font-medium">
+                                {tip}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
                     )}
                   </div>
                 </div>
@@ -591,7 +680,7 @@ export default function NewsFeed({
 
               {/* Reader Footer Utility */}
               <div className="p-8 bg-black/80 border-t border-white/5 text-center">
-                 <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">KONEC STREAMU &copy; 2026</p>
+                 <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em]">VOYAGER INTELLECTUAL HUB | AKTUALIZOVÁNO REÁLNĚ</p>
               </div>
             </motion.div>
           )}

@@ -20,18 +20,27 @@ function useInterval(callback: () => void, delay: number) {
 }
 
 interface NewsItem {
-  id: number;
+  id: string;
   title: string;
   summary: string;
-  content: string;
-  link?: string;
+  link: string;
+  date?: string;
+  source: string;
+  isAnalyzed?: boolean;
+  isLoading?: boolean;
+  strategic_insight?: string;
+  deep_analysis?: string;
+  practical_tips?: string[];
+  fullContent?: string;
+  image?: string;
+  insight?: string;
 }
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isSourceManagerOpen, setIsSourceManagerOpen] = useState(false);
-  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [customSources, setCustomSources] = useState<{ url: string; name: string }[]>([]);
@@ -40,6 +49,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [isMoreLoading, setIsMoreLoading] = useState(false);
   const fingerprintRef = useRef<string>("");
 
   useEffect(() => {
@@ -51,6 +61,8 @@ export default function Home() {
     if (!silent && !isLoadMore) setIsLoading(true);
     else if (silent) setIsRefreshing(true);
     
+    if (isLoadMore) setIsMoreLoading(true);
+    
     try {
       const extraFeeds = customSources.map(s => s.url).join(",");
       const currentOffset = isLoadMore ? offset + 30 : 0;
@@ -61,21 +73,20 @@ export default function Home() {
       const res = await fetch(url);
       const data = await res.json();
       
-      if (!Array.isArray(data) || data.length < 30) {
-        setHasMore(false);
-      } else {
-        setHasMore(true);
-      }
+      const articles = data.articles || [];
+      const moreAvailable = data.hasMore ?? (articles.length >= 30);
+
+      setHasMore(moreAvailable);
 
       if (isLoadMore) {
-        setNews(prev => [...prev, ...data]);
+        setNews(prev => [...prev, ...articles]);
         setOffset(currentOffset);
       } else {
         // Fingerprint = hash prvních 8 titulků
-        const newFingerprint = (data as NewsItem[]).slice(0, 8).map((i: NewsItem) => i.title).join("|");
+        const newFingerprint = (articles as NewsItem[]).slice(0, 8).map((i: NewsItem) => i.title).join("|");
         if (newFingerprint !== fingerprintRef.current || !silent) {
           fingerprintRef.current = newFingerprint;
-          setNews(data);
+          setNews(articles);
           setLastUpdated(new Date());
           setOffset(0);
         }
@@ -85,6 +96,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
+      setIsMoreLoading(false);
     }
   }, [customSources, offset]);
 
@@ -94,7 +106,7 @@ export default function Home() {
   useInterval(() => { fetchNews(true); }, REFRESH_INTERVAL_MS);
 
   return (
-    <main className="relative w-full min-h-screen overflow-y-auto bg-[#050505] text-white">
+    <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto bg-[#050505] text-white">
       {/* 3D Canvas v pozadí - FIXED pro plynulý scroll */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <ThreeCanvas searchQuery={searchQuery} />
@@ -103,11 +115,11 @@ export default function Home() {
         <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#9d00ff]/10 blur-[120px] rounded-full animate-glow" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      {/* Top HUD Controls */}
-      <div className="sticky top-0 left-0 right-0 z-[30] flex justify-between items-center px-16 py-10 pointer-events-none">
-        <div className="flex items-center gap-3 bg-white/[0.04] backdrop-blur-xl border border-white/10 px-6 py-2.5 rounded-full text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.1)] pointer-events-auto transition-all hover:bg-white/10 cursor-default group">
-          <Sparkles size={14} className="animate-pulse group-hover:scale-110 transition-transform" />
-          <span className="text-[10px] font-black tracking-[0.4em] uppercase">VOYAGER INTELIGENCE</span>
+      {/* Top HUD Controls - RESPONSIVE */}
+      <div className="sticky top-0 left-0 right-0 z-[30] flex justify-between items-center px-6 sm:px-16 py-6 sm:py-10 pointer-events-none">
+        <div className="flex items-center gap-2 sm:gap-3 bg-white/[0.04] backdrop-blur-xl border border-white/10 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[#00d1ff] shadow-[0_0_20px_rgba(0,209,255,0.1)] pointer-events-auto transition-all hover:bg-white/10 cursor-default group max-w-[140px] sm:max-w-none">
+          <Sparkles size={14} className="animate-pulse group-hover:scale-110 transition-transform flex-shrink-0" />
+          <span className="text-[7px] sm:text-[10px] font-black tracking-[0.2em] sm:tracking-[0.4em] uppercase truncate">VOYAGER INTELIGENCE</span>
         </div>
         
         <div className="flex items-center gap-6 pointer-events-auto">
@@ -119,14 +131,15 @@ export default function Home() {
                   setSelectedArticleId(null);
                   setIsPanelOpen(true);
                 }}
-                className="flex items-center gap-3 px-8 py-3 rounded-full bg-[#00d1ff]/10 hover:bg-[#00d1ff]/20 border border-[#00d1ff]/30 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 group shadow-[0_0_30px_rgba(0,209,255,0.2)] hover:shadow-[0_0_40px_rgba(0,209,255,0.4)]"
+                className="flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-3 rounded-full bg-[#00d1ff]/10 hover:bg-[#00d1ff]/20 border border-[#00d1ff]/30 text-white font-black text-[9px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all hover:scale-105 active:scale-95 group shadow-[0_0_30px_rgba(0,209,255,0.2)] hover:shadow-[0_0_40px_rgba(0,209,255,0.4)]"
               >
-                CENTRUM ZNALOSTÍ
-                <Globe size={16} className="group-hover:rotate-[30deg] transition-transform duration-500 text-[#00d1ff]" />
+                <span className="hidden sm:inline">CENTRUM ZNALOSTÍ</span>
+                <span className="sm:hidden">HUB</span>
+                <Globe size={14} className="group-hover:rotate-[30deg] transition-transform duration-500 text-[#00d1ff] sm:w-[16px] sm:h-[16px]" />
               </button>
               
               {/* Compact Stat Cards in top bar */}
-              <div className="hidden sm:flex items-center gap-4">
+              <div className="hidden lg:flex items-center gap-4">
                 <StatCardMini 
                   label="Zdroje" 
                   value={String(32 + customSources.length) + "+"} 
@@ -136,7 +149,7 @@ export default function Home() {
                 <StatCardMini label="Stav" value="Online" color="#00ffa3" />
               </div>
 
-              <div className="flex items-center gap-3 min-w-[40px] pointer-events-auto z-[9999]">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-[40px] pointer-events-auto z-[9999]">
                 <AccountButton />
               </div>
             </>
@@ -150,13 +163,13 @@ export default function Home() {
         onSourcesChange={(sources) => setCustomSources(sources)} 
       />
 
-      <div className="relative z-10 flex flex-col justify-center px-16 pt-10 pb-40 pointer-events-none">
+      <div className="relative z-10 flex flex-col justify-center px-6 sm:px-16 pt-10 pb-40 pointer-events-none">
         {/* Main Title Section */}
         <div className="mb-20">
           <h1 className="text-[10vw] font-display font-black leading-[0.8] tracking-tighter drop-shadow-2xl opacity-10 blur-sm absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 select-none">
             VOYAGER
           </h1>
-          <h2 className="text-6xl font-display font-bold leading-[0.9] tracking-tighter mb-4 text-white">
+          <h2 className="text-4xl sm:text-6xl font-display font-bold leading-[0.9] tracking-tighter mb-4 text-white">
             NEJNOVĚJŠÍ <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d1ff] to-[#9d00ff]">INTELIGENCE</span>
           </h2>
@@ -166,7 +179,7 @@ export default function Home() {
         </div>
 
         {/* 6-Article Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl pointer-events-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl pointer-events-auto">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, idx) => (
               <SkeletonCard key={`skeleton-${idx}`} index={idx} />
@@ -176,10 +189,10 @@ export default function Home() {
               <div 
                 key={item.id}
                 onClick={() => {
-                  setSelectedArticleId(idx);
+                  setSelectedArticleId(item.id);
                   setIsPanelOpen(true);
                 }}
-                className="group/card relative cyber-glass rounded-[32px] p-6 border border-white/5 transition-all duration-500 hover:border-[#00d1ff]/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] cursor-pointer animate-float"
+                className="group/card relative cyber-glass rounded-[24px] sm:rounded-[32px] p-5 sm:p-6 border border-white/5 transition-all duration-500 hover:border-[#00d1ff]/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] cursor-pointer animate-float"
                 style={{ animationDelay: `${idx * 0.2}s` }}
               >
                 <div className="flex items-center gap-3 mb-4">
@@ -212,11 +225,11 @@ export default function Home() {
           <div className="flex justify-center mt-24 mb-20 pointer-events-auto">
             <button 
               onClick={() => fetchNews(false, true)}
-              disabled={isLoading}
+              disabled={isLoading || isMoreLoading}
               className="flex items-center gap-3 px-10 py-4 rounded-full bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-black text-[10px] uppercase tracking-[0.3em] transition-all group hover:scale-105 active:scale-95 disabled:opacity-50 shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
             >
-              Načíst starší zprávy
-              <RefreshCw size={14} className={`group-hover:rotate-180 transition-transform duration-700 ${isLoading ? 'animate-spin' : ''}`} />
+              {isMoreLoading ? "Načítám inteligenční data..." : "Načíst starší zprávy"}
+              <RefreshCw size={14} className={`group-hover:rotate-180 transition-transform duration-700 ${isMoreLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         )}
@@ -231,6 +244,7 @@ export default function Home() {
         selectedArticleId={selectedArticleId}
         onLoadMore={() => fetchNews(false, true)}
         hasMore={hasMore}
+        isMoreLoading={isMoreLoading}
         activeSources={customSources}
         onRemoveSource={(url: string) => {
           const updated = customSources.filter(s => s.url !== url);
@@ -240,7 +254,7 @@ export default function Home() {
       />
 
       {/* Ambient Glass Border */}
-      <div className="absolute inset-0 pointer-events-none border-[1px] border-white/[0.03] rounded-[48px] m-6"></div>
+      <div className="absolute inset-0 pointer-events-none border-[1px] border-white/[0.03] rounded-[24px] sm:rounded-[48px] m-2 sm:m-6"></div>
     </main>
 
   );

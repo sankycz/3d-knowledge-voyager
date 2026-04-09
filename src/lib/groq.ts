@@ -6,25 +6,38 @@ const groq = new Groq({
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-export async function generateDeepSummary(title: string, rawContent: string) {
+// Jednoduchá in-memory cache pro rychlost
+const analysisCache = new Map<string, any>();
+
+export async function generateDeepSummary(title: string, rawContent: string, url?: string) {
+  // Kontrola cache podle URL nebo titulku
+  const cacheKey = url || title;
+  if (analysisCache.has(cacheKey)) {
+    console.log("🚀 Returning cached analysis for:", title);
+    return analysisCache.get(cacheKey);
+  }
+
   if (!rawContent || rawContent.length < 50) {
     return { title: title, summary: "Obsah článku je příliš krátký pro hloubkovou analýzu." };
   }
 
-  const prompt = `
-    Jsi špičkový technologický analytik a futurista. Tvým úkolem je vytvořit hloubkový, ale bleskově čitelný rozbor z dodaného textu článku.
+  // Zkrácení obsahu pro rychlejší zpracování (LLM nepotřebuje víc pro summary)
+  const contentForSummary = rawContent.substring(0, 8000);
+
+    const prompt = `
+    Jsi špičkový technologický analytik a futurista. Místo prostého překladu vytvoř HLOUBKOVOU EXPERTNÍ ANALÝZU z dodaného textu.
     
-    ORIGINÁLNÍ TITULEK: ${title}
-    OBSAH ČLÁNKU: ${rawContent.substring(0, 10000)}
+    TITULEK: ${title}
+    TEXT: ${contentForSummary}
 
-    POŽADAVKY NA VÝSTUP (V ČEŠTINĚ):
-    1. "title": Úderný, bulvární ale seriózní český titulek (Cyberpunk/Tech styl).
-    2. "summary": 3-5 klíčových bodů (odrážek) vysvětlujících PODSTATU sdělení. Žádná omáčka.
-    3. "strategic_insight": Jedna věta o tom, jaký to má DŮSLEDREK pro budoucnost nebo trh (tzv. "The Big Picture").
-    4. "translated_content": Profesionální ZCELA KOMPLETNÍ překlad celého dodaného těla článku do češtiny.
+    Vystup v ČEŠTINĚ jako JSON objekt s klíči:
+    1. "title": Úderný český titulek (Cyberpunk/Tech styl).
+    2. "summary": 3-5 bleskových bodů podstaty.
+    3. "deep_analysis": EXTRÉMNĚ DETAILNÍ rozbor tématu (aspoň 3-4 odstavce). Jdi do hloubky, vysvětli souvislosti, technologie a kontext, které v textu nejsou přímo zmíněny, ale souvisí s ním.
+    4. "practical_tips": 3 konkrétní praktické TIPY nebo rady pro čtenáře (jak to využít, na co si dát pozor, co vyzkoušet).
+    5. "strategic_insight": Jedna věta o DŮSLEDKU pro budoucnost (The Big Picture).
 
-    ODPOVÍDAJICÍ STRUKTURA MUSÍ BÝT JSON OBJECT OBSAHUJÍCÍ TYTO KLÍČE:
-    title, summary, strategic_insight, translated_content
+    Odpovídej POUZE validním JSONem.
   `;
 
   try {
@@ -42,12 +55,17 @@ export async function generateDeepSummary(title: string, rawContent: string) {
     const parsed = JSON.parse(responseContent);
     const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
 
-    return {
+    const result = {
       title: parsed.title || title,
       summary: summaryText,
       strategic_insight: parsed.strategic_insight || null,
-      translated_content: parsed.translated_content || null
+      deep_analysis: parsed.deep_analysis || null,
+      practical_tips: Array.isArray(parsed.practical_tips) ? parsed.practical_tips : [parsed.practical_tips].filter(Boolean)
     };
+
+    // Uložit do cache
+    analysisCache.set(cacheKey, result);
+    return result;
   } catch (error: any) {
     console.warn("Groq Deep Summary Error, trying OpenRouter fallback...", error.message);
 
@@ -81,7 +99,8 @@ export async function generateDeepSummary(title: string, rawContent: string) {
           title: parsed.title || title,
           summary: summaryText,
           strategic_insight: parsed.strategic_insight || null,
-          translated_content: parsed.translated_content || null,
+          deep_analysis: parsed.deep_analysis || null,
+          practical_tips: Array.isArray(parsed.practical_tips) ? parsed.practical_tips : [parsed.practical_tips].filter(Boolean),
           llmSource: "OpenRouter (Fallback)"
         };
       } catch (fallbackError: any) {
@@ -93,7 +112,37 @@ export async function generateDeepSummary(title: string, rawContent: string) {
       title: title || "Analýza nedostupná",
       summary: "Nepodařilo se vygenerovat AI rozbor. Všechny služby (Groq i OpenRouter) jsou dočasně přetížené.",
       strategic_insight: null,
-      translated_content: null
+      deep_analysis: null,
+      practical_tips: []
     };
   }
+}
+
+/**
+ * STREAMING VERZE: Pro okamžitou odezvu v UI.
+ * Vrací stream, který klient může číst po částech.
+ */
+export async function generateStreamingAnalysis(title: string, rawContent: string) {
+  const contentForSummary = rawContent.substring(0, 10000);
+  
+  const prompt = `
+    Jsi špičkový technologický analytik a futurista. Vytvoř EXTRÉMNĚ HLOUBKOVOU EXPERTNÍ ANALÝZU.
+    Tématem je: ${title}
+    Zdrojový text: ${contentForSummary}
+    
+    STRUKTURA TVÉ ODPOVĚDI (DŮLEŽITÉ):
+    1. Začni přímo hloubkovým rozborem o minimálně 4-5 odstavcích. Buď konkrétní, technický a analytický.
+    2. Pak přidej sekci [STRATEGIC_INSIGHT] a napiš jednu silnou větu o širším dopadu na budoucnost.
+    3. Pak přidej sekci [TIPS] a napiš 3 konkrétní praktické rady pro čtenáře.
+    
+    Piš výhradně v ČEŠTINĚ. Nepoužívej úvody jako "Zde je analýza". Piš přímo k věci. Cyberpunk/Tech styl.
+  `;
+
+  return groq.chat.completions.create({
+    messages: [{ role: "user", content: prompt }],
+    model: "llama-3.3-70b-versatile",
+    max_tokens: 4096,
+    temperature: 0.5,
+    stream: true,
+  });
 }

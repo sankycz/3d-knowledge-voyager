@@ -13,6 +13,9 @@ type LLMResponse = {
   summary: string;
 }
 
+// Global cache for summarized translations to speed up main feed
+const translationCache = new Map<string, { title: string, summary: string }>();
+
 const FEEDS_MAP: Record<string, string> = {
   "https://asociace.ai/feed/": "Česká asociace AI",
   "https://www.lupa.cz/rss/rubriky/umela-inteligence/": "Lupa.cz",
@@ -83,7 +86,7 @@ export async function GET(request: Request) {
           const feed = await parser.parseURL(url).catch(() => null);
           if (feed) {
             clearTimeout(timeoutId);
-            return (feed.items || []).slice(0, 10).map(item => ({
+            return (feed.items || []).slice(0, 30).map(item => ({
               title: item.title,
               summary: item.contentSnippet || item.summary || item.content || "",
               link: item.link,
@@ -101,7 +104,7 @@ export async function GET(request: Request) {
         const $ = cheerio.load(html);
         
         const scrapedItems: any[] = [];
-        $("article, .post, .entry").slice(0, 10).each((_, el) => {
+        $("article, .post, .entry").slice(0, 30).each((_, el) => {
           const titleEl = $(el).find("h1, h2, h3, .title").first();
           const linkEl = $(el).find("a").first();
           const title = titleEl.text().trim();
@@ -140,12 +143,22 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    // HROMADNÝ PŘEKLAD (Titulky + Shrnutí)
-    // Přeložíme pole pro 30 článků. Budeme posílat JSON pole pro stabilitu.
-    const itemsToTranslate = paginatedItems.map(it => ({
-      originalTitle: it.title,
-      originalSummary: (it.summary || "").substring(0, 300) // Omezíme délku pro překlad
-    }));
+    // HROMADNÝ PŘEKLAD s Cache kontrolou
+    const itemsToTranslate = [];
+    const cacheIndices: number[] = [];
+    
+    for (let i = 0; i < paginatedItems.length; i++) {
+      const it = paginatedItems[i];
+      if (translationCache.has(it.link)) {
+        cacheIndices.push(i);
+      } else {
+        itemsToTranslate.push({
+          id: i,
+          originalTitle: it.title,
+          originalSummary: (it.summary || "").substring(0, 300)
+        });
+      }
+    }
 
     const systemPrompt = `Jsi profesionální technologický překladatel. Přelož titulky a shrnutí článků do ČEŠTINY.
         - Titulky musí být úderné a atraktivní.
@@ -231,27 +244,42 @@ export async function GET(request: Request) {
     }
 
     try {
-      translatedData = await callLLM();
+      if (itemsToTranslate.length > 0) {
+        const rawTranslations = await callLLM();
+        // Spárování a uložení do cache
+        itemsToTranslate.forEach((it, idx) => {
+          const trans = rawTranslations[idx];
+          if (trans && trans.title) {
+            translationCache.set(paginatedItems[it.id].link, {
+              title: trans.title,
+              summary: trans.summary
+            });
+          }
+        });
+      }
     } catch (err) {
       console.error("Všechny překladatelské služby selhaly:", err);
       usedModel = "None (Original English)";
     }
 
     const processedItems = paginatedItems.map((item: any, index: number) => {
-      const translated = translatedData[index];
+      const cached = translationCache.get(item.link);
       return {
-        id: offset + index,
-        title: (translated?.title && translated.title.length > 5) ? translated.title : item.title,
-        summary: (translated?.summary && translated.summary.length > 10) ? translated.summary : (item.summary || "Analýza nedostupná..."),
+        id: `${offset}_${index}_${item.link}`, // Unique ID
+        title: (cached?.title && cached.title.length > 5) ? cached.title : item.title,
+        summary: (cached?.summary && cached.summary.length > 10) ? cached.summary : (item.summary || "Analýza nedostupná..."),
         link: item.link,
         date: item.pubDate || item.isoDate,
         source: item.sourceName || "AI Hub",
-        isAnalyzed: !!translated?.summary,
+        isAnalyzed: !!cached?.summary,
         llmSource: usedModel
       };
     });
 
-    return NextResponse.json(processedItems);
+    return NextResponse.json({
+      articles: processedItems,
+      hasMore: sortedItems.length > offset + limit
+    });
   } catch (err) {
     console.error("Critical API Error:", err);
     return NextResponse.json({ error: "Intelligence Hub is temporarily offline" }, { status: 500 });
