@@ -9,11 +9,12 @@ interface ThreeCanvasProps {
   onSelect: (id: string) => void;
   selectedId: string | null;
   isScanning: boolean;
+  theme: "light" | "dark";
 }
 
-export default function ThreeCanvas({ items, onSelect, selectedId, isScanning }: ThreeCanvasProps) {
+export default function ThreeCanvas({ items, onSelect, selectedId, isScanning, theme }: ThreeCanvasProps) {
   return (
-    <div className="w-full h-screen bg-neutral-950">
+    <div className="w-full h-screen bg-transparent">
       <Canvas
         shadows
         camera={{ position: [0, 5, 20], fov: 35 }}
@@ -25,6 +26,7 @@ export default function ThreeCanvas({ items, onSelect, selectedId, isScanning }:
             onSelect={onSelect} 
             selectedId={selectedId} 
             isScanning={isScanning} 
+            theme={theme}
           />
         </Suspense>
       </Canvas>

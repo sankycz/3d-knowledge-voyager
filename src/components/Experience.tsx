@@ -6,13 +6,25 @@ import { useRef, useMemo } from "react";
 import * as THREE from "three";
 import KnowledgeGraph from "./KnowledgeGraph";
 
-export default function Experience({ items, onSelect, selectedId, isScanning }: { 
+export default function Experience({ items, onSelect, selectedId, isScanning, theme }: { 
   items: any[], 
   onSelect: (id: string) => void,
   selectedId: string | null,
-  isScanning: boolean
+  isScanning: boolean,
+  theme: "dark" | "light"
 }) {
   const nebulaRef = useRef<THREE.Group>(null);
+
+  const colors = useMemo(() => ({
+    bg: theme === "dark" ? "#010103" : "#f0f4f8",
+    fog: theme === "dark" ? "#010103" : "#f0f4f8",
+    lightPrimary: theme === "dark" ? "#00ffff" : "#3b82f6",
+    lightSecondary: theme === "dark" ? "#8a2be2" : "#1e40af",
+    cloud1: theme === "dark" ? "#113366" : "#cbd5e1",
+    cloud2: theme === "dark" ? "#440066" : "#94a3b8",
+    cloud3: theme === "dark" ? "#006644" : "#cbd5e1",
+    grid: theme === "dark" ? "#00ffff" : "#3b82f6",
+  }), [theme]);
 
   useFrame((state) => {
     if (nebulaRef.current) {
@@ -23,8 +35,8 @@ export default function Experience({ items, onSelect, selectedId, isScanning }: 
 
   return (
     <>
-      <color attach="background" args={["#020205"]} />
-      <fog attach="fog" args={["#020205", 20, 45]} />
+      <color attach="background" args={[colors.bg]} />
+      <fog attach="fog" args={[colors.fog, 20, 45]} />
       
       <PerspectiveCamera makeDefault position={[0, 0, 25]} fov={50} />
       <OrbitControls 
@@ -37,59 +49,67 @@ export default function Experience({ items, onSelect, selectedId, isScanning }: 
       />
 
       {/* Lighting */}
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} color="#00ffff" />
-      <pointLight position={[-10, -10, -10]} intensity={1} color="#8a2be2" />
-      <spotLight position={[0, 20, 0]} intensity={2} color="#ffffff" angle={0.5} penumbra={1} />
+      <ambientLight intensity={theme === "dark" ? 0.2 : 0.8} />
+      <pointLight position={[10, 10, 10]} intensity={theme === "dark" ? 1.5 : 0.8} color={colors.lightPrimary} />
+      <pointLight position={[-10, -10, -10]} intensity={theme === "dark" ? 1 : 0.5} color={colors.lightSecondary} />
+      <spotLight position={[0, 20, 0]} intensity={theme === "dark" ? 2 : 1.2} color="#ffffff" angle={0.5} penumbra={1} />
 
       {/* Background Environment */}
-      <Stars radius={150} depth={50} count={9000} factor={4} saturation={0.8} fade speed={1.5} />
+      <Stars 
+        radius={150} 
+        depth={50} 
+        count={theme === "dark" ? 9000 : 2000} 
+        factor={4} 
+        saturation={theme === "dark" ? 0.8 : 0.2} 
+        fade 
+        speed={1.5} 
+      />
       
       <group ref={nebulaRef}>
         <Cloud 
-          opacity={0.15} 
+          opacity={theme === "dark" ? 0.15 : 0.05} 
           speed={0.4} 
           bounds={[20, 10, 10]} 
           segments={40} 
-          color="#113366" 
+          color={colors.cloud1} 
           position={[0, 0, -10]}
         />
         <Cloud 
-          opacity={0.1} 
+          opacity={theme === "dark" ? 0.1 : 0.03} 
           speed={0.2} 
           bounds={[15, 5, 5]} 
           segments={20} 
-          color="#440066" 
+          color={colors.cloud2} 
           position={[10, 5, -8]}
         />
         <Cloud 
-          opacity={0.05} 
+          opacity={theme === "dark" ? 0.05 : 0.02} 
           speed={0.3} 
           bounds={[20, 10, 10]} 
           segments={30} 
-          color="#006644" 
+          color={colors.cloud3} 
           position={[-10, -5, -12]}
         />
       </group>
 
       {/* Orbital Wireframe Grid & Scanning Sweep */}
       <group rotation={[Math.PI / 2, 0, 0]}>
-        <gridHelper args={[120, 40, "#00ffff", "#ffffff"]}>
-          <meshBasicMaterial attach="material" color="#00ffff" transparent opacity={0.04} />
+        <gridHelper args={[120, 40, colors.grid, theme === "dark" ? "#ffffff" : "#64748b"]}>
+          <meshBasicMaterial attach="material" color={colors.grid} transparent opacity={theme === "dark" ? 0.04 : 0.08} />
         </gridHelper>
         
         {/* Scanning Sweep Line */}
         {isScanning && (
-          <ScanningSweep />
+          <ScanningSweep color={colors.grid} />
         )}
 
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[12, 12.1, 128]} />
-          <meshBasicMaterial color="#00ffff" transparent opacity={0.2} toneMapped={false} />
+          <meshBasicMaterial color={colors.grid} transparent opacity={theme === "dark" ? 0.2 : 0.4} toneMapped={false} />
         </mesh>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[22, 22.05, 128]} />
-          <meshBasicMaterial color="#8a2be2" transparent opacity={0.1} toneMapped={false} />
+          <meshBasicMaterial color={colors.lightSecondary} transparent opacity={theme === "dark" ? 0.1 : 0.2} toneMapped={false} />
         </mesh>
       </group>
 
@@ -99,22 +119,23 @@ export default function Experience({ items, onSelect, selectedId, isScanning }: 
         onSelect={onSelect} 
         selectedId={selectedId}
         isScanning={isScanning}
+        theme={theme}
       />
 
       {/* Knowledge Core Glow */}
       <Float speed={4} rotationIntensity={1} floatIntensity={1}>
         <Sphere args={[1.5, 32, 32]} position={[0, 0, 0]}>
-          <meshBasicMaterial color="#00ffff" transparent opacity={0.2} wireframe toneMapped={false} />
+          <meshBasicMaterial color={colors.lightPrimary} transparent opacity={theme === "dark" ? 0.2 : 0.1} wireframe toneMapped={false} />
         </Sphere>
       </Float>
       <Sphere args={[4, 64, 64]} position={[0, 0, 0]}>
-        <meshBasicMaterial color="#00ffff" transparent opacity={0.05} toneMapped={false} />
+        <meshBasicMaterial color={colors.lightPrimary} transparent opacity={theme === "dark" ? 0.05 : 0.02} toneMapped={false} />
       </Sphere>
     </>
   );
 }
 
-function ScanningSweep() {
+function ScanningSweep({ color = "#00ffff" }: { color?: string }) {
   const lineRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
@@ -130,7 +151,7 @@ function ScanningSweep() {
   return (
     <mesh ref={lineRef} rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry args={[120, 0.5]} />
-      <meshBasicMaterial color="#00ffff" transparent opacity={0.1} side={THREE.DoubleSide} />
+      <meshBasicMaterial color={color} transparent opacity={0.1} side={THREE.DoubleSide} />
     </mesh>
   );
 }

@@ -28,23 +28,32 @@ interface KnowledgeGraphProps {
   onSelect: (id: string) => void;
   selectedId: string | null;
   isScanning: boolean;
+  theme: "dark" | "light";
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  AI: "#00ffff",
-  "Věda": "#8a2be2",
-  Tech: "#00ffa3",
-  "Výzkum": "#ffaa00",
-  Default: "#4444ff",
+const CATEGORY_COLORS: Record<string, { dark: string; light: string }> = {
+  AI: { dark: "#00ffff", light: "#0ea5e9" },
+  "Věda": { dark: "#a855f7", light: "#7c3aed" },
+  Tech: { dark: "#10b981", light: "#059669" },
+  "Výzkum": { dark: "#f59e0b", light: "#d97706" },
+  Default: { dark: "#6366f1", light: "#4f46e5" },
 };
 
-export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning }: KnowledgeGraphProps) {
+export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning, theme }: KnowledgeGraphProps) {
   const { camera } = useThree();
   const graphRef = useRef<THREE.Group>(null);
   const [nodes, setNodes] = useState<NodeData[]>([]);
   const [edges, setEdges] = useState<EdgeData[]>([]);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
+  const colors = useMemo(() => ({
+    connection: theme === "dark" ? "#4444ff" : "#cbd5e1",
+    highlight: theme === "dark" ? "#00ffff" : "#0ea5e9",
+    text: theme === "dark" ? "#ffffff" : "#0f172a",
+    packet: theme === "dark" ? "#00ffff" : "#0ea5e9",
+  }), [theme]);
+
+  // Existing logic for nodes/edges generation...
   useEffect(() => {
     if (items.length === 0) return;
 
@@ -159,7 +168,6 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
         const t = nodes.find(n => n.id === edge.target);
         if (!s || !t) return null;
 
-        // Calculate a consistent but dynamic mid point for the Bezier curve
         const mid: [number, number, number] = [
           (s.x + t.x) / 2 + (Math.sin(i) * 2),
           (s.y + t.y) / 2 + (Math.cos(i) * 2),
@@ -174,6 +182,7 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
             mid={mid}
             isScanning={isScanning}
             isHighlighted={hoveredNodeId === edge.source || hoveredNodeId === edge.target || selectedId === edge.source || selectedId === edge.target}
+            colors={colors}
           />
         );
       })}
@@ -187,18 +196,21 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
           isScanning={isScanning}
           onSelect={() => onSelect(node.id)}
           onHover={(hovered) => setHoveredNodeId(hovered ? node.id : null)}
+          theme={theme}
+          textLabelColor={colors.text}
         />
       ))}
     </group>
   );
 }
 
-function Connection({ start, end, mid, isScanning, isHighlighted }: { 
+function Connection({ start, end, mid, isScanning, isHighlighted, colors }: { 
   start: any, 
   end: any, 
   mid: any, 
   isScanning: boolean, 
-  isHighlighted: boolean 
+  isHighlighted: boolean,
+  colors: any
 }) {
   const lineRef = useRef<any>(null);
   const packetRef = useRef<THREE.Mesh>(null);
@@ -210,7 +222,6 @@ function Connection({ start, end, mid, isScanning, isHighlighted }: {
     if (packetRef.current) {
       const speed = isHighlighted ? 2 : (isScanning ? 3 : 0.8);
       const t = (state.clock.getElapsedTime() * speed) % 1;
-      // Quadratic Bezier Interpolation
       const x = (1 - t) * (1 - t) * start[0] + 2 * (1 - t) * t * mid[0] + t * t * end[0];
       const y = (1 - t) * (1 - t) * start[1] + 2 * (1 - t) * t * mid[1] + t * t * end[1];
       const z = (1 - t) * (1 - t) * start[2] + 2 * (1 - t) * t * mid[2] + t * t * end[2];
@@ -229,7 +240,7 @@ function Connection({ start, end, mid, isScanning, isHighlighted }: {
         start={start}
         end={end}
         mid={mid}
-        color={isHighlighted ? "#00ffff" : "#4444ff"}
+        color={isHighlighted ? colors.highlight : colors.connection}
         opacity={isHighlighted ? 0.8 : 0.15}
         transparent
         lineWidth={isHighlighted ? 1.5 : 0.5}
@@ -239,22 +250,25 @@ function Connection({ start, end, mid, isScanning, isHighlighted }: {
       />
       <mesh ref={packetRef}>
         <sphereGeometry args={[isHighlighted ? 0.08 : 0.04, 8, 8]} />
-        <meshBasicMaterial color={isHighlighted ? "#ffffff" : "#00ffff"} toneMapped={false} transparent />
+        <meshBasicMaterial color={isHighlighted ? (colors.text === "white" ? "#ffffff" : colors.highlight) : colors.packet} toneMapped={false} transparent />
       </mesh>
     </group>
   );
 }
 
-function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover }: { 
+function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover, theme, textLabelColor }: { 
   node: NodeData, 
   isSelected: boolean, 
   isHovered: boolean,
   isScanning: boolean,
   onSelect: () => void,
-  onHover: (hovered: boolean) => void
+  onHover: (hovered: boolean) => void,
+  theme: "dark" | "light",
+  textLabelColor: string
 }) {
   const groupRef = useRef<THREE.Group>(null);
-  const color = CATEGORY_COLORS[node.category] || CATEGORY_COLORS.Default;
+  const colorData = CATEGORY_COLORS[node.category] || CATEGORY_COLORS.Default;
+  const color = theme === "dark" ? colorData.dark : colorData.light;
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -267,23 +281,21 @@ function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover 
       <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
         <mesh 
           onClick={(e) => { e.stopPropagation(); onSelect(); }}
-          onPointerOver={(e) => { e.stopPropagation(); onHover(true); document.body.style.cursor = 'pointer'; }}
-          onPointerOut={() => { onHover(false); document.body.style.cursor = 'auto'; }}
+          onPointerOver={(e) => { e.stopPropagation(); onHover(true); document.body.style.cursor = "pointer"; }}
+          onPointerOut={() => { onHover(false); document.body.style.cursor = "auto"; }}
         >
           <sphereGeometry args={[isSelected ? 0.4 : 0.18, 32, 32]} />
           <meshStandardMaterial 
-            color={isSelected || isHovered ? "#ffffff" : color} 
+            color={isSelected || isHovered ? (theme === "dark" ? "#ffffff" : color) : color} 
             emissive={color} 
             emissiveIntensity={isSelected || isHovered ? 8 : (isScanning ? 3 : 1.5)} 
             toneMapped={false}
           />
           
-          {/* Secondary "Ping" Ring */}
           {(isSelected || isScanning) && (
             <PingAnimation color={color} />
           )}
 
-          {/* Glow Sphere */}
           {isSelected && (
             <mesh scale={[2, 2, 2]}>
               <sphereGeometry args={[0.3, 16, 16]} />
@@ -296,19 +308,16 @@ function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover 
       <Billboard position={[0, 0.8, 0]}>
         <Text
           fontSize={0.15}
-          color="white"
-          maxWidth={1.5}
+          color={textLabelColor}
+          maxWidth={1.2}
           textAlign="center"
           font="https://fonts.gstatic.com/s/jetbrainsmono/v18/t6nu27PSqS_Z7xPto9N06UeX029q83Mv.woff"
-          fillOpacity={isSelected ? 1 : (isScanning ? 0.9 : 0.3)}
+          fillOpacity={isSelected ? 1 : (isScanning ? 0.9 : 0.4)}
+          outlineWidth={0.02}
+          outlineColor={theme === "dark" ? "#000000" : "#ffffff"}
+          outlineOpacity={0.8}
         >
           {node.title.toUpperCase()}
-          <meshBasicMaterial 
-            color="white" 
-            transparent 
-            opacity={isSelected ? 1 : 0.3} 
-            toneMapped={false}
-          />
         </Text>
       </Billboard>
     </group>

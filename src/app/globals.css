@@ -7,66 +7,98 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
-@layer base {
+@@layer base {
   :root {
+    /* Themes will be applied via data-theme attribute */
     --background: #010103;
     --foreground: #fcfcfc;
     
-    /* Spatial Intelligence Palette - More Saturated */
+    /* Core Accent Colors */
     --electric-cyan: #00ffff;
-    --neon-violet: #9d00ff;
+    --neon-violet: #8a2be2;
     --matrix-emerald: #00ffa3;
     --alert-amber: #ffaa00;
-    --obsidian: #010103;
-    --deep-midnight: #000814;
     
-    /* Glassmorphism 2.0 - More Intense Blur */
-    --glass-bg: rgba(1, 1, 3, 0.75);
-    --glass-border: rgba(0, 255, 255, 0.12);
-    --glass-shine: rgba(255, 255, 255, 0.08);
+    /* Variable-based design system - DARK (Default) */
+    --bg-main: #020205;
+    --bg-secondary: #0a0a15;
+    --surface: rgba(15, 15, 30, 0.8);
+    --surface-contrast: rgba(20, 20, 40, 0.95);
+    --surface-border: rgba(0, 255, 255, 0.12);
+    --surface-shine: rgba(255, 255, 255, 0.03);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --accent: var(--electric-cyan);
+    --accent-glow: rgba(0, 255, 255, 0.25);
+    --shadow-main: 0 40px 100px rgba(0, 0, 0, 0.9);
+    --selection-bg: rgba(0, 255, 255, 0.25);
+    --selection-text: #ffffff;
+  }
+
+  [data-theme='light'] {
+    --background: #f8fafc;
+    --foreground: #0f172a;
     
-    /* Typography */
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-display: 'Space Grotesk', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --bg-main: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-contrast: rgba(255, 255, 255, 1);
+    --surface-border: rgba(148, 163, 184, 0.2);
+    --surface-shine: rgba(255, 255, 255, 0.8);
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent: #2563eb; /* Cobalt Blue */
+    --accent-glow: rgba(37, 99, 235, 0.15);
+    --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.05);
+    
+    --selection-bg: rgba(37, 99, 235, 0.15);
+    --selection-text: #1e40af;
   }
 
   body {
-    color: var(--foreground);
-    background: var(--background);
+    color: var(--text-primary);
+    background: var(--bg-main);
     font-family: var(--font-sans);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.5s ease, color 0.5s ease;
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
 
   .font-mono {
     font-family: var(--font-mono);
   }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--selection-text);
+  }
 }
 
-/* Cyber-Glass 2.0 - More Intricate */
+/* Cyber-Glass 2.0 - Theme Aware */
 .cyber-glass {
-  background: var(--glass-bg);
+  background: var(--surface);
   backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-main);
   position: relative;
+  transition: all 0.5s ease;
 }
 
 /* HUD Panel with Bracket Corners - Refined */
 .hud-panel {
   @apply rounded-xl transition-all duration-700 overflow-hidden;
-  background: var(--glass-bg);
+  background: var(--surface);
   backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 
-    0 10px 40px rgba(0, 0, 0, 0.8),
-    inset 0 0 20px rgba(0, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-main);
   position: relative;
 }
 
@@ -75,7 +107,8 @@
   position: absolute;
   width: 15px;
   height: 15px;
-  border-color: rgba(0, 255, 255, 0.4);
+  border-color: var(--accent);
+  opacity: 0.4;
   pointer-events: none;
   z-index: 10;
 }
@@ -84,11 +117,11 @@
 .hud-panel::after { bottom: 0; right: 0; border-bottom: 1px solid; border-right: 1px solid; }
 
 .hud-panel:hover {
-  border-color: rgba(0, 255, 255, 0.3);
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.05);
+  border-color: var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
 }
 
-/* Scanline Effect - More Subtle */
+/* Scanline Effect - Subtle in Light Mode */
 .scanline {
   position: fixed;
   top: 0;
@@ -98,32 +131,17 @@
   background: linear-gradient(
     to bottom,
     transparent 50%,
-    rgba(0, 255, 255, 0.01) 51%,
+    var(--accent) 51%,
     transparent 52%
   );
   background-size: 100% 8px;
   pointer-events: none;
   z-index: 50;
-  opacity: 0.3;
+  opacity: 0.05;
 }
 
-/* Data Stream Glitch Text */
-.glitch-text {
-  text-shadow: 
-    0.05em 0 0 rgba(255, 0, 0, 0.75),
-    -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
-    0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-  animation: glitch-anim 500ms infinite;
-}
-
-@keyframes glitch-anim {
-  0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75); }
-  14% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,255,0,0.75); }
-  15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
-  49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
-  50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
-  99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
-  100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
+[data-theme='light'] .scanline {
+  opacity: 0.02;
 }
 
 /* Grain Overlay for Premium Texture */
@@ -139,6 +157,10 @@
   animation: grain 8s steps(10) infinite;
 }
 
+[data-theme='light'] .grain-overlay {
+  opacity: 0.05;
+}
+
 @keyframes grain {
   0%, 100% { transform:translate(0, 0); }
   10% { transform:translate(-5%, -10%); }
@@ -152,48 +174,7 @@
   90% { transform:translate(-10%, 10%); }
 }
 
-/* Classified Stamp */
-.classified-stamp {
-  @apply font-mono border-2 border-red-500 text-red-500 uppercase px-2 py-1 rotate-[-15deg] opacity-70 font-black tracking-tighter text-[10px];
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.7));
-}
-
-.text-glow-cyan { text-shadow: 0 0 15px rgba(0, 255, 255, 0.6), 0 0 30px rgba(0, 255, 255, 0.2); }
-.text-glow-violet { text-shadow: 0 0 15px rgba(157, 0, 255, 0.6), 0 0 30px rgba(157, 0, 255, 0.2); }
-
-.hud-border-glow {
-  box-shadow: 
-    inset 0 0 15px rgba(0, 255, 255, 0.05),
-    0 0 20px rgba(0, 255, 255, 0.1);
-}
-
-/* Smooth Scrollbars */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { 
-  background: rgba(0, 255, 255, 0.1); 
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 255, 0.3); }
-
-/* Holographic Flicker */
-@keyframes holographic-flicker {
-  0% { opacity: 0.98; transform: translateX(0) skewX(0deg); filter: brightness(1); }
-  2% { opacity: 0.8; transform: translateX(2px) skewX(0.5deg); filter: brightness(1.2) hue-rotate(2deg); }
-  4% { opacity: 0.98; transform: translateX(0) skewX(0deg); filter: brightness(1); }
-  50% { opacity: 1; transform: translateX(0); }
-  51% { opacity: 0.9; transform: translateX(-1px); filter: contrast(1.1); }
-  52% { opacity: 1; transform: translateX(0); }
-  100% { opacity: 1; }
-}
-
-.hologram-flicker {
-  animation: holographic-flicker 8s infinite linear;
-}
-
-.hologram-flicker-intense {
-  animation: holographic-flicker 0.15s infinite linear;
-}
+.text-glow-cyan { text-shadow: 0 0 15px var(--accent-glow); }
 
 /* Tech Corners Utilities */
 .tech-corners::before, .tech-corners::after {
@@ -201,7 +182,7 @@
   position: absolute;
   width: 24px;
   height: 24px;
-  border-color: var(--electric-cyan);
+  border-color: var(--accent);
   opacity: 0.5;
   pointer-events: none;
   z-index: 10;
@@ -226,5 +207,6 @@
   opacity: 1;
   width: 40px;
   height: 40px;
-  filter: drop-shadow(0 0 5px var(--electric-cyan));
+  filter: drop-shadow(0 0 5px var(--accent));
 }
+

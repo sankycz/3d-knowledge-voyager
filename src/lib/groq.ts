@@ -21,23 +21,25 @@ export async function generateDeepSummary(title: string, rawContent: string, url
     return { title: title, summary: "Obsah článku je příliš krátký pro hloubkovou analýzu." };
   }
 
-  // Zkrácení obsahu pro rychlejší zpracování (LLM nepotřebuje víc pro summary)
-  const contentForSummary = rawContent.substring(0, 8000);
+  // Zkrácení obsahu pro rychlejší zpracování
+  const contentForSummary = rawContent.substring(0, 10000);
 
-    const prompt = `
-    Jsi špičkový technologický analytik a futurista. Místo prostého překladu vytvoř HLOUBKOVOU EXPERTNÍ ANALÝZU z dodaného textu.
+  const prompt = `
+    Jsi VRCHNÍ VELITEL INFORMAČNÍCH OPERACÍ (Supreme Intelligence Commander) sítě Knowledge Voyager.
+    Tvým úkolem není psát shrnutí, ale HLOUBKOVÝ INTELLIGENCE REPORT, který proniká pod povrch reality.
     
-    TITULEK: ${title}
-    TEXT: ${contentForSummary}
+    TÉMA: ${title}
+    ZDROJOVÝ TEXT: ${contentForSummary}
 
-    Vystup v ČEŠTINĚ jako JSON objekt s klíči:
-    1. "title": Úderný český titulek (Cyberpunk/Tech styl).
-    2. "summary": 3-5 bleskových bodů podstaty.
-    3. "deep_analysis": EXTRÉMNĚ DETAILNÍ rozbor tématu (aspoň 3-4 odstavce). Jdi do hloubky, vysvětli souvislosti, technologie a kontext, které v textu nejsou přímo zmíněny, ale souvisí s ním.
-    4. "practical_tips": 3 konkrétní praktické TIPY nebo rady pro čtenáře (jak to využít, na co si dát pozor, co vyzkoušet).
-    5. "strategic_insight": Jedna věta o DŮSLEDKU pro budoucnost (The Big Picture).
+    STRUKTURA (MANDATORNÍ):
+    Vystup jako JSON objekt s klíči:
+    1. "title": Strategický název operace (česky, úderný, technokratický).
+    2. "core": JÁDRO ANALÝZY - Komplexní, nemilosrdně detailní rozbor. MUSÍ OBSAHOVAT PŘESNĚ 5 ROZSOEHLÝCH ODSTAVCŮ. Každý odstavec musí analyzovat jiný aspekt: technický, ekonomický, geopolitický, sociální a futuristický. Minimálně 3000 znaků celkem.
+    3. "exploration": DETAILNÍ PRŮZKUM - Informační forenzika. Skrytá fakta, technické specifikace, nevídané souvislosti.
+    4. "outlook": STRATEGICKÝ VÝHLED - Prediktivní modelování. Jak toto změní globální rovnováhu sil v horizontu 10 let?
+    5. "tips": EXEKUTIVNÍ PROTOKOLY - Minimálně 5 konkrétních akčních bodů v imperativu.
 
-    Odpovídej POUZE validním JSONem.
+    Odpovídej POUZE validním JSONem v ČEŠTINĚ. Styl: Klinický, precizní, futuristický.
   `;
 
   try {
@@ -53,89 +55,68 @@ export async function generateDeepSummary(title: string, rawContent: string, url
     if (!responseContent) throw new Error("Empty response from Groq");
 
     const parsed = JSON.parse(responseContent);
-    const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
 
     const result = {
       title: parsed.title || title,
-      summary: summaryText,
-      strategic_insight: parsed.strategic_insight || null,
-      deep_analysis: parsed.deep_analysis || null,
-      practical_tips: Array.isArray(parsed.practical_tips) ? parsed.practical_tips : [parsed.practical_tips].filter(Boolean)
+      core: parsed.core || parsed.deep_analysis || "",
+      exploration: parsed.exploration || "",
+      outlook: parsed.outlook || parsed.strategic_insight || "",
+      tips: Array.isArray(parsed.tips) ? parsed.tips : (parsed.tips ? [parsed.tips] : [])
     };
 
     // Uložit do cache
     analysisCache.set(cacheKey, result);
     return result;
   } catch (error: any) {
-    console.warn("Groq Deep Summary Error, trying OpenRouter fallback...", error.message);
-
-    if (OPENROUTER_API_KEY) {
-      try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://voyager.ai",
-            "X-Title": "Voyager News Hub"
-          },
-          body: JSON.stringify({
-            model: "meta-llama/llama-3.3-70b-instruct",
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 4096,
-            temperature: 0.1,
-            response_format: { type: "json_object" }
-          })
-        });
-
-        const data = await response.json();
-        const content = data.choices[0]?.message?.content;
-        if (!content) throw new Error("Empty response from OpenRouter");
-
-        const parsed = JSON.parse(content);
-        const summaryText = Array.isArray(parsed.summary) ? parsed.summary.join("\n") : (parsed.summary || "Shrnutí nebylo vygenerováno.");
-
-        return {
-          title: parsed.title || title,
-          summary: summaryText,
-          strategic_insight: parsed.strategic_insight || null,
-          deep_analysis: parsed.deep_analysis || null,
-          practical_tips: Array.isArray(parsed.practical_tips) ? parsed.practical_tips : [parsed.practical_tips].filter(Boolean),
-          llmSource: "OpenRouter (Fallback)"
-        };
-      } catch (fallbackError: any) {
-        console.error("OpenRouter Fallback also failed:", fallbackError.message);
-      }
-    }
-
+    console.warn("Groq Deep Summary Error...", error.message);
     return {
-      title: title || "Analýza nedostupná",
-      summary: "Nepodařilo se vygenerovat AI rozbor. Všechny služby (Groq i OpenRouter) jsou dočasně přetížené.",
-      strategic_insight: null,
-      deep_analysis: null,
-      practical_tips: []
+      title: title || "ANALÝZA_SELHALA",
+      core: "ERROR: NEURÁLNÍ_PROPOJENÍ_PŘERUŠENO. Nepodařilo se vygenerovat intelligence report.",
+      exploration: "",
+      outlook: "",
+      tips: []
     };
   }
 }
 
 /**
  * STREAMING VERZE: Pro okamžitou odezvu v UI.
- * Vrací stream, který klient může číst po částech.
  */
 export async function generateStreamingAnalysis(title: string, rawContent: string) {
-  const contentForSummary = rawContent.substring(0, 10000);
+  const contentForSummary = rawContent.substring(0, 15000);
   
   const prompt = `
-    Jsi špičkový technologický analytik a futurista. Vytvoř EXTRÉMNĚ HLOUBKOVOU EXPERTNÍ ANALÝZU.
-    Tématem je: ${title}
-    Zdrojový text: ${contentForSummary}
+    Jsi VRCHNÍ VELITEL INFORMAČNÍCH OPERACÍ (Supreme Intelligence Commander) sítě Knowledge Voyager. 
+    Provádíš HLOUBKOVOU NEURÁLNÍ DEŠIFRACI datového toku. Tvým cílem je absolutní informační dominance.
     
-    STRUKTURA TVÉ ODPOVĚDI (DŮLEŽITÉ):
-    1. Začni přímo hloubkovým rozborem o minimálně 4-5 odstavcích. Buď konkrétní, technický a analytický.
-    2. Pak přidej sekci [STRATEGIC_INSIGHT] a napiš jednu silnou větu o širším dopadu na budoucnost.
-    3. Pak přidej sekci [TIPS] a napiš 3 konkrétní praktické rady pro čtenáře.
+    Téma: ${title}
+    Zdroj: ${contentForSummary}
     
-    Piš výhradně v ČEŠTINĚ. Nepoužívej úvody jako "Zde je analýza". Piš přímo k věci. Cyberpunk/Tech styl.
+    PROTOKOL GENEROVÁNÍ (MANDATORNÍ):
+    1. ZAKÁZÁNO: Jakékoli uvítací fráze, shrnutí na začátku, nebo zdvořilosti.
+    2. JAZYK: Výhradně klinická čeština (technokratický, futuristický styl).
+    3. STRUKTURA: Musíš použít tyto přesné tagy pro rozdělení sekcí:
+    
+    @@@CORE@@@
+    JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 5 ROZSÁHLÝCH ODSTAVCŮ (každý min. 600 znaků). 
+    Každý odstavec se musí věnovat právě jedné z těchto 5 domén v tomto pořadí:
+    - TECHNOLOGICKÁ SINGULARITA (fyzika, algoritmy, hardware, limity)
+    - EKONOMICKÁ DISRUPCE (tržní dynamika, kapitálové šoky, supply chain)
+    - GEOPOLITICKÉ PŘESUNY (státní suverenita, kyber-moc, globální konflikty)
+    - SOCIETÁLNÍ REKONFIGURACE (psychologie davu, bio-etika, trh práce)
+    - EXISTENCIÁLNÍ SYNTÉZA (dlouhodobý dopad na lidstvo jako druh)
+    Celková délka jádra: PŘESNĚ 3000-4000 znaků. Žádné odrážky v této sekci.
+    
+    @@@EXPLORATION@@@
+    DETAILNÍ PRŮZKUM: Forenzní analýza technických detailů a skrytých souvislostí, které běžná média ignorují. Minimálně 2 odstavce.
+    
+    @@@OUTLOOK@@@
+    STRATEGICKÝ VÝHLED: Prediktivní modelování v horizontu 5 a 10 let. Buď nemilosrdně upřímný v predikcích.
+    
+    @@@TIPS@@@
+    EXEKUTIVNÍ PROTOKOLY: Minimálně 6 konkrétních, vysoce akčních bodů v imperativu (např. "AKTIVOVAT", "REKONFIGUROVAT"). Každý bod na nový řádek začínající pomlčkou.
+    
+    KONEC PROTOKOLU.
   `;
 
   return groq.chat.completions.create({

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ThemeProvider } from "@/components/ThemeContext";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -36,10 +37,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans selection:bg-blue-500 selection:text-white">
-      <AuthProvider>
-        {children}
-      </AuthProvider>
+      <body className="min-h-full flex flex-col font-sans transition-colors duration-500">
+      <ThemeProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </ThemeProvider>
     </body>
     </html>
   );
