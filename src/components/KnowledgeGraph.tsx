@@ -178,6 +178,7 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
         );
       })}
 
+      {nodes.map((node) => (
         <GraphNode
           key={node.id}
           node={node}
