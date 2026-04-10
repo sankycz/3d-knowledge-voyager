@@ -3,16 +3,29 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import Experience from "./Experience";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 
-export default function ThreeCanvas({ searchQuery }: { searchQuery: string }) {
+interface ThreeCanvasProps {
+  items: any[];
+  onSelect: (id: string) => void;
+  selectedId: string | null;
+  isScanning: boolean;
+}
+
+export default function ThreeCanvas({ items, onSelect, selectedId, isScanning }: ThreeCanvasProps) {
   return (
     <div className="w-full h-screen bg-neutral-950">
-      <Canvas shadows>
+      <Canvas
+        shadows
+        camera={{ position: [0, 5, 20], fov: 35 }}
+        gl={{ antialias: true }}
+      >
         <Suspense fallback={null}>
-          <PerspectiveCamera makeDefault position={[12, 12, 12]} fov={50} />
-          <Experience searchQuery={searchQuery} />
-          <OrbitControls makeDefault minPolarAngle={0} maxPolarAngle={Math.PI / 1.75} />
+          <Experience 
+            items={items} 
+            onSelect={onSelect} 
+            selectedId={selectedId} 
+            isScanning={isScanning} 
+          />
         </Suspense>
       </Canvas>
     </div>

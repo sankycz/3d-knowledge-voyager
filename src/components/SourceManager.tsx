@@ -178,15 +178,15 @@ export default function SourceManager({ isOpen, onClose, onSourcesChange }: Sour
             {/* Tab Toggle */}
             <div className="flex bg-white/[0.03] rounded-2xl p-1 mb-6 border border-white/5">
               {([
-                { key: "rss", label: "RSS kanál", icon: <Rss size={12} /> },
-                { key: "web", label: "Webová stránka", icon: <Globe size={12} /> },
+                { key: "rss", label: "RSS KANÁL", icon: <Rss size={12} /> },
+                { key: "web", label: "WEB STRÁNKA", icon: <Globe size={12} /> },
               ] as const).map(({ key, label, icon }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all ${
                     activeTab === key
-                      ? "bg-[#00d1ff]/20 text-[#00d1ff] border border-[#00d1ff]/30"
+                      ? "bg-[#00ffff]/20 text-[#00ffff] border border-[#00ffff]/30 shadow-[0_0_15px_rgba(0,255,255,0.1)]"
                       : "text-neutral-500 hover:text-neutral-300"
                   }`}
                 >
