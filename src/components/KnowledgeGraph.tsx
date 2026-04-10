@@ -32,11 +32,11 @@ interface KnowledgeGraphProps {
 }
 
 const CATEGORY_COLORS: Record<string, { dark: string; light: string }> = {
-  AI: { dark: "#00ffff", light: "#0ea5e9" },
-  "Věda": { dark: "#a855f7", light: "#7c3aed" },
-  Tech: { dark: "#10b981", light: "#059669" },
-  "Výzkum": { dark: "#f59e0b", light: "#d97706" },
-  Default: { dark: "#6366f1", light: "#4f46e5" },
+  AI: { dark: "#00ffff", light: "#2563eb" },
+  "Věda": { dark: "#bf77ff", light: "#7c3aed" },
+  Tech: { dark: "#00ffa3", light: "#059669" },
+  "Výzkum": { dark: "#ffaa00", light: "#d97706" },
+  Default: { dark: "#8a2be2", light: "#4f46e5" },
 };
 
 export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning, theme }: KnowledgeGraphProps) {

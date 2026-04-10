@@ -98,23 +98,23 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
     3. STRUKTURA: Musíš použít tyto přesné tagy pro rozdělení sekcí:
     
     @@@CORE@@@
-    JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 5 ROZSÁHLÝCH ODSTAVCŮ (každý min. 600 znaků). 
+    JÁDRO ANALÝZY: Toto je nejdůležitější část. Musí obsahovat PŘESNĚ 5 VELMI DLOUHÝCH A DETAILNÍCH ODSTAVCŮ (každý minimálně 1000 znaků). 
     Každý odstavec se musí věnovat právě jedné z těchto 5 domén v tomto pořadí:
-    - TECHNOLOGICKÁ SINGULARITA (fyzika, algoritmy, hardware, limity)
-    - EKONOMICKÁ DISRUPCE (tržní dynamika, kapitálové šoky, supply chain)
-    - GEOPOLITICKÉ PŘESUNY (státní suverenita, kyber-moc, globální konflikty)
-    - SOCIETÁLNÍ REKONFIGURACE (psychologie davu, bio-etika, trh práce)
-    - EXISTENCIÁLNÍ SYNTÉZA (dlouhodobý dopad na lidstvo jako druh)
-    Celková délka jádra: PŘESNĚ 3000-4000 znaků. Žádné odrážky v této sekci.
+    1. TECHNOLOGICKÁ SINGULARITA (fyzika, algoritmy, hardware, limity)
+    2. EKONOMICKÁ DISRUPCE (tržní dynamika, kapitálové šoky, supply chain, geopolitický dopad na trhy)
+    3. GEOPOLITICKÉ PŘESUNY (státní suverenita, kyber-moc, globální konflikty, nové sféry vlivu)
+    4. SOCIETÁLNÍ REKONFIGURACE (psychologie davu, bio-etika, trh práce, transformace lidského interakce)
+    5. EXISTENCIÁLNÍ SYNTÉZA (dlouhodobý dopad na lidstvo jako druh, etický horizont, evoluční skok)
+    Celková délka jádra: PŘESNĚ 5000-6000 znaků. Žádné odrážky v této sekci. Buď nemilosrdně detailní.
     
     @@@EXPLORATION@@@
-    DETAILNÍ PRŮZKUM: Forenzní analýza technických detailů a skrytých souvislostí, které běžná média ignorují. Minimálně 2 odstavce.
+    DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Hledej skryté vzorce, technické nuance, jména, data a souvislosti, které unikají běžným pozorovatelům. Minimálně 3 rozsáhlé odstavce o celkové délce 2000 znaků.
     
     @@@OUTLOOK@@@
-    STRATEGICKÝ VÝHLED: Prediktivní modelování v horizontu 5 a 10 let. Buď nemilosrdně upřímný v predikcích.
+    STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti. Co se stane za 2, 5 a 10 let? Buď nemilosrdně upřímný a konkrétní v predikcích rizik i příležitostí. Musí to být ucelený odstavcový text, ne odrážky.
     
     @@@TIPS@@@
-    EXEKUTIVNÍ PROTOKOLY: Minimálně 6 konkrétních, vysoce akčních bodů v imperativu (např. "AKTIVOVAT", "REKONFIGUROVAT"). Každý bod na nový řádek začínající pomlčkou.
+    EXEKUTIVNÍ PROTOKOLY: Minimálně 10 konkrétních, vysoce akčních bodů v imperativu pro okamžitou implementaci. Každý bod na nový řádek začínající pomlčkou (-).
     
     KONEC PROTOKOLU.
   `;
@@ -122,8 +122,8 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
   return groq.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
     model: "llama-3.3-70b-versatile",
-    max_tokens: 4096,
-    temperature: 0.5,
+    max_tokens: 8000,
+    temperature: 0.4,
     stream: true,
   });
 }

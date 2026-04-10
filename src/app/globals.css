@@ -19,42 +19,49 @@
     --matrix-emerald: #00ffa3;
     --alert-amber: #ffaa00;
     
-    /* Variable-based design system - DARK (Default) */
-    --bg-main: #020205;
-    --bg-secondary: #0a0a15;
-    --surface: rgba(15, 15, 30, 0.8);
-    --surface-contrast: rgba(20, 20, 40, 0.95);
-    --surface-border: rgba(0, 255, 255, 0.12);
-    --surface-shine: rgba(255, 255, 255, 0.03);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #475569;
+    /* Variable-based design system - DARK (Default) - Optimized Contrast */
+    --bg-main: #010103;
+    --bg-secondary: #020208;
+    --surface: rgba(10, 10, 25, 0.7);
+    --surface-contrast: rgba(15, 15, 30, 0.95);
+    --surface-border: rgba(0, 255, 255, 0.25);
+    --surface-shine: rgba(255, 255, 255, 0.08);
+    --text-primary: #fcfcfc;
+    --text-secondary: #e2e8f0;
+    --text-muted: #94a3b8;
     --accent: var(--electric-cyan);
-    --accent-glow: rgba(0, 255, 255, 0.25);
-    --shadow-main: 0 40px 100px rgba(0, 0, 0, 0.9);
-    --selection-bg: rgba(0, 255, 255, 0.25);
+    --accent-glow: rgba(0, 255, 255, 0.45);
+    --shadow-main: 0 40px 100px rgba(0, 0, 0, 0.98);
+    --selection-bg: rgba(0, 255, 255, 0.4);
     --selection-text: #ffffff;
+    
+    /* Extra Glassmorphism tokens */
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-background: rgba(8, 8, 16, 0.7);
   }
 
   [data-theme='light'] {
-    --background: #f8fafc;
-    --foreground: #0f172a;
+    --background: #ffffff;
+    --foreground: #020617;
     
     --bg-main: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --surface: rgba(255, 255, 255, 0.9);
-    --surface-contrast: rgba(255, 255, 255, 1);
-    --surface-border: rgba(148, 163, 184, 0.2);
-    --surface-shine: rgba(255, 255, 255, 0.8);
+    --bg-secondary: #ffffff;
+    --surface: rgba(255, 255, 255, 0.95);
+    --surface-contrast: #ffffff;
+    --surface-border: rgba(0, 0, 0, 0.15);
+    --surface-shine: rgba(255, 255, 255, 1);
     --text-primary: #0f172a;
     --text-secondary: #334155;
     --text-muted: #64748b;
-    --accent: #2563eb; /* Cobalt Blue */
-    --accent-glow: rgba(37, 99, 235, 0.15);
-    --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.05);
+    --accent: #2563eb; /* Royal Azure */
+    --accent-glow: rgba(37, 99, 235, 0.25);
+    --shadow-main: 0 20px 60px rgba(0, 0, 0, 0.12);
     
-    --selection-bg: rgba(37, 99, 235, 0.15);
-    --selection-text: #1e40af;
+    --selection-bg: rgba(37, 99, 235, 0.3);
+    --selection-text: #ffffff;
+    
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-background: rgba(255, 255, 255, 0.8);
   }
 
   body {

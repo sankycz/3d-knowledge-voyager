@@ -145,18 +145,22 @@ export default function NewsFeed({
         
         const extractSection = (fullText: string, tag: string, nextTags: string[]) => {
           const upperFull = fullText.toUpperCase();
-          const upperTag = `@@@${tag.toUpperCase()}@@@`;
-          const startIndex = upperFull.indexOf(upperTag);
-          if (startIndex === -1) return "";
+          const upperTag = tag.toUpperCase();
           
-          const contentStart = startIndex + upperTag.length;
+          // Regex to match @@@TAG@@@ with optional spaces inside the tag, case-insensitive
+          const tagRegex = new RegExp(`@@@\\s*${upperTag}\\s*@@@`, 'i');
+          const match = fullText.match(tagRegex);
+          if (!match) return "";
+          
+          const startIndex = match.index!;
+          const contentStart = startIndex + match[0].length;
           let contentEnd = fullText.length;
           
           for (const nextTag of nextTags) {
-            const nextUpperTag = `@@@${nextTag.toUpperCase()}@@@`;
-            const nextIndex = upperFull.indexOf(nextUpperTag, contentStart);
-            if (nextIndex !== -1 && nextIndex < contentEnd) {
-              contentEnd = nextIndex;
+            const nextTagRegex = new RegExp(`@@@\\s*${nextTag.toUpperCase()}\\s*@@@`, 'i');
+            const nextMatch = fullText.match(nextTagRegex);
+            if (nextMatch && nextMatch.index! > startIndex && nextMatch.index! < contentEnd) {
+              contentEnd = nextMatch.index!;
             }
           }
           
@@ -166,7 +170,13 @@ export default function NewsFeed({
             contentEnd = endProtocolIndex;
           }
           
-          return fullText.substring(contentStart, contentEnd).trim();
+          let content = fullText.substring(contentStart, contentEnd).trim();
+          
+          // Remove leading "JÁDRO ANALÝZY:", "DETAILNÍ PRŮZKUM:" etc if present
+          const headerRegex = new RegExp(`^(JÁDRO ANALÝZY|DETAILNÍ PRŮZKUM|STRATEGICKÝ VÝHLED|EXEKUTIVNÍ PROTOKOLY|EXEKUTIVNÍ BODY):\\s*`, 'i');
+          content = content.replace(headerRegex, '');
+          
+          return content;
         };
 
         while (true) {
@@ -183,13 +193,14 @@ export default function NewsFeed({
             const next = [...prev];
             const updatedItem = { 
               ...next[index], 
-              core: newCore || next[index].core,
-              exploration: newExploration || next[index].exploration,
-              outlook: newOutlook || next[index].outlook,
-              tips: newTipsRaw ? newTipsRaw.split("\n").map(t => t.replace(/^- /, "").trim()).filter(t => t.length > 3) : next[index].tips,
+              core: newCore || (next[index].isLoading ? next[index].core : ""),
+              exploration: newExploration || (next[index].isLoading ? next[index].exploration : ""),
+              outlook: newOutlook || (next[index].isLoading ? next[index].outlook : ""),
+              tips: newTipsRaw ? newTipsRaw.split("\n").map(t => t.replace(/^[-*•]\s?/, "").trim()).filter(t => t.length > 3) : (next[index].isLoading ? next[index].tips : []),
               isAnalyzed: true
             };
             next[index] = updatedItem;
+            // Update active article if it's the one being analyzed
             if (activeArticle && activeArticle.id === next[index].id) {
               setActiveArticle(updatedItem);
             }
@@ -298,10 +309,8 @@ export default function NewsFeed({
               <div className="max-w-4xl mx-auto pb-20 relative z-10">
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="px-3 py-1 bg-[#00ffff]/10 border border-[#00ffff]/30 text-[#00ffff] text-[10px] font-black tracking-[0.3em] rounded uppercase">Priority High</div>
-                    <div className="px-3 py-1 bg-[#8a2be2]/10 border border-[#8a2be2]/30 text-[#8a2be2] text-[10px] font-black tracking-[0.3em] rounded uppercase">Sector: AI_DEEP_INTEL</div>
-                    <div className="px-3 py-1 bg-[var(--primary)]/10 border border-[var(--primary)]/30 text-[var(--primary)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Priority High</div>
-                    <div className="px-3 py-1 bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Sector: AI_DEEP_INTEL</div>
+                    <div className="px-3 py-1 bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Priority High</div>
+                    <div className="px-3 py-1 bg-[var(--neon-violet)]/10 border border-[var(--neon-violet)]/30 text-[var(--neon-violet)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Sector: AI_DEEP_INTEL</div>
                   </div>
                   
                   <h1 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-[0.85] mb-16 text-[var(--text-main)] uppercase text-glow-cyan drop-shadow-[0_0_30px_rgba(0,255,255,0.3)]">
