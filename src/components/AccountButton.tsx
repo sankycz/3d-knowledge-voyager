@@ -3,6 +3,7 @@
 import { User, LogOut, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { motion, AnimatePresence } from "framer-motion";
+import { auth } from "@/lib/firebase";
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-[14px] h-[14px]">
@@ -18,9 +19,9 @@ export default function AccountButton() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl animate-pulse">
-        <div className="w-8 h-8 rounded-full bg-white/10" />
-        <div className="w-20 h-2 bg-white/10 rounded" />
+      <div className="flex items-center gap-3 bg-surface-shine border border-surface-border px-6 py-3 rounded-2xl animate-pulse">
+        <div className="w-8 h-8 rounded-full bg-surface-shine" />
+        <div className="w-20 h-2 bg-surface-shine rounded" />
       </div>
     );
   }
@@ -37,18 +38,18 @@ export default function AccountButton() {
             onClick={() => signIn()}
             className="group relative flex items-center gap-4 px-8 py-3 rounded-2xl bg-surface backdrop-blur-3xl border border-surface-border hover:border-accent transition-all shadow-main overflow-hidden tech-corners"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#ea4335]/5 via-transparent to-[#4285F4]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             
             <div className="relative flex items-center justify-center p-2 rounded-xl bg-surface-shine group-hover:bg-accent/10 transition-colors shadow-inner">
               <GoogleIcon />
             </div>
             
             <div className="flex flex-col items-start leading-none group">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary group-hover:text-accent transition-colors">Přihlásit se</span>
-              <span className="text-[8px] font-mono text-neutral-500 mt-1">VOYAGER_ACCESS_PROTO_v4</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white group-hover:text-accent transition-colors">Přihlásit se</span>
+              <span className="text-[8px] font-mono text-neutral-500 mt-1 tracking-widest uppercase">VOYAGER_ACCESS_PROTO_v4</span>
             </div>
             
-            <ShieldAlert size={14} className="text-neutral-700 group-hover:text-red-500/50 transition-colors ml-2" />
+            <ShieldAlert size={14} className="text-neutral-500 group-hover:text-accent transition-colors ml-2" />
           </motion.button>
         ) : (
           <motion.div 
@@ -58,28 +59,28 @@ export default function AccountButton() {
             className="flex items-center gap-5"
           >
             <div className="flex items-center gap-4 bg-surface backdrop-blur-3xl px-6 py-3 rounded-2xl border border-surface-border shadow-main relative overflow-hidden group tech-corners">
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               {user.photoURL ? (
-                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-white/10 shadow-lg relative z-10" />
+                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-surface-border shadow-lg relative z-10" />
               ) : (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#00ffff]/20 text-[#00ffff] border border-[#00ffff]/30 relative z-10">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent/20 text-accent border border-accent/30 relative z-10">
                   <User size={16} />
                 </div>
               )}
               
               <div className="flex flex-col relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-primary">{user.displayName?.split(" ")[0] || "OPERÁTOR"}</span>
-                  <ShieldCheck size={10} className="text-[#00ffa3]" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-white">{user.displayName?.split(" ")[0] || "OPERÁTOR"}</span>
+                  <ShieldCheck size={10} className="text-accent" />
                 </div>
                 <span className="text-[8px] font-mono text-neutral-500 uppercase tracking-widest">Clearance Level 5</span>
               </div>
             </div>
 
             <button 
-              onClick={() => signOut()}
-              className="p-4 rounded-2xl bg-surface-shine border border-surface-border hover:bg-red-500/10 hover:border-red-500/40 text-text-secondary hover:text-red-400 transition-all shadow-main group"
+              onClick={() => signOut(auth)}
+              className="p-4 rounded-2xl bg-surface-shine border border-surface-border hover:bg-red-500/10 hover:border-red-500/40 text-neutral-400 hover:text-red-400 transition-all shadow-main group"
               title="Odhlásit Protocol"
             >
               <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />

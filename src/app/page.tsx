@@ -164,7 +164,7 @@ export default function Home() {
           animate={{ x: 0, opacity: 1 }}
           className="p-10 pointer-events-auto w-96 bg-surface backdrop-blur-3xl border border-surface-border rounded-3xl relative shadow-main tech-corners overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[#00ffff]/5 blur-3xl rounded-full" />
+          <div className="absolute top-0 right-0 w-16 h-16 bg-accent/5 blur-3xl rounded-full" />
           
           <div className="space-y-10 relative z-10">
             {/* Archive Toggle Section */}
@@ -198,7 +198,7 @@ export default function Home() {
                     <span className="text-[9px] font-mono opacity-50">{showArchivesOnly ? "FILTROVÁNÍ AKTIVNÍ" : "PŘEPNOUT REŽIM"}</span>
                   </div>
                 </div>
-                {showArchivesOnly && <div className="w-3 h-3 rounded-full bg-[#00ffff] animate-pulse shadow-[0_0_15px_#00ffff]" />}
+                {showArchivesOnly && <div className="w-3 h-3 rounded-full bg-accent animate-pulse shadow-[0_0_15px_var(--accent-glow)]" />}
                 {!user && <Shield size={14} className="text-neutral-600" />}
               </button>
             </div>
@@ -206,34 +206,34 @@ export default function Home() {
             {/* System Status Indicators (Consolidated) */}
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-[12px] font-black tracking-[0.5em] text-[#8a2be2] uppercase">Systémová Aktivita</h4>
-                <div className={`w-2 h-2 rounded-full ${isRefreshing ? "bg-[#00ffff] animate-pulse" : "bg-neutral-800"}`} />
+                <h4 className="text-[12px] font-black tracking-[0.5em] text-neon-violet uppercase">Systémová Aktivita</h4>
+                <div className={`w-2 h-2 rounded-full ${isRefreshing ? "bg-accent animate-pulse" : "bg-neutral-800"}`} />
               </div>
               
-              <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+              <div className="p-6 rounded-2xl bg-surface-shine border border-surface-border space-y-4">
                 <div className="flex justify-between items-center text-[10px] font-mono">
                   <span className="text-text-muted uppercase">Synchronizace</span>
                   <span className={isRefreshing ? "text-accent" : "text-text-muted"}>{isRefreshing ? "PROBÍHÁ" : "DOKONČENA"}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-neutral-500 uppercase">Latency</span>
-                  <span className="text-[#00ffa3]">12ms</span>
+                  <span className="text-text-muted uppercase opacity-50">Latency</span>
+                  <span className="text-matrix-emerald">12ms</span>
                 </div>
               </div>
             </div>
 
             {/* System Resources Footer */}
-            <div className="pt-8 border-t border-white/5 space-y-6">
-              <div className="flex justify-between items-end">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase">Vytížení Sítě</span>
-                  <span className="text-[14px] font-mono text-[#00ffff] font-bold">12.4 TB / s</span>
-                </div>
+              <div className="pt-8 border-t border-surface-border space-y-6">
+                <div className="flex justify-between items-end">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black tracking-widest text-text-muted uppercase">Vytížení Sítě</span>
+                    <span className="text-[14px] font-mono text-accent font-bold">12.4 TB / s</span>
+                  </div>
                 <div className="flex gap-1 items-end h-8">
                   {[0.4, 0.7, 0.9, 0.5, 0.8, 1, 0.6, 0.9].map((h, i) => (
                     <motion.div 
                       key={i} 
-                      className="w-1.5 bg-[#00ffff]/60" 
+                      className="w-1.5 bg-accent/60" 
                       animate={{ height: `${h * 100}%` }}
                       transition={{ duration: 1, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
                     />
@@ -252,9 +252,9 @@ export default function Home() {
           animate={{ x: 0, opacity: 1 }}
           className="bg-surface backdrop-blur-3xl border border-surface-border rounded-3xl p-6 xl:p-10 flex-1 pointer-events-auto flex flex-col relative shadow-main overflow-hidden tech-corners"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#8a2be2] to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-violet to-transparent" />
           
-          <div className="flex items-center justify-between mb-10 border-b border-white/10 pb-8">
+          <div className="flex items-center justify-between mb-10 border-b border-surface-border pb-8">
             <div className="flex items-center gap-5">
               <div className="p-4 bg-neon-violet/10 rounded-2xl border border-neon-violet/30 shadow-[0_0_20px_rgba(138,43,226,0.2)]">
                 <Target size={28} className="text-neon-violet" />
@@ -293,18 +293,18 @@ export default function Home() {
                   }}
                   className={`group relative p-8 rounded-3xl border transition-all duration-500 cursor-pointer overflow-hidden ${
                     selectedArticleId === item.id 
-                      ? "bg-[#00ffff]/5 border-[#00ffff]/50 shadow-[0_0_40px_rgba(0,255,255,0.05)]" 
-                      : "bg-white/[0.02] border-white/5 hover:border-[#00ffff]/30 hover:bg-white/[0.05] hover:shadow-xl"
+                      ? "bg-accent/5 border-accent/50 shadow-[0_0_40px_rgba(0,255,255,0.05)]" 
+                      : "bg-surface-shine border-surface-border hover:border-accent/30 hover:bg-surface-shine/20 hover:shadow-xl"
                   }`}
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight size={20} className="text-[#00ffff]" />
+                    <ChevronRight size={20} className="text-accent" />
                   </div>
 
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-3">
-                       <div className="w-1 h-4 bg-[#00ffff]/50 rounded-full" />
-                       <span className="text-[11px] font-mono text-neutral-500 uppercase tracking-widest font-bold">{item.source}</span>
+                       <div className="w-1 h-4 bg-accent/50 rounded-full" />
+                       <span className="text-[11px] font-mono text-text-muted uppercase tracking-widest font-bold">{item.source}</span>
                     </div>
                     <span className="text-[12px] font-mono text-[#8a2be2] font-black opacity-30 group-hover:opacity-100 transition-all group-hover:scale-125">
                       {idx < 9 ? `0${idx + 1}` : idx + 1}
@@ -329,36 +329,36 @@ export default function Home() {
       </aside>
 
       {/* DYNAMIC LOG TERMINAL & STATUS MODALS (BOTTOM) */}
-      <footer className={`absolute bottom-8 left-8 right-8 transition-all duration-500 z-40 pointer-events-none flex items-end gap-6 xl:gap-10 ${isPanelOpen ? "" : "lg:right-[460px] xl:right-[520px]"}`}>
+      <footer className={`absolute bottom-8 left-8 right-8 transition-all duration-500 z-40 pointer-events-none flex items-end gap-6 xl:gap-10 ${isPanelOpen ? "" : "lg:right-[480px] xl:right-[540px]"}`}>
         <motion.div 
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="bg-surface backdrop-blur-3xl border border-surface-border rounded-3xl p-8 flex-1 pointer-events-auto h-56 flex flex-col relative tech-corners shadow-main"
         >
-          <div className="flex items-center justify-between mb-5 border-b border-white/10 pb-4">
+          <div className="flex items-center justify-between mb-5 border-b border-surface-border pb-4">
             <div className="flex items-center gap-4">
-              <Terminal size={20} className="text-[#00ffa3]" />
+              <Terminal size={20} className="text-matrix-emerald" />
               <div className="flex flex-col">
-                <span className="text-[13px] font-black tracking-[0.5em] text-[#00ffa3]">VOYAGER_OS TERMINÁL</span>
-                <span className="text-[8px] font-mono text-neutral-600">KERNEL_TIME: {new Date().getTime()}</span>
+                <span className="text-[13px] font-black tracking-[0.5em] text-matrix-emerald">VOYAGER_OS TERMINÁL</span>
+                <span className="text-[8px] font-mono text-text-muted opacity-50">KERNEL_TIME: {new Date().getTime()}</span>
               </div>
             </div>
             <div className="flex items-center gap-8">
               <div className="flex flex-col items-end">
-                <span className="text-[8px] font-mono text-neutral-700">MODUL_ŠIFRY</span>
-                <span className="text-[11px] font-mono text-[#00ffa3] font-bold">X-RAY_V4</span>
+                <span className="text-[8px] font-mono text-text-muted opacity-50">MODUL_ŠIFRY</span>
+                <span className="text-[11px] font-mono text-matrix-emerald font-bold">X-RAY_V4</span>
               </div>
-              <Activity size={20} className="text-[#00ffa3] animate-pulse" />
+              <Activity size={20} className="text-matrix-emerald animate-pulse" />
             </div>
           </div>
           
           <div className="flex-1 overflow-y-auto no-scrollbar font-mono text-[12px] space-y-3">
             {logs.map((log, i) => (
               <div key={i} className="flex gap-4 items-center group">
-                <span className={`transition-all duration-300 ${i === 0 ? "text-[#00ffff] font-black" : "text-neutral-500 group-hover:text-white"}`}>
+                <span className={`transition-all duration-300 ${i === 0 ? "text-accent font-black" : "text-text-muted group-hover:text-text-primary"}`}>
                   {log}
                 </span>
-                {i === 0 && <motion.div animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} className="w-2 h-4 bg-[#00ffff] shadow-[0_0_10px_#00ffff]" />}
+                {i === 0 && <motion.div animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} className="w-2 h-4 bg-accent shadow-[0_0_10px_var(--accent-glow)]" />}
               </div>
             ))}
           </div>

@@ -33,7 +33,7 @@ interface KnowledgeGraphProps {
 
 const CATEGORY_COLORS: Record<string, { dark: string; light: string }> = {
   AI: { dark: "#00ffff", light: "#2563eb" },
-  "Věda": { dark: "#bf77ff", light: "#7c3aed" },
+  "Věda": { dark: "#8a2be2", light: "#7c3aed" },
   Tech: { dark: "#00ffa3", light: "#059669" },
   "Výzkum": { dark: "#ffaa00", light: "#d97706" },
   Default: { dark: "#8a2be2", light: "#4f46e5" },
@@ -47,10 +47,10 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   const colors = useMemo(() => ({
-    connection: theme === "dark" ? "#4444ff" : "#cbd5e1",
-    highlight: theme === "dark" ? "#00ffff" : "#0ea5e9",
+    connection: theme === "dark" ? "#1e1e32" : "#cbd5e1",
+    highlight: theme === "dark" ? "#00ffff" : "#2563eb",
     text: theme === "dark" ? "#ffffff" : "#0f172a",
-    packet: theme === "dark" ? "#00ffff" : "#0ea5e9",
+    packet: theme === "dark" ? "#00ffff" : "#2563eb",
   }), [theme]);
 
   // Existing logic for nodes/edges generation...

@@ -94,32 +94,34 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
     
     PROTOKOL GENEROVÁNÍ (MANDATORNÍ):
     - JAZYK: Výhradně klinická čeština (technokratický, futuristický styl).
-    - STRUKTURA: Musíš použít tyto přesné tagy na začátku každé sekce. Každý tag musí být na samostatném řádku!
+    - STRUKTURA: Musíš použít tyto PŘESNÉ TAGY na samostatných řádcích. Nepoužívej markdown nadpisy pro sekce, pouze tyto tagy:
     
     @@@CORE@@@
-    Sekce JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 5 ROZSÁHLÝCH ODSTAVCŮ. Každý odstavec (cca 800-1000 znaků) se musí věnovat jedné doméně v tomto pořadí:
-    1. TECHNOLOGICKÁ SINGULARITA
-    2. EKONOMICKÁ DISRUPCE
-    3. GEOPOLITICKÉ PŘESUNY
-    4. SOCIETÁLNÍ REKONFIGURACE
-    5. EXISTENCIÁLNÍ SYNTÉZA (Dopad na evoluční horizont lidstva)
+    Sekce JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 6 ROZSÁHLÝCH ODSTAVCŮ (každý min. 800 znaků). 
+    Analyzuj v tomto pořadí:
+    1. TECHNOLOGICKÝ HORIZONT - Co se děje pod kapotou? Hloubková technická dekonstrukce.
+    2. EKONOMICKÉ DOPADY - Kdo získá/ztratí moc a kapitál? Finanční a tržní implikace.
+    3. GEOPOLITICKÁ ARÉNA - Změny v globální rovnováze. Mocenské hry.
+    4. SOCIETÁLNÍ REKONFIGURACE - Jak to změní běžný život? Kulturní a lidský posun.
+    5. ETICKÉ A PRÁVNÍ PARADIGMA - Morální dilemata a legislativní výzvy.
+    6. EVOLUČNÍ SYNTÉZA - Dlouhodobý dopad na civilizaci (horizont 20-50 let).
     
     @@@EXPLORATION@@@
-    Sekce DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Hledej skryté vzorce, technické nuance a souvislosti. Minimálně 2-3 rozsáhlé odstavce.
+    Sekce DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Skrytá fakta, technické nuance a nečekané souvislosti. Minimálně 4 rozsáhlé odstavce.
     
     @@@OUTLOOK@@@
-    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti (horizont 2, 5 a 10 let). Ucelený text, žádné odrážky.
+    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti (horizont 2, 5 a 10 let). Přesný, úderný text.
     
     @@@TIPS@@@
-    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 8 konkrétních akčních bodů (každý na nový řádek začínající pomlčkou "-").
+    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 10 konkrétních, praktických akčních bodů (každý na nový řádek začínající pomlčkou "-").
     
-    KONEC PROTOKOLU.
+    Pamatuj: Žádný úvodní text, žádné "Zde je analýza", žádné markdown nadpisy (## ). Začni ROVNOU tagem @@@CORE@@@. KONEC PROTOKOLU.
   `;
 
   return groq.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
     model: "llama-3.3-70b-versatile",
-    max_tokens: 8000,
+    max_tokens: 8192,
     temperature: 0.4,
     stream: true,
   });
