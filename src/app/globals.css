@@ -10,8 +10,8 @@
 @@layer base {
   :root {
     /* Themes will be applied via data-theme attribute */
-    --background: #010103;
-    --foreground: #fcfcfc;
+    --background: #000000;
+    --foreground: #ffffff;
     
     /* Core Accent Colors */
     --electric-cyan: #00ffff;
@@ -20,47 +20,47 @@
     --alert-amber: #ffaa00;
     
     /* Variable-based design system - DARK (Default) - Optimized Contrast */
-    --bg-main: #010103;
-    --bg-secondary: #020208;
-    --surface: rgba(10, 10, 25, 0.7);
-    --surface-contrast: rgba(15, 15, 30, 0.95);
-    --surface-border: rgba(0, 255, 255, 0.25);
-    --surface-shine: rgba(255, 255, 255, 0.08);
-    --text-primary: #fcfcfc;
-    --text-secondary: #e2e8f0;
+    --bg-main: #000000;
+    --bg-secondary: #050510;
+    --surface: rgba(15, 15, 25, 0.85);
+    --surface-contrast: rgba(20, 20, 35, 0.98);
+    --surface-border: rgba(255, 255, 255, 0.15);
+    --surface-shine: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
     --text-muted: #94a3b8;
     --accent: var(--electric-cyan);
-    --accent-glow: rgba(0, 255, 255, 0.45);
-    --shadow-main: 0 40px 100px rgba(0, 0, 0, 0.98);
+    --accent-glow: rgba(0, 255, 255, 0.5);
+    --shadow-main: 0 40px 100px rgba(0, 0, 0, 0.8);
     --selection-bg: rgba(0, 255, 255, 0.4);
     --selection-text: #ffffff;
     
     /* Extra Glassmorphism tokens */
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-background: rgba(8, 8, 16, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-background: rgba(10, 10, 20, 0.8);
   }
 
   [data-theme='light'] {
-    --background: #ffffff;
+    --background: #f8fafc;
     --foreground: #020617;
     
-    --bg-main: #f8fafc;
+    --bg-main: #f1f5f9;
     --bg-secondary: #ffffff;
     --surface: rgba(255, 255, 255, 0.95);
     --surface-contrast: #ffffff;
-    --surface-border: rgba(0, 0, 0, 0.15);
-    --surface-shine: rgba(255, 255, 255, 1);
+    --surface-border: rgba(15, 23, 42, 0.12);
+    --surface-shine: rgba(255, 255, 255, 0.05);
     --text-primary: #0f172a;
     --text-secondary: #334155;
     --text-muted: #64748b;
-    --accent: #2563eb; /* Royal Azure */
-    --accent-glow: rgba(37, 99, 235, 0.25);
-    --shadow-main: 0 20px 60px rgba(0, 0, 0, 0.12);
+    --accent: #1d4ed8; 
+    --accent-glow: rgba(29, 78, 216, 0.2);
+    --shadow-main: 0 20px 60px rgba(15, 23, 42, 0.08);
     
-    --selection-bg: rgba(37, 99, 235, 0.3);
+    --selection-bg: rgba(29, 78, 216, 0.25);
     --selection-text: #ffffff;
     
-    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-border: rgba(15, 23, 42, 0.1);
     --glass-background: rgba(255, 255, 255, 0.8);
   }
 

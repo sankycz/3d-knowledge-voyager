@@ -147,7 +147,7 @@ export default function NewsFeed({
           const upperFull = fullText.toUpperCase();
           const upperTag = tag.toUpperCase();
           
-          // Regex to match @@@TAG@@@ with optional spaces inside the tag, case-insensitive
+          // Regex match @@@TAG@@@ (case insensitive, flexible spaces)
           const tagRegex = new RegExp(`@@@\\s*${upperTag}\\s*@@@`, 'i');
           const match = fullText.match(tagRegex);
           if (!match) return "";
@@ -156,23 +156,27 @@ export default function NewsFeed({
           const contentStart = startIndex + match[0].length;
           let contentEnd = fullText.length;
           
-          for (const nextTag of nextTags) {
-            const nextTagRegex = new RegExp(`@@@\\s*${nextTag.toUpperCase()}\\s*@@@`, 'i');
-            const nextMatch = fullText.match(nextTagRegex);
-            if (nextMatch && nextMatch.index! > startIndex && nextMatch.index! < contentEnd) {
-              contentEnd = nextMatch.index!;
+          // Find next section tag or "KONEC PROTOKOLU"
+          const boundaryTagStrings = [...nextTags, "KONEC PROTOKOLU", "KONEC"];
+          for (const boundary of boundaryTagStrings) {
+            const bRegex = new RegExp(`@@@\\s*${boundary.toUpperCase()}\\s*@@@`, 'i');
+            const bMatch = fullText.match(bRegex);
+            if (bMatch && bMatch.index! > startIndex && bMatch.index! < contentEnd) {
+              contentEnd = bMatch.index!;
             }
-          }
-          
-          // Pokud narazíme na "KONEC PROTOKOLU", ořízneme to taky
-          const endProtocolIndex = upperFull.indexOf("KONEC PROTOKOLU", contentStart);
-          if (endProtocolIndex !== -1 && endProtocolIndex < contentEnd) {
-            contentEnd = endProtocolIndex;
+            
+            // Also check for plain text "KONEC PROTOKOLU" if it appears without @@@
+            if (boundary === "KONEC PROTOKOLU") {
+                const plainIndex = upperFull.indexOf("KONEC PROTOKOLU", contentStart);
+                if (plainIndex !== -1 && plainIndex < contentEnd) {
+                    contentEnd = plainIndex;
+                }
+            }
           }
           
           let content = fullText.substring(contentStart, contentEnd).trim();
           
-          // Remove leading "JÁDRO ANALÝZY:", "DETAILNÍ PRŮZKUM:" etc if present
+          // Cleanup section headers if model repeats them
           const headerRegex = new RegExp(`^(JÁDRO ANALÝZY|DETAILNÍ PRŮZKUM|STRATEGICKÝ VÝHLED|EXEKUTIVNÍ PROTOKOLY|EXEKUTIVNÍ BODY):\\s*`, 'i');
           content = content.replace(headerRegex, '');
           

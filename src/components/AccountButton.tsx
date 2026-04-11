@@ -35,16 +35,16 @@ export default function AccountButton() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={() => signIn()}
-            className="group relative flex items-center gap-4 px-8 py-3 rounded-2xl bg-black/40 backdrop-blur-3xl border border-white/10 hover:border-[#00ffff]/40 transition-all shadow-2xl overflow-hidden tech-corners"
+            className="group relative flex items-center gap-4 px-8 py-3 rounded-2xl bg-surface backdrop-blur-3xl border border-surface-border hover:border-accent transition-all shadow-main overflow-hidden tech-corners"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[#ea4335]/5 via-transparent to-[#4285F4]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            <div className="relative flex items-center justify-center p-2 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors shadow-inner">
+            <div className="relative flex items-center justify-center p-2 rounded-xl bg-surface-shine group-hover:bg-accent/10 transition-colors shadow-inner">
               <GoogleIcon />
             </div>
             
             <div className="flex flex-col items-start leading-none group">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/90 group-hover:text-white transition-colors">Přihlásit se</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary group-hover:text-accent transition-colors">Přihlásit se</span>
               <span className="text-[8px] font-mono text-neutral-500 mt-1">VOYAGER_ACCESS_PROTO_v4</span>
             </div>
             
@@ -57,7 +57,7 @@ export default function AccountButton() {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-5"
           >
-            <div className="flex items-center gap-4 bg-black/60 backdrop-blur-3xl px-6 py-3 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,255,255,0.05)] relative overflow-hidden group tech-corners">
+            <div className="flex items-center gap-4 bg-surface backdrop-blur-3xl px-6 py-3 rounded-2xl border border-surface-border shadow-main relative overflow-hidden group tech-corners">
               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               {user.photoURL ? (
@@ -70,7 +70,7 @@ export default function AccountButton() {
               
               <div className="flex flex-col relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-white">{user.displayName?.split(" ")[0] || "OPERÁTOR"}</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-primary">{user.displayName?.split(" ")[0] || "OPERÁTOR"}</span>
                   <ShieldCheck size={10} className="text-[#00ffa3]" />
                 </div>
                 <span className="text-[8px] font-mono text-neutral-500 uppercase tracking-widest">Clearance Level 5</span>
@@ -79,7 +79,7 @@ export default function AccountButton() {
 
             <button 
               onClick={() => signOut()}
-              className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/40 text-neutral-500 hover:text-red-400 transition-all shadow-xl group"
+              className="p-4 rounded-2xl bg-surface-shine border border-surface-border hover:bg-red-500/10 hover:border-red-500/40 text-text-secondary hover:text-red-400 transition-all shadow-main group"
               title="Odhlásit Protocol"
             >
               <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />

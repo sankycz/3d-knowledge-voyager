@@ -86,35 +86,32 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
   const contentForSummary = rawContent.substring(0, 15000);
   
   const prompt = `
-    Jsi VRCHNÍ VELITEL INFORMAČNÍCH OPERACÍ (Supreme Intelligence Commander) sítě Knowledge Voyager. 
+    Jsi VRCHNÍ VELITEL INFORMAČNÍCH OPERACÍ sítě Knowledge Voyager. 
     Provádíš HLOUBKOVOU NEURÁLNÍ DEŠIFRACI datového toku. Tvým cílem je absolutní informační dominance.
     
     Téma: ${title}
     Zdroj: ${contentForSummary}
     
     PROTOKOL GENEROVÁNÍ (MANDATORNÍ):
-    1. ZAKÁZÁNO: Jakékoli uvítací fráze, shrnutí na začátku, nebo zdvořilosti.
-    2. JAZYK: Výhradně klinická čeština (technokratický, futuristický styl).
-    3. STRUKTURA: Musíš použít tyto přesné tagy pro rozdělení sekcí:
+    - JAZYK: Výhradně klinická čeština (technokratický, futuristický styl).
+    - STRUKTURA: Musíš použít tyto přesné tagy na začátku každé sekce. Každý tag musí být na samostatném řádku!
     
     @@@CORE@@@
-    JÁDRO ANALÝZY: Toto je nejdůležitější část. Musí obsahovat PŘESNĚ 5 VELMI DLOUHÝCH A DETAILNÍCH ODSTAVCŮ (každý minimálně 1000 znaků). 
-    Každý odstavec se musí věnovat právě jedné z těchto 5 domén v tomto pořadí:
-    1. TECHNOLOGICKÁ SINGULARITA (fyzika, algoritmy, hardware, limity)
-    2. EKONOMICKÁ DISRUPCE (tržní dynamika, kapitálové šoky, supply chain, geopolitický dopad na trhy)
-    3. GEOPOLITICKÉ PŘESUNY (státní suverenita, kyber-moc, globální konflikty, nové sféry vlivu)
-    4. SOCIETÁLNÍ REKONFIGURACE (psychologie davu, bio-etika, trh práce, transformace lidského interakce)
-    5. EXISTENCIÁLNÍ SYNTÉZA (dlouhodobý dopad na lidstvo jako druh, etický horizont, evoluční skok)
-    Celková délka jádra: PŘESNĚ 5000-6000 znaků. Žádné odrážky v této sekci. Buď nemilosrdně detailní.
+    Sekce JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 5 ROZSÁHLÝCH ODSTAVCŮ. Každý odstavec (cca 800-1000 znaků) se musí věnovat jedné doméně v tomto pořadí:
+    1. TECHNOLOGICKÁ SINGULARITA
+    2. EKONOMICKÁ DISRUPCE
+    3. GEOPOLITICKÉ PŘESUNY
+    4. SOCIETÁLNÍ REKONFIGURACE
+    5. EXISTENCIÁLNÍ SYNTÉZA (Dopad na evoluční horizont lidstva)
     
     @@@EXPLORATION@@@
-    DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Hledej skryté vzorce, technické nuance, jména, data a souvislosti, které unikají běžným pozorovatelům. Minimálně 3 rozsáhlé odstavce o celkové délce 2000 znaků.
+    Sekce DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Hledej skryté vzorce, technické nuance a souvislosti. Minimálně 2-3 rozsáhlé odstavce.
     
     @@@OUTLOOK@@@
-    STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti. Co se stane za 2, 5 a 10 let? Buď nemilosrdně upřímný a konkrétní v predikcích rizik i příležitostí. Musí to být ucelený odstavcový text, ne odrážky.
+    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti (horizont 2, 5 a 10 let). Ucelený text, žádné odrážky.
     
     @@@TIPS@@@
-    EXEKUTIVNÍ PROTOKOLY: Minimálně 10 konkrétních, vysoce akčních bodů v imperativu pro okamžitou implementaci. Každý bod na nový řádek začínající pomlčkou (-).
+    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 8 konkrétních akčních bodů (každý na nový řádek začínající pomlčkou "-").
     
     KONEC PROTOKOLU.
   `;

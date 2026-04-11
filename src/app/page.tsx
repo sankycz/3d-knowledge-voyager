@@ -246,27 +246,27 @@ export default function Home() {
       </aside>
 
       {/* INTELLIGENCE FEED (RIGHT) */}
-      <aside className="absolute top-8 bottom-8 right-8 w-[460px] z-40 flex flex-col pointer-events-none">
+      <aside className={`absolute top-8 bottom-8 right-8 w-full max-w-[420px] xl:max-w-[480px] z-40 flex flex-col pointer-events-none transition-all duration-500 ${isPanelOpen ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}`}>
         <motion.div 
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="bg-surface backdrop-blur-3xl border border-surface-border rounded-3xl p-10 flex-1 pointer-events-auto flex flex-col relative shadow-main overflow-hidden tech-corners"
+          className="bg-surface backdrop-blur-3xl border border-surface-border rounded-3xl p-6 xl:p-10 flex-1 pointer-events-auto flex flex-col relative shadow-main overflow-hidden tech-corners"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#8a2be2] to-transparent" />
           
           <div className="flex items-center justify-between mb-10 border-b border-white/10 pb-8">
             <div className="flex items-center gap-5">
-              <div className="p-4 bg-[#8a2be2]/20 rounded-2xl border border-[#8a2be2]/30 shadow-[0_0_20px_rgba(138,43,226,0.3)]">
-                <Target size={28} className="text-[#8a2be2]" />
+              <div className="p-4 bg-neon-violet/10 rounded-2xl border border-neon-violet/30 shadow-[0_0_20px_rgba(138,43,226,0.2)]">
+                <Target size={28} className="text-neon-violet" />
               </div>
               <div className="flex flex-col">
-                <h3 className="text-[18px] font-black tracking-[0.5em] uppercase text-white leading-tight">{showArchivesOnly ? "ARCHIV INTEL" : "DATOVÝ TOK"}</h3>
-                <span className="text-[10px] font-mono text-[#8a2be2] uppercase tracking-[0.2em]">{showArchivesOnly ? "Vlastní Databáze" : "Analýza v Reálném Čase"}</span>
+                <h3 className="text-[18px] font-black tracking-[0.5em] uppercase text-primary leading-tight">{showArchivesOnly ? "ARCHIV INTEL" : "DATOVÝ TOK"}</h3>
+                <span className="text-[10px] font-mono text-neon-violet uppercase tracking-[0.2em]">{showArchivesOnly ? "Vlastní Databáze" : "Analýza v Reálném Čase"}</span>
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-[32px] font-mono font-black text-[#8a2be2] leading-none">{filteredNews.length}</span>
-              <span className="text-[8px] font-mono text-neutral-600 uppercase tracking-widest mt-1">Dostupné Pakety</span>
+              <span className="text-[32px] font-mono font-black text-neon-violet leading-none">{filteredNews.length}</span>
+              <span className="text-[8px] font-mono text-text-muted uppercase tracking-widest mt-1">Dostupné Pakety</span>
             </div>
           </div>
           
@@ -329,7 +329,7 @@ export default function Home() {
       </aside>
 
       {/* DYNAMIC LOG TERMINAL & STATUS MODALS (BOTTOM) */}
-      <footer className="absolute bottom-8 left-8 right-[500px] z-40 pointer-events-none flex items-end gap-10">
+      <footer className={`absolute bottom-8 left-8 right-8 transition-all duration-500 z-40 pointer-events-none flex items-end gap-6 xl:gap-10 ${isPanelOpen ? "" : "lg:right-[460px] xl:right-[520px]"}`}>
         <motion.div 
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
