@@ -29,17 +29,18 @@ interface KnowledgeGraphProps {
   selectedId: string | null;
   isScanning: boolean;
   theme: "dark" | "light";
+  graphColorOverride?: string;
 }
 
 const CATEGORY_COLORS: Record<string, { dark: string; light: string }> = {
-  AI: { dark: "#00ffff", light: "#2563eb" },
-  "Věda": { dark: "#8a2be2", light: "#7c3aed" },
-  Tech: { dark: "#00ffa3", light: "#059669" },
-  "Výzkum": { dark: "#ffaa00", light: "#d97706" },
-  Default: { dark: "#8a2be2", light: "#4f46e5" },
+  AI: { dark: "#a4e6ff", light: "#00b4d8" }, // Cyber Blue
+  "Věda": { dark: "#dfb7ff", light: "#9d4edd" }, // Bio Purple
+  Tech: { dark: "#00fca1", light: "#00a86b" }, // Neon Green
+  "Výzkum": { dark: "#ffab7b", light: "#d66d0d" }, // Alert Orange
+  Default: { dark: "#dfb7ff", light: "#9d4edd" },
 };
 
-export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning, theme }: KnowledgeGraphProps) {
+export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning, theme, graphColorOverride }: KnowledgeGraphProps) {
   const { camera } = useThree();
   const graphRef = useRef<THREE.Group>(null);
   const [nodes, setNodes] = useState<NodeData[]>([]);
@@ -47,11 +48,11 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   const colors = useMemo(() => ({
-    connection: theme === "dark" ? "#1e1e32" : "#cbd5e1",
-    highlight: theme === "dark" ? "#00ffff" : "#2563eb",
-    text: theme === "dark" ? "#ffffff" : "#0f172a",
-    packet: theme === "dark" ? "#00ffff" : "#2563eb",
-  }), [theme]);
+    connection: theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.1)",
+    highlight: graphColorOverride || "#a4e6ff", 
+    text: theme === "dark" ? "#e2e8f0" : "#0e0e0e",
+    packet: graphColorOverride || "#a4e6ff", 
+  }), [theme, graphColorOverride]);
 
   // Existing logic for nodes/edges generation...
   useEffect(() => {
@@ -198,6 +199,7 @@ export default function KnowledgeGraph({ items, onSelect, selectedId, isScanning
           onHover={(hovered) => setHoveredNodeId(hovered ? node.id : null)}
           theme={theme}
           textLabelColor={colors.text}
+          graphColorOverride={graphColorOverride}
         />
       ))}
     </group>
@@ -256,7 +258,7 @@ function Connection({ start, end, mid, isScanning, isHighlighted, colors }: {
   );
 }
 
-function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover, theme, textLabelColor }: { 
+function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover, theme, textLabelColor, graphColorOverride }: { 
   node: NodeData, 
   isSelected: boolean, 
   isHovered: boolean,
@@ -264,11 +266,12 @@ function GraphNode({ node, isSelected, isHovered, isScanning, onSelect, onHover,
   onSelect: () => void,
   onHover: (hovered: boolean) => void,
   theme: "dark" | "light",
-  textLabelColor: string
+  textLabelColor: string,
+  graphColorOverride?: string
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const colorData = CATEGORY_COLORS[node.category] || CATEGORY_COLORS.Default;
-  const color = theme === "dark" ? colorData.dark : colorData.light;
+  const color = graphColorOverride || (theme === "dark" ? colorData.dark : colorData.light);
 
   useFrame((state) => {
     if (groupRef.current) {

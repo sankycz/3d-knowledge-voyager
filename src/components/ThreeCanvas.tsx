@@ -10,11 +10,12 @@ interface ThreeCanvasProps {
   selectedId: string | null;
   isScanning: boolean;
   theme: "light" | "dark";
+  graphColorOverride?: string;
 }
 
-export default function ThreeCanvas({ items, onSelect, selectedId, isScanning, theme }: ThreeCanvasProps) {
+export default function ThreeCanvas({ items, onSelect, selectedId, isScanning, theme, graphColorOverride }: ThreeCanvasProps) {
   return (
-    <div className="w-full h-screen bg-transparent">
+    <div className="w-full h-full bg-transparent">
       <Canvas
         shadows
         camera={{ position: [0, 5, 20], fov: 35 }}
@@ -27,6 +28,7 @@ export default function ThreeCanvas({ items, onSelect, selectedId, isScanning, t
             selectedId={selectedId} 
             isScanning={isScanning} 
             theme={theme}
+            graphColorOverride={graphColorOverride}
           />
         </Suspense>
       </Canvas>

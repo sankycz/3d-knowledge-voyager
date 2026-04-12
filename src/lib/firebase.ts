@@ -38,6 +38,7 @@ if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
 }
 
 export const firebase = { app, auth, db, googleProvider };
+export { auth, db };
 
 export const signInWithGoogle = async (): Promise<User | null> => {
   try {

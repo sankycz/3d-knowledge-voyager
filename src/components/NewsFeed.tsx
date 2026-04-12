@@ -33,7 +33,7 @@ interface NewsFeedProps {
 function DecryptionText({ text, delay = 0, isStreaming = false }: { text: string, delay?: number, isStreaming?: boolean }) {
   const [displayedText, setDisplayedText] = useState("");
   const [isStarted, setIsStarted] = useState(false);
-  const lastTextLength = useRef(0);
+  const lastFinalTextRef = useRef("");
 
   useEffect(() => {
     const timer = setTimeout(() => setIsStarted(true), delay * 1000);
@@ -43,34 +43,40 @@ function DecryptionText({ text, delay = 0, isStreaming = false }: { text: string
   useEffect(() => {
     if (!isStarted) return;
     
-    // If first time or not streaming, do the full decryption
-    if (lastTextLength.current === 0) {
+    if (isStreaming) {
+      // During streaming, just show the text but maybe scramble the last few characters for effect
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+      if (text.length > lastFinalTextRef.current.length) {
+        setDisplayedText(text.slice(0, -1) + chars[Math.floor(Math.random() * chars.length)]);
+      } else {
+        setDisplayedText(text);
+      }
+      lastFinalTextRef.current = text;
+      return;
+    }
+
+    // Once streaming is done, do a single reveal animation if the text changed
+    if (lastFinalTextRef.current !== text) {
+      lastFinalTextRef.current = text;
       let iterations = 0;
+      const maxIterations = 10;
       const interval = setInterval(() => {
-        setDisplayedText(prev => {
-          if (iterations >= text.length) {
+        setDisplayedText(() => {
+          if (iterations >= maxIterations) {
             clearInterval(interval);
-            lastTextLength.current = text.length;
             return text;
           }
-          const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
-          const randomChar = chars[Math.floor(Math.random() * chars.length)];
-          const currentText = text.slice(0, Math.max(0, iterations)) + randomChar;
-          iterations += 1;
-          return currentText;
+          const chars = "X01_";
+          const progress = iterations / maxIterations;
+          const revealedCount = Math.floor(text.length * progress);
+          iterations++;
+          return text.slice(0, revealedCount) + 
+                 text.slice(revealedCount).split('').map(() => chars[Math.floor(Math.random() * chars.length)]).join('').slice(0, text.length - revealedCount);
         });
-      }, 10);
+      }, 50);
       return () => clearInterval(interval);
-    } else if (isStreaming && text.length > lastTextLength.current) {
-      // For streaming updates: just update text to avoid flicker
-      setDisplayedText(text);
-      lastTextLength.current = text.length;
-    } else if (!isStreaming && text !== displayedText) {
-      // Final sync
-      setDisplayedText(text);
-      lastTextLength.current = text.length;
     }
-  }, [isStarted, text, isStreaming, displayedText]);
+  }, [isStarted, text, isStreaming]);
 
   return <span>{displayedText}</span>;
 }
@@ -144,75 +150,39 @@ export default function NewsFeed({
         let core = "", exploration = "", outlook = "", tipsRaw = "";
         
         const extractSection = (fullText: string, tag: string, nextTags: string[]) => {
-          const upperFull = fullText.toUpperCase();
-          const upperTag = tag.toUpperCase();
+          const markerMap: Record<string, string> = {
+            "CORE": "[[VOYAGER_CORE]]",
+            "EXPLORATION": "[[VOYAGER_EXPLORATION]]",
+            "OUTLOOK": "[[VOYAGER_OUTLOOK]]",
+            "TIPS": "[[VOYAGER_TIPS]]"
+          };
           
-          // Primary: Look for @@@TAG@@@
-          const tagRegex = new RegExp(`@@@\\s*${upperTag}\\s*@@@`, 'i');
-          let match = fullText.match(tagRegex);
-          let startIndex = -1;
-          let contentStart = -1;
+          const currentMarker = markerMap[tag];
+          if (!currentMarker) return "";
 
-          if (match) {
-            startIndex = match.index!;
-            contentStart = startIndex + match[0].length;
-          } else {
-            // Fallback: Look for localized headers if tag is missing
-            const fallbacks: Record<string, string[]> = {
-              "CORE": ["JÁDRO ANALÝZY", "CORE ANALYSIS", "HLAVNÍ BODY"],
-              "EXPLORATION": ["DETAILNÍ PRŮZKUM", "DETAILED EXPLORATION", "HLOUBKOVÁ ANALÝZA"],
-              "OUTLOOK": ["STRATEGICKÝ VÝHLED", "STRATEGIC OUTLOOK", "PREDIKCE"],
-              "TIPS": ["EXEKUTIVNÍ PROTOKOLY", "EXEKUTIVNÍ BODY", "PRAKTICKÉ TIPY", "PRACTICAL TIPS"]
-            };
-            
-            const possibleHeaders = fallbacks[upperTag] || [];
-            for (const header of possibleHeaders) {
-              const hIndex = upperFull.indexOf(header);
-              if (hIndex !== -1) {
-                startIndex = hIndex;
-                contentStart = hIndex + header.length;
-                break;
-              }
-            }
-          }
-
+          const startIndex = fullText.indexOf(currentMarker);
           if (startIndex === -1) return "";
-          
+
+          const contentStart = startIndex + currentMarker.length;
           let contentEnd = fullText.length;
+
+          // Find the earliest occurrence of any other section marker or END markers
+          const allMarkers = Object.values(markerMap);
+          const endMarkers = ["[[VOYAGER_END]]", "VOYAGER_END", "---", "###"];
           
-          // Find next boundary (Tag or Fallback Header)
-          const nextBoundaryCandidates = [...nextTags, "KONEC PROTOKOLU", "KONEC", "---"];
-          for (const boundary of nextBoundaryCandidates) {
-            // Check for @@@ boundaries
-            const bRegex = new RegExp(`@@@\\s*${boundary.toUpperCase()}\\s*@@@`, 'i');
-            const bMatch = fullText.match(bRegex);
-            if (bMatch && bMatch.index! > startIndex && bMatch.index! < contentEnd) {
-              contentEnd = bMatch.index!;
-            }
-            
-            // Check for localized boundaries as fallbacks
-            const fallbacks: Record<string, string[]> = {
-              "EXPLORATION": ["DETAILNÍ PRŮZKUM", "HLOUBKOVÁ ANALÝZA", "DETAILED EXPLORATION"],
-              "OUTLOOK": ["STRATEGICKÝ VÝHLED", "PREDIKCE", "STRATEGIC OUTLOOK"],
-              "TIPS": ["EXEKUTIVNÍ PROTOKOLY", "EXEKUTIVNÍ BODY", "PRAKTICKÉ TIPY", "PRACTICAL TIPS"],
-              "KONEC PROTOKOLU": ["KONEC PROTOKOLU", "END OF REPORT"]
-            };
-            const nextPossibleHeaders = fallbacks[boundary] || [];
-            for (const nextH of nextPossibleHeaders) {
-              const nIndex = upperFull.indexOf(nextH, contentStart);
-              if (nIndex !== -1 && nIndex < contentEnd) {
-                contentEnd = nIndex;
-              }
+          const boundaries = [...allMarkers, ...endMarkers];
+
+          for (const boundary of boundaries) {
+            const bIndex = fullText.indexOf(boundary, contentStart);
+            if (bIndex !== -1 && bIndex < contentEnd) {
+              contentEnd = bIndex;
             }
           }
-          
+
           let content = fullText.substring(contentStart, contentEnd).trim();
           
-          // Cleanup leading symbols/headers
-          content = content.replace(/^[:\s\-\*#\uff1a]+/ , '');
-          const headerCleanupRegex = new RegExp(`^(JÁDRO ANALÝZY|DETAILNÍ PRŮZKUM|STRATEGICKÝ VÝHLED|EXEKUTIVNÍ PROTOKOLY|EXEKUTIVNÍ BODY|CORE ANALYSIS|DETAILED EXPLORATION|STRATEGIC OUTLOOK|EXECUTIVE PROTOCOLS|HLAVNÍ BODY|HLOUBKOVÁ ANALÝZA|PREDIKCE|PRAKTICKÉ TIPY)[:\s\*#\-]*`, 'i');
-          content = content.replace(headerCleanupRegex, '');
-          
+          // Cleanup markdown artifacts
+          content = content.replace(/^[:\s\-\*#\uff1a>]+/ , '');
           return content.trim();
         };
 
@@ -233,7 +203,7 @@ export default function NewsFeed({
               core: newCore || (next[index].isLoading ? next[index].core : ""),
               exploration: newExploration || (next[index].isLoading ? next[index].exploration : ""),
               outlook: newOutlook || (next[index].isLoading ? next[index].outlook : ""),
-              tips: newTipsRaw ? newTipsRaw.split("\n").map(t => t.replace(/^[-*•]\s?/, "").trim()).filter(t => t.length > 3) : (next[index].isLoading ? next[index].tips : []),
+              tips: newTipsRaw ? newTipsRaw.split("\n").map(t => t.replace(/^(?:[-*•>]|###_)\s?/, "").trim()).filter(t => t.length > 3) : (next[index].isLoading ? next[index].tips : []),
               isAnalyzed: true
             };
             next[index] = updatedItem;
@@ -276,229 +246,207 @@ export default function NewsFeed({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
         >
-          <div className="absolute inset-0 bg-[var(--bg-main)]/95 backdrop-blur-2xl" onClick={onClose} />
+          <div 
+            className="absolute inset-0 bg-[var(--bg-void)]/90 backdrop-blur-3xl" 
+            onClick={onClose} 
+          />
           
           <motion.div
-            initial={{ scale: 0.95, y: 30, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.95, y: 30, opacity: 1 }}
-            className="relative w-full max-w-6xl h-[90vh] bg-[var(--surface)] border border-[var(--primary)]/20 rounded-3xl overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] tech-corners"
+            initial={{ scale: 0.98, opacity: 0, y: 40 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.98, opacity: 0, y: 40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1700px] glass-panel flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden"
           >
-            <div className="scanline" />
+            {/* Intel Ribbon */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
             
-            {/* HUD HEADER: CLASSIFIED INTEL */}
-            <div className="flex items-center justify-between p-6 border-b border-surface-border bg-surface-shine">
-              <div className="flex items-center gap-8">
+            {/* Header: Editorial Navigation */}
+            <header className="flex items-center justify-between px-10 py-6 bg-void/20 backdrop-blur-xl z-20">
+              <div className="flex items-center gap-10">
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-accent animate-pulse" />
-                    <span className="text-[10px] font-black text-accent tracking-[0.5em] uppercase text-glow-cyan">DATOVÝ PAKET INTEL</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-text-muted mt-1">REF_ID: {activeArticle.id.slice(0, 16).toUpperCase()}</span>
+                  <span className="subheadline mb-1">Intelligence Report</span>
+                  <span className="editorial-headline text-lg tracking-[0.2em]">ID_VOYAGER_{activeArticle.id.slice(0, 8).toUpperCase()}</span>
                 </div>
-                <div className="h-10 w-px bg-surface-border hidden lg:block" />
-                <div className="hidden lg:flex items-center gap-6">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-accent uppercase tracking-widest text-[8px]">Zdroj Dat</span>
-                    <span className="text-[11px] font-mono font-bold text-text-primary uppercase">{activeArticle.source}</span>
-                  </div>
-                  <div className="flex flex-col text-right">
-                    <span className="text-[9px] font-black text-text-muted uppercase tracking-widest text-[8px]">Klasifikace</span>
-                    <span className="text-[11px] font-mono font-bold text-accent opacity-80">TAJNÉ // AI_INTEL</span>
-                  </div>
+                <div className="hidden sm:flex flex-col opacity-40">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{activeArticle.source}</span>
+                  <span className="text-[9px] font-mono text-white/50 mt-1 uppercase">Clearance_Alpha</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => speak(`${activeArticle.title}. ${activeArticle.summary}`)}
-                  className={`p-3 rounded-xl border transition-all ${isSpeaking ? "bg-accent/20 border-accent text-accent shadow-[0_0_15px_var(--accent-glow)]" : "bg-surface-shine border-surface-border text-text-muted hover:text-text-primary"}`}
-                  title="Předčítat text"
+                  className={`nav-pill ${isSpeaking ? "nav-pill-active" : ""}`}
                 >
-                  {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </button>
                 <button 
                   onClick={() => handleSave(activeArticle)} 
-                  className="p-3 rounded-xl bg-surface-shine border border-surface-border hover:border-accent/50 transition-all text-text-muted hover:text-accent"
-                  title="Uložit do archivu"
+                  className={`nav-pill ${savedIds.includes(activeArticle.id) ? "nav-pill-active" : ""}`}
                 >
-                  <Bookmark size={20} fill={savedIds.includes(activeArticle.id) ? "var(--accent)" : "none"} className={savedIds.includes(activeArticle.id) ? "text-accent" : ""} />
+                  <Bookmark size={16} fill={savedIds.includes(activeArticle.id) ? "currentColor" : "none"} />
                 </button>
-                <button onClick={onClose} className="p-3 rounded-xl bg-surface-shine border border-surface-border hover:bg-surface-shine/20 transition-all text-text-primary">
-                  <X size={20} />
+                <button 
+                  onClick={onClose} 
+                  className="nav-pill"
+                >
+                  <X size={18} />
                 </button>
               </div>
-            </div>
+            </header>
 
-            {/* CONTENT AREA */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-12 lg:p-20 no-scrollbar relative">
-              <div className="absolute top-10 right-10 pointer-events-none select-none opacity-20 rotate-12 flex flex-col items-center">
-                <div className="border-[6px] border-red-500 text-red-500 px-8 py-2 font-black text-5xl tracking-[0.2em] rounded-xl transform scale-125 mb-2">
-                  CLASSIFIED
-                </div>
-                <div className="text-red-500 font-mono text-[10px] tracking-widest font-black">
-                  VOYAGER_CLEARANCE_LEVEL_5
-                </div>
-              </div>
+            {/* Main Content Layout: Editorial Grid */}
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+              {/* Left Column: Visual & Core Analysis */}
+              <div className="flex-1 overflow-y-auto no-scrollbar border-r border-white/5 bg-[var(--bg-void)]/30">
+                <div className="max-w-4xl mx-auto p-8 md:p-16 lg:p-24 space-y-16">
+                  {/* Article Hero Section */}
+                  <div className="space-y-8">
+                    <div className="flex gap-2">
+                      <span className="px-2 py-0.5 rounded bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[8px] font-black tracking-widest uppercase">Verified</span>
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[var(--text-low)] text-[8px] font-black tracking-widest uppercase">{activeArticle.date || "Real-time"}</span>
+                    </div>
+                    
+                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-display font-medium tracking-tight leading-[1.1] text-[var(--text-high)]">
+                      {activeArticle.title}
+                    </h1>
 
-              <div className="max-w-4xl mx-auto pb-20 relative z-10">
-                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="px-3 py-1 bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Priority High</div>
-                    <div className="px-3 py-1 bg-[var(--neon-violet)]/10 border border-[var(--neon-violet)]/30 text-[var(--neon-violet)] text-[10px] font-black tracking-[0.3em] rounded uppercase">Sector: AI_DEEP_INTEL</div>
+                    {activeArticle.image && (
+                      <div className="aspect-[21/9] w-full rounded-2xl overflow-hidden border border-white/5 relative group">
+                        <img 
+                          src={activeArticle.image} 
+                          className="w-full h-full object-cover brightness-75 group-hover:brightness-100 transition-all duration-700 hover:scale-105" 
+                          alt={activeArticle.title}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-void)]/60 to-transparent pointer-events-none" />
+                      </div>
+                    )}
                   </div>
-                  
-                  <h1 className="text-5xl md:text-8xl font-display font-black tracking-tighter leading-[0.85] mb-16 text-text-primary uppercase text-glow-cyan drop-shadow-[0_0_30px_var(--accent-glow)]">
-                    {activeArticle.title}
-                  </h1>
-                  
-                  {activeArticle.image && (
-                    <div className="w-full h-80 md:h-[500px] rounded-[40px] overflow-hidden mb-20 border border-surface-border shadow-3xl relative group">
-                      <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-80" />
-                      <img src={activeArticle.image} className="w-full h-full object-cover grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-[2000ms] scale-110 group-hover:scale-100" />
-                      <div className="absolute bottom-10 left-10 flex items-center gap-4">
-                        <Activity size={20} className="text-accent animate-pulse" />
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black tracking-[0.4em] text-white">VISUÁLNÍ KONTEXT</span>
-                          <span className="text-[8px] font-mono text-white/40 uppercase">Aktivní rekognice // Identifikace_Objektu</span>
-                        </div>
+
+                  {/* Core Analysis (Editorial Text) */}
+                  <div className="space-y-20">
+                    <section className="space-y-8">
+                      <div className="flex items-center gap-4">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--color-primary)]" />
+                        <span className="module-label">Executive Intelligence</span>
                       </div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-                    <div className="lg:col-span-3 space-y-12">
-                        <section className="p-10 rounded-3xl bg-surface-shine border border-surface-border relative overflow-hidden group tech-corners">
-                          <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity"><Database size={24} className="text-accent" /></div>
-                          <h4 className="text-[10px] font-black text-accent tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-accent" /> JÁDRO ANALÝZY
-                          </h4>
-                          <div className="space-y-6 text-xl md:text-2xl text-text-primary font-medium leading-[1.6] selection:bg-accent/50">
-                            {activeArticle.isLoading && !activeArticle.core ? (
-                               <div className="flex flex-col items-center py-12">
-                                 <Loader2 size={30} className="animate-spin text-accent mb-4 opacity-40" />
-                                 <span className="text-[9px] font-mono uppercase tracking-[0.3em] opacity-40">Extrahuji neurální data...</span>
-                               </div>
-                            ) : (
-                                (activeArticle.core || activeArticle.summary)?.split('\n\n').map((p, i) => (
-                                 <p key={i} className="mb-4 last:mb-0">
-                                   <DecryptionText text={p} delay={i * 0.1} isStreaming={activeArticle.isLoading} />
-                                 </p>
-                                ))
-                            )}
-                         </div>
-                       </section>
-
-                       {(activeArticle.exploration || activeArticle.isLoading) && (
-                         <section className="space-y-10">
-                             <h4 className="text-[10px] font-black text-[var(--text-muted)] tracking-[0.4em] uppercase flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 bg-[var(--text-muted)]" /> DETAILNÍ PRŮZKUM
-                            </h4>
-                            <div className="space-y-8 text-text-muted text-lg leading-[1.6] font-medium selection:bg-accent/30 selection:text-text-primary">
-                             {activeArticle.isLoading && !activeArticle.exploration ? (
-                               <div className="flex flex-col items-center py-24 bg-surface-shine rounded-3xl border border-surface-border border-dashed">
-                                 <Loader2 size={40} className="animate-spin text-accent mb-6" />
-                                 <span className="text-[11px] font-black tracking-[0.4em] uppercase text-text-muted">Dekóduji hloubkovou analýzu...</span>
-                               </div>
-                             ) : (
-                               activeArticle.exploration?.split('\n\n').map((p, i) => (
-                                  <motion.p 
-                                    initial={{ opacity: 0 }} 
-                                    animate={{ opacity: 1 }} 
-                                    transition={{ delay: 0.1 * i }} 
-                                    key={i}
-                                  >
-                                    <DecryptionText text={p} delay={i * 0.2} isStreaming={activeArticle.isLoading} />
-                                  </motion.p>
-                               ))
-                             )}
-                           </div>
-                         </section>
-                       )}
-                    </div>
-
-                    <aside className="space-y-8">
-                      <div className="p-8 rounded-3xl bg-[var(--accent)]/5 border border-[var(--accent)]/20 relative overflow-hidden group tech-corners">
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent animate-pulse" />
-                        <div className="flex items-center gap-3 mb-6 text-[var(--accent)]">
-                          <Zap size={16} fill="var(--accent)" />
-                          <span className="text-[10px] font-black tracking-[0.3em] uppercase">STRATEGICKÝ VÝHLED</span>
-                        </div>
-                        <p className="text-base font-bold text-text-primary italic leading-snug">
-                          "{activeArticle.outlook || (activeArticle.isLoading ? "Skenuji horizont událostí..." : "Probíhá predikce vlivu...")}"
-                        </p>
-                        {/* Decorative progress bars */}
-                        <div className="mt-6 flex gap-1 h-3 items-end">
-                            {[0.2, 0.5, 0.8, 0.4, 0.6].map((h, i) => (
-                                <div key={i} className="flex-1 bg-accent/20 rounded-sm relative overflow-hidden">
-                                    <motion.div 
-                                        className="absolute bottom-0 left-0 w-full bg-accent" 
-                                        animate={{ height: `${h * 100}%` }}
-                                        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: i * 0.2 }}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      {activeArticle.tips && activeArticle.tips.length > 0 && (
-                        <div className="p-8 rounded-3xl bg-surface-shine border border-surface-border tech-corners">
-                          <h4 className="text-[10px] font-black text-[var(--text-muted)] tracking-[0.3em] uppercase mb-8 flex items-center gap-2">
-                            <Target size={14} className="text-[var(--accent)]" /> EXEKUTIVNÍ BODY
-                          </h4>
-                           <div className="space-y-6">
-                            {activeArticle.tips.map((tip, i) => (
-                               <div key={i} className="flex gap-4 group">
-                                 <span className="text-[var(--accent)] font-mono text-[11px] font-black opacity-40 group-hover:opacity-100 transition-opacity mt-0.5">0{i+1}</span>
-                                 <p className="text-xs text-text-muted leading-relaxed font-medium group-hover:text-text-primary transition-colors">{tip}</p>
-                               </div>
-                            ))}
+                      <div className="text-lg md:text-2xl text-white/70 leading-relaxed font-light space-y-10">
+                        {activeArticle.isLoading && !activeArticle.core ? (
+                          <div className="flex flex-col items-center py-12 gap-4">
+                            <Loader2 className="animate-spin text-[var(--accent)] opacity-50" size={32} />
+                            <span className="text-[10px] font-mono tracking-widest text-[var(--text-low)] uppercase">Decrypting stream...</span>
                           </div>
-                        </div>
-                      )}
-                      
-                      <div className="p-6 border border-surface-border rounded-2xl flex flex-col gap-2">
-                         <span className="text-[8px] font-black text-[var(--text-muted)] tracking-widest uppercase">Míra Spolehlivosti</span>
-                         <div className="flex justify-between items-end">
-                            <span className="text-xl font-mono text-[var(--accent)] font-black tracking-tight">98.4%</span>
-                            <div className="flex gap-1 h-4 items-end">
-                               {[0.4, 0.7, 0.9, 0.5, 0.8, 1].map((h, i) => (
-                                 <div key={i} className="w-1 bg-[var(--accent)]" style={{ height: `${h * 100}%` }} />
-                               ))}
-                            </div>
-                         </div>
+                        ) : (
+                          (activeArticle.core || activeArticle.summary)?.split('\n\n').map((p, i) => (
+                            <p key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                              <DecryptionText text={p} delay={i * 0.1} isStreaming={activeArticle.isLoading} />
+                            </p>
+                          ))
+                        )}
                       </div>
-                    </aside>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+                    </section>
 
-            <div className="p-6 bg-surface border-t border-surface-border flex flex-col sm:flex-row justify-between items-center px-10 gap-4">
-              <div className="flex flex-wrap items-center justify-center gap-10 text-[9px] font-black text-text-muted tracking-[0.5em] uppercase">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                  <span>COORD: X=124.2 Y=905.1</span>
-                </div>
-                <div className="flex items-center gap-3 hidden md:flex">
-                  <div className="w-1.5 h-1.5 bg-[#8a2be2] rounded-full shadow-[0_0_10px_#8a2be2]" />
-                  <span>STAV: NEURÁLNĚ_MAPOVÁNO</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-matrix-emerald rounded-full shadow-[0_0_10px_#00ffa3]" />
-                  <span>ŠIFRA: VOYAGER_X1</span>
+                    {(activeArticle.exploration || activeArticle.isLoading) && (
+                      <section className="space-y-8 pt-16">
+                        <div className="flex items-center gap-4">
+                          <Cpu size={14} className="text-primary opacity-50" />
+                          <span className="module-label">Deep Context Analysis</span>
+                        </div>
+                        <div className="text-md text-white/50 leading-relaxed font-light space-y-10">
+                          {activeArticle.isLoading && !activeArticle.exploration ? (
+                            <div className="h-48 flex items-center justify-center bg-white/[0.02] rounded-[40px]">
+                              <span className="module-label opacity-40 animate-pulse">Running heuristic scan...</span>
+                            </div>
+                          ) : (
+                            activeArticle.exploration?.split('\n\n').map((p, i) => (
+                              <p key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.15}s` }}>
+                                <DecryptionText text={p} delay={i * 0.2} isStreaming={activeArticle.isLoading} />
+                              </p>
+                            ))
+                          )}
+                        </div>
+                      </section>
+                    )}
+                  </div>
                 </div>
               </div>
-              <a 
-                href={activeArticle.link} 
-                target="_blank" 
-                className="flex items-center gap-3 text-accent hover:text-white transition-all bg-accent/10 px-6 py-3 rounded-xl border border-accent/20 hover:border-accent group"
-              >
-                <span className="text-[10px] font-black tracking-[0.3em]">EXTERNÍ PŘÍSTUP</span>
-                <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-              </a>
+
+              {/* Right Column: Technical Sidebar */}
+              <aside className="w-full lg:w-[450px] overflow-y-auto no-scrollbar bg-void/30 backdrop-blur-3xl px-10 py-12 space-y-12">
+                {/* Outlook Module */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <Zap size={14} className="text-primary" />
+                    <span className="module-label">Forecasting</span>
+                  </div>
+                  <div className="p-8 rounded-[32px] bg-white/[0.03] space-y-6">
+                    <p className="text-md font-medium text-white/80 leading-relaxed italic">
+                      "{activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}"
+                    </p>
+                    <div className="flex gap-1.5 h-4 items-end">
+                      {[0.4, 0.7, 0.3, 0.9, 0.5, 0.8].map((h, i) => (
+                        <div key={i} className="flex-1 bg-primary/10 rounded-full relative overflow-hidden">
+                          <motion.div 
+                            className="absolute bottom-0 left-0 w-full bg-primary/40" 
+                            animate={{ height: `${h * 100}%` }}
+                            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: i * 0.2 }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tactical Points */}
+                {activeArticle.tips && activeArticle.tips.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <Target size={14} className="text-primary" />
+                      <span className="module-label">Action Metrics</span>
+                    </div>
+                    <div className="space-y-5">
+                      {activeArticle.tips.map((tip, i) => (
+                        <div key={i} className="flex gap-5 p-6 rounded-[24px] bg-white/[0.04] group hover:bg-white/[0.06] transition-all">
+                          <span className="text-primary font-mono text-[10px] font-black opacity-30 mt-1">0{i+1}</span>
+                          <p className="text-[12px] text-white/50 group-hover:text-white/80 leading-relaxed transition-colors">{tip}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* System Status / Confidence */}
+                <div className="p-8 rounded-[32px] bg-gradient-to-br from-white/[0.05] to-transparent flex flex-col gap-5">
+                  <div className="flex justify-between items-center">
+                    <span className="module-label">Reliability Index</span>
+                    <span className="editorial-headline text-lg text-primary">98.4%</span>
+                  </div>
+                  <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-primary shadow-[0_0_10px_var(--color-primary)]" 
+                      initial={{ width: 0 }} 
+                      animate={{ width: "98.4%" }} 
+                      transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }} 
+                    />
+                  </div>
+                </div>
+
+                {/* External Link */}
+                <div className="pt-6">
+                  <a 
+                    href={activeArticle.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full h-16 flex items-center justify-center gap-4 rounded-[32px] bg-primary text-void text-[12px] font-black tracking-[0.2em] uppercase hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_40px_rgba(164,230,255,0.2)]"
+                  >
+                    Explore Matrix
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
+              </aside>
             </div>
           </motion.div>
         </motion.div>

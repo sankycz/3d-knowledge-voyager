@@ -1,40 +1,28 @@
 import Groq from "groq-sdk";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || ""
+  apiKey: process.env.GROQ_API_KEY || "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", // Fallback for build if necessary
 });
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-
-// Jednoduchá in-memory cache pro rychlost
+// Cache for analysis to prevent redundant API calls
 const analysisCache = new Map<string, any>();
 
-export async function generateDeepSummary(title: string, rawContent: string, url?: string) {
-  // Kontrola cache podle URL nebo titulku
-  const cacheKey = url || title;
-  if (analysisCache.has(cacheKey)) {
-    console.log("🚀 Returning cached analysis for:", title);
-    return analysisCache.get(cacheKey);
-  }
+export async function generateDeepSummary(title: string, rawContent: string) {
+  const cacheKey = `${title}_${rawContent.substring(0, 100)}`;
+  if (analysisCache.has(cacheKey)) return analysisCache.get(cacheKey);
 
-  if (!rawContent || rawContent.length < 50) {
-    return { title: title, summary: "Obsah článku je příliš krátký pro hloubkovou analýzu." };
-  }
-
-  // Zkrácení obsahu pro rychlejší zpracování
   const contentForSummary = rawContent.substring(0, 10000);
-
+  
   const prompt = `
-    Jsi VRCHNÍ VELITEL INFORMAČNÍCH OPERACÍ (Supreme Intelligence Commander) sítě Knowledge Voyager.
-    Tvým úkolem není psát shrnutí, ale HLOUBKOVÝ INTELLIGENCE REPORT, který proniká pod povrch reality.
+    Jsi ELITNÍ ANALYTIK sítě Knowledge Voyager. Tvým úkolem je vytvořit INTELLIGENCE REPORT z následujících surových dat.
+    Data jsou v češtině nebo angličtině, ale report musí být VŽDY v ČEŠTINĚ.
     
-    TÉMA: ${title}
-    ZDROJOVÝ TEXT: ${contentForSummary}
-
-    STRUKTURA (MANDATORNÍ):
-    Vystup jako JSON objekt s klíči:
-    1. "title": Strategický název operace (česky, úderný, technokratický).
-    2. "core": JÁDRO ANALÝZY - Komplexní, nemilosrdně detailní rozbor. MUSÍ OBSAHOVAT PŘESNĚ 5 ROZSOEHLÝCH ODSTAVCŮ. Každý odstavec musí analyzovat jiný aspekt: technický, ekonomický, geopolitický, sociální a futuristický. Minimálně 3000 znaků celkem.
+    Téma: ${title}
+    Surová data: ${contentForSummary}
+    
+    POŽADOVANÁ STRUKTURA (JSON):
+    1. "title": Úderný, futuristický název reportu.
+    2. "core": HLAVNÍ ANALÝZA - Minimálně 3 rozsáhlé odstavce. Hluboký vhled, žádná vata.
     3. "exploration": DETAILNÍ PRŮZKUM - Informační forenzika. Skrytá fakta, technické specifikace, nevídané souvislosti.
     4. "outlook": STRATEGICKÝ VÝHLED - Prediktivní modelování. Jak toto změní globální rovnováhu sil v horizontu 10 let?
     5. "tips": EXEKUTIVNÍ PROTOKOLY - Minimálně 5 konkrétních akčních bodů v imperativu.
@@ -96,33 +84,35 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
     - JAZYK: Výhradně klinická čeština (technokratický, futuristický styl).
     - STRUKTURA: Musíš použít tyto PŘESNÉ TAGY na samostatných řádcích. Nepoužívej markdown nadpisy pro sekce, pouze tyto tagy:
     
-    @@@CORE@@@
-    Sekce JÁDRO ANALÝZY: Musí obsahovat PŘESNĚ 6 ROZSÁHLÝCH ODSTAVCŮ (každý min. 800 znaků). 
-    Analyzuj v tomto pořadí:
-    1. TECHNOLOGICKÝ HORIZONT - Co se děje pod kapotou? Hloubková technická dekonstrukce.
-    2. EKONOMICKÉ DOPADY - Kdo získá/ztratí moc a kapitál? Finanční a tržní implikace.
-    3. GEOPOLITICKÁ ARÉNA - Změny v globální rovnováze. Mocenské hry.
-    4. SOCIETÁLNÍ REKONFIGURACE - Jak to změní běžný život? Kulturní a lidský posun.
-    5. ETICKÉ A PRÁVNÍ PARADIGMA - Morální dilemata a legislativní výzvy.
-    6. EVOLUČNÍ SYNTÉZA - Dlouhodobý dopad na civilizaci (horizont 20-50 let).
+    ###_VOYAGER_CORE_###
+    Sekce JÁDRO ANALÝZY: Tato sekce MUSÍ být mimořádně rozsáhlá (minimálně 7000 znaků). 
+    Zpracuj PŘESNĚ 6 HLUBOKÝCH ODSTAVCŮ, každý s vlastním tematickým zaměřením:
+    1. TECHNOLOGICKÁ DEKONSTRUKCE - Co se děje pod povrchem? Inženýrský pohled.
+    2. EKONOMICKÁ KORELACE - Finanční toky, tržní dominance a kapitálové směny.
+    3. GEOPOLITICKÝ DOPAD - Změny v globální rovnováze moci.
+    4. SOCIETÁLNÍ REKONFIGURACE - Dopad na lidstvo, kulturu a každodenní realitu.
+    5. ETICKÝ DISKURZ - Morální dilemata, rizika a právní výzvy.
+    6. EVOLUČNÍ SYNTÉZA - Jak toto změní civilizaci v horizontu 50 let.
     
-    @@@EXPLORATION@@@
-    Sekce DETAILNÍ PRŮZKUM: Hloubková forenzní analýza. Skrytá fakta, technické nuance a nečekané souvislosti. Minimálně 4 rozsáhlé odstavce.
+    ###_VOYAGER_EXPLORATION_###
+    Sekce DETAILNÍ PRŮZKUM: Hloubková informační forenzika. Skrytá fakta a technické detaily, které ostatní přehlížejí. Minimálně 5 odstavců.
     
-    @@@OUTLOOK@@@
-    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti (horizont 2, 5 a 10 let). Přesný, úderný text.
+    ###_VOYAGER_OUTLOOK_###
+    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti. Jaký je konečný cíl a kam se svět posune?
     
-    @@@TIPS@@@
-    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 10 konkrétních, praktických akčních bodů (každý na nový řádek začínající pomlčkou "-").
+    ###_VOYAGER_TIPS_###
+    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 12 konkrétních, praktických a imperativních akčních bodů (každý začínající symbolem ">").
     
-    Pamatuj: Žádný úvodní text, žádné "Zde je analýza", žádné markdown nadpisy (## ). Začni ROVNOU tagem @@@CORE@@@. KONEC PROTOKOLU.
+    ###_VOYAGER_END_###
+    
+    Pamatuj: Žádný úvodní text, žádné "Zde je analýza", žádné markdown nadpisy (## ). Začni ROVNOU tagem ###_VOYAGER_CORE_###. KONEC PROTOKOLU.
   `;
 
   return groq.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
     model: "llama-3.3-70b-versatile",
     max_tokens: 8192,
-    temperature: 0.4,
+    temperature: 0.25, // Slightly lower for more rigid adherence to tags
     stream: true,
   });
 }

@@ -6,25 +6,26 @@ import { useRef, useMemo } from "react";
 import * as THREE from "three";
 import KnowledgeGraph from "./KnowledgeGraph";
 
-export default function Experience({ items, onSelect, selectedId, isScanning, theme }: { 
+export default function Experience({ items, onSelect, selectedId, isScanning, theme, graphColorOverride }: { 
   items: any[], 
   onSelect: (id: string) => void,
   selectedId: string | null,
   isScanning: boolean,
-  theme: "dark" | "light"
+  theme: "dark" | "light",
+  graphColorOverride?: string
 }) {
   const nebulaRef = useRef<THREE.Group>(null);
 
   const colors = useMemo(() => ({
-    bg: theme === "dark" ? "#010103" : "#f0f4f8",
-    fog: theme === "dark" ? "#010103" : "#f0f4f8",
-    lightPrimary: theme === "dark" ? "#00ffff" : "#3b82f6",
-    lightSecondary: theme === "dark" ? "#8a2be2" : "#1e40af",
-    cloud1: theme === "dark" ? "#113366" : "#cbd5e1",
-    cloud2: theme === "dark" ? "#440066" : "#94a3b8",
-    cloud3: theme === "dark" ? "#006644" : "#cbd5e1",
-    grid: theme === "dark" ? "#00ffff" : "#3b82f6",
-  }), [theme]);
+    bg: theme === "dark" ? "#0e0e0e" : "#f8fafc",
+    fog: theme === "dark" ? "#0e0e0e" : "#f8fafc",
+    lightPrimary: graphColorOverride || (theme === "dark" ? "#a4e6ff" : "#00677f"),
+    lightSecondary: theme === "dark" ? "#dfb7ff" : "#6b00b0",
+    cloud1: theme === "dark" ? "#00d1ff" : "#00677f",
+    cloud2: theme === "dark" ? "#9d05ff" : "#6b00b0",
+    cloud3: theme === "dark" ? "#00fca1" : "#005b37",
+    grid: graphColorOverride || (theme === "dark" ? "#a4e6ff" : "#00677f"),
+  }), [theme, graphColorOverride]);
 
   useFrame((state) => {
     if (nebulaRef.current) {
