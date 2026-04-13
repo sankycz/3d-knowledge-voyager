@@ -89,7 +89,7 @@
 
 @layer components {
   /* THE CELESTIAL LENS (Cyber-Glass 2.0) */
-  .glass-panel {
+  @utility glass-panel {
     background: var(--glass-fill);
     backdrop-filter: blur(var(--glass-blur)) saturate(190%);
     border-radius: 40px;
