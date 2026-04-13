@@ -16,17 +16,17 @@
   --color-on-surface: #ffffff;
   --color-surface-dim: #0e0e0e;
   --color-outline-variant: rgba(255, 255, 255, 0.03);
+
+  /* Cyber Blue Palette */
+  --color-accent-data: #a4e6ff;
+  --color-accent-synth: #dfb7ff;
+  --color-accent-bio: #b1ffce;
 }
 
 @layer base {
   :root {
     --bg-void: #000000;
     --bg-deep: #050505;
-    
-    /* Cyber Blue Palette */
-    --accent-data: #a4e6ff;
-    --accent-synth: #dfb7ff;
-    --accent-bio: #b1ffce;
     
     /* Typography Tones */
     --text-high: #f1f5f9;
@@ -52,9 +52,9 @@
   [data-theme='light'] {
     --bg-void: #f9fbfd;
     --bg-deep: #ffffff;
-    --accent-data: #0056cc;
-    --accent-synth: #6d28d9;
-    --accent-bio: #047857;
+    --color-accent-data: #0056cc;
+    --color-accent-synth: #6d28d9;
+    --color-accent-bio: #047857;
     --text-high: #0f172a;
     --text-mid: #475569;
     --text-low: #94a3b8;
