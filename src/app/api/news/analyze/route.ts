@@ -46,14 +46,14 @@ export async function POST(request: Request) {
     }
 
     // Standard non-streaming analysis (JSON)
-    const deepAnalysis = await generateDeepSummary(title || "", content, url);
+    const deepAnalysis = await generateDeepSummary(title || "", content);
     
     return NextResponse.json({
       title: deepAnalysis.title || title,
-      summary: deepAnalysis.summary || "Analýza proběhla.",
-      insight: deepAnalysis.strategic_insight || null,
-      deep_analysis: deepAnalysis.deep_analysis || null,
-      practical_tips: deepAnalysis.practical_tips || [],
+      summary: deepAnalysis.core || "Analýza proběhla.",
+      insight: deepAnalysis.outlook || null,
+      deep_analysis: deepAnalysis.exploration || null,
+      practical_tips: deepAnalysis.tips || [],
       image: scrapedData?.image || null,
       fullContent: content,
       isAnalyzed: true
