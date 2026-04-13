@@ -299,12 +299,12 @@ export default function NewsFeed({
             </header>
 
             {/* Main Content Layout: Editorial Grid */}
-            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
               {/* Left Column: Visual & Core Analysis */}
-              <div className="flex-1 overflow-y-auto no-scrollbar border-r border-white/5 bg-[var(--bg-void)]/30">
-                <div className="max-w-4xl mx-auto p-8 md:p-16 lg:p-24 space-y-16">
+              <div className="flex-1 overflow-y-auto no-scrollbar bg-[var(--bg-void)]/30 scroll-smooth">
+                <div className="max-w-4xl mx-auto p-10 md:p-20 lg:p-32 space-y-24">
                   {/* Article Hero Section */}
-                  <div className="space-y-8">
+                  <div className="space-y-12">
                     <div className="flex gap-2">
                       <span className="px-2 py-0.5 rounded bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[8px] font-black tracking-widest uppercase">Verified</span>
                       <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[var(--text-low)] text-[8px] font-black tracking-widest uppercase">{activeArticle.date || "Real-time"}</span>

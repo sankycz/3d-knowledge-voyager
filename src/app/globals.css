@@ -5,53 +5,69 @@
   --font-sans: var(--font-manrope), sans-serif;
   --font-mono: var(--font-jetbrains-mono), monospace;
   
-  --color-primary: #a4e6ff;
-  --color-primary-container: #00d1ff;
+  /* The Void Palette */
+  --color-primary: #a2e4fd;
+  --color-primary-container: #68a9c1;
   --color-secondary: #dfb7ff;
-  --color-secondary-container: #9d05ff;
-  --color-tertiary: #00fca1;
+  --color-secondary-container: #593876;
+  --color-tertiary: #b1ffce;
   --color-background: #0e0e0e;
   --color-surface: #0e0e0e;
   --color-on-surface: #ffffff;
   --color-surface-dim: #0e0e0e;
-  --color-outline-variant: rgba(255, 255, 255, 0.05);
+  --color-outline-variant: rgba(255, 255, 255, 0.03);
 }
 
 @layer base {
   :root {
-    --bg-void: #0e0e0e;
-    --bg-deep: #000000;
+    --bg-void: #000000;
+    --bg-deep: #050505;
+    
+    /* Cyber Blue Palette */
     --accent-data: #a4e6ff;
     --accent-synth: #dfb7ff;
-    --accent-bio: #00fca1;
-    --text-high: #ffffff;
-    --text-low: #8e8e8e;
+    --accent-bio: #b1ffce;
     
-    /* Layering Tones (Cyber-Glass 2.0) */
-    --surface-low: #131313;
-    --surface-mid: #1a1a1a;
-    --surface-high: #262626;
+    /* Typography Tones */
+    --text-high: #f1f5f9;
+    --text-mid: #94a3b8;
+    --text-low: #475569;
+    --text-lowest: #1e293b;
     
-    /* Signature Glows */
+    /* Obsidian Surface Tiers (For tonal shifts instead of borders) */
+    --surface-lowest: #050505;
+    --surface-low: #0a0a0a;
+    --surface-mid: #0e0e0e;
+    --surface-high: #141414;
+    --surface-highest: #1a1a1a;
+    
+    /* Premium Atmospheric Tokens */
+    --glass-fill: rgba(8, 8, 8, 0.45);
+    --glass-blur: 48px;
     --glow-primary: rgba(164, 230, 255, 0.15);
-    --glow-secondary: rgba(223, 183, 255, 0.05);
+    --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+    --border-low: rgba(255, 255, 255, 0.04);
   }
 
   [data-theme='light'] {
-    --bg-void: #f8fafc;
+    --bg-void: #f9fbfd;
     --bg-deep: #ffffff;
-    --accent-data: #00677f;
-    --accent-synth: #6b00b0;
-    --accent-bio: #005b37;
+    --accent-data: #0056cc;
+    --accent-synth: #6d28d9;
+    --accent-bio: #047857;
     --text-high: #0f172a;
-    --text-low: #64748b;
+    --text-mid: #475569;
+    --text-low: #94a3b8;
     
-    --surface-low: #f1f5f9;
-    --surface-mid: #ffffff;
+    --surface-lowest: #f1f5f9;
+    --surface-low: #ffffff;
+    --surface-mid: #f8fafc;
     --surface-high: #e2e8f0;
-    
-    --glow-primary: rgba(0, 103, 127, 0.05);
-    --glow-secondary: rgba(107, 0, 176, 0.03);
+    --surface-highest: #cbd5e1;
+
+    --glass-fill: rgba(255, 255, 255, 0.85);
+    --ambient-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.08);
+    --border-low: rgba(0, 0, 0, 0.04);
   }
 
   body {
@@ -60,58 +76,62 @@
     font-family: var(--font-sans);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.011em;
+    transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
-    line-height: 0.95;
+    letter-spacing: -0.03em;
+    line-height: 0.85;
   }
 }
 
 @layer components {
-  /* THE CRYSTAL CORE: Glassmorphism Utility */
+  /* THE CELESTIAL LENS (Cyber-Glass 2.0) */
   .glass-panel {
-    background: color-mix(in srgb, var(--surface-low), transparent 45%);
-    backdrop-filter: blur(64px) saturate(180%);
-    border-radius: 32px;
+    background: var(--glass-fill);
+    backdrop-filter: blur(var(--glass-blur)) saturate(190%);
+    border-radius: 40px;
     position: relative;
     overflow: hidden;
-    /* The "No-Line" Rule: Borders are implied by tonal shifts */
     border: none;
-    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ambient-shadow);
   }
 
   .voyager-module {
-    @apply p-8 glass-panel transition-all duration-700;
-    /* Depth through tonal stacking rather than shadows */
-    background: color-mix(in srgb, var(--surface-low), transparent 60%);
+    @apply p-8 glass-panel transition-all duration-1000 cubic-bezier(0.23, 1, 0.32, 1);
+    background: var(--surface-low);
   }
 
   .voyager-module:hover {
-    background: color-mix(in srgb, var(--surface-mid), transparent 40%);
+    background: color-mix(in srgb, var(--surface-mid), transparent 30%);
     transform: translateY(-2px);
-    box-shadow: 0 0 40px -10px var(--glow-primary);
+    box-shadow: 0 0 50px -10px var(--glow-primary);
   }
 
-  /* Feed Column Tonal Shift (No borders per rule) */
+  /* Island Container Padding */
+  .island-container {
+    @apply p-6 flex flex-col h-full overflow-hidden;
+  }
+
+  /* Feed Column Tonal Shift */
   .feed-column {
-    background: color-mix(in srgb, var(--bg-void), var(--surface-low) 50%);
+    background: color-mix(in srgb, var(--bg-void), var(--surface-low) 40%);
   }
 
   /* Floating Navigation Island */
   .nav-island {
     @apply flex items-center gap-4 p-2 glass-panel rounded-full;
-    background: color-mix(in srgb, var(--surface-high), transparent 30%);
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+    background: color-mix(in srgb, var(--surface-high), transparent 25%);
+    box-shadow: 0 15px 50px -10px rgba(0, 0, 0, 0.6);
   }
 
   /* Editorial Typography Hooks */
   .editorial-headline {
     @apply font-display font-black uppercase leading-[0.85];
     color: var(--text-high);
-    letter-spacing: 0.05em; /* Aggressive tracking per system rules */
+    letter-spacing: 0.05em;
     text-wrap: balance;
   }
 
@@ -129,7 +149,7 @@
     @apply text-text-low;
     &:hover {
       color: var(--text-high);
-      background: color-mix(in srgb, var(--text-high), transparent 95%);
+      background: color-mix(in srgb, var(--text-high), transparent 93%);
     }
   }
 
@@ -149,4 +169,13 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes dash {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-dash {
+  animation: dash 2s linear infinite;
 }

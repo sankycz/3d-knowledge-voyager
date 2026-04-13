@@ -18,9 +18,9 @@ export default function AccountButton() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 bg-surface-shine border border-surface-border px-6 py-3 rounded-2xl animate-pulse">
-        <div className="w-8 h-8 rounded-full bg-surface-shine" />
-        <div className="w-20 h-2 bg-surface-shine rounded" />
+      <div className="flex items-center gap-3 px-6 py-3 rounded-2xl animate-pulse bg-surface-low">
+        <div className="w-8 h-8 rounded-full bg-surface-mid" />
+        <div className="w-20 h-2 bg-surface-mid rounded" />
       </div>
     );
   }
@@ -35,52 +35,52 @@ export default function AccountButton() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={() => signIn()}
-            className="group relative flex items-center gap-4 px-8 py-3 rounded-2xl bg-surface backdrop-blur-3xl border border-surface-border hover:border-accent transition-all shadow-main overflow-hidden tech-corners"
+            className="group relative flex items-center gap-4 px-8 py-3 rounded-[20px] bg-surface-mid hover:bg-surface-high transition-all shadow-xl overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            <div className="relative flex items-center justify-center p-2 rounded-xl bg-surface-shine group-hover:bg-accent/10 transition-colors shadow-inner">
+            <div className="relative flex items-center justify-center p-2 rounded-xl bg-surface-high group-hover:bg-primary/10 transition-colors">
               <GoogleIcon />
             </div>
             
-            <div className="flex flex-col items-start leading-none group">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white group-hover:text-accent transition-colors">Přihlásit se</span>
-              <span className="text-[8px] font-mono text-neutral-500 mt-1 tracking-widest uppercase">VOYAGER_ACCESS_PROTO_v4</span>
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white group-hover:text-primary transition-colors">Sign In</span>
+              <span className="text-[8px] font-mono text-text-low mt-1.5 tracking-widest uppercase">System_Auth</span>
             </div>
             
-            <ShieldAlert size={14} className="text-neutral-500 group-hover:text-accent transition-colors ml-2" />
+            <ShieldAlert size={14} className="text-text-low group-hover:text-primary transition-colors ml-2" />
           </motion.button>
         ) : (
           <motion.div 
             key="account"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-5"
+            className="flex items-center gap-4"
           >
-            <div className="flex items-center gap-4 bg-surface backdrop-blur-3xl px-6 py-3 rounded-2xl border border-surface-border shadow-main relative overflow-hidden group tech-corners">
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-4 bg-surface-mid px-6 py-3 rounded-[20px] shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               {user.photoURL ? (
-                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-surface-border shadow-lg relative z-10" />
+                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-white/5 shadow-lg relative z-10" />
               ) : (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent/20 text-accent border border-accent/30 relative z-10">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary border border-primary/20 relative z-10">
                   <User size={16} />
                 </div>
               )}
               
               <div className="flex flex-col relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-white">{user.displayName?.split(" ")[0] || "OPERÁTOR"}</span>
-                  <ShieldCheck size={10} className="text-accent" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-white leading-none">{user.displayName?.split(" ")[0] || "OPERATOR"}</span>
+                  <ShieldCheck size={10} className="text-primary" />
                 </div>
-                <span className="text-[8px] font-mono text-neutral-500 uppercase tracking-widest">Clearance Level 5</span>
+                <span className="text-[8px] font-mono text-text-low uppercase tracking-widest mt-1">Level_05</span>
               </div>
             </div>
 
             <button 
               onClick={() => signOut()}
-              className="p-4 rounded-2xl bg-surface-shine border border-surface-border hover:bg-red-500/10 hover:border-red-500/40 text-neutral-400 hover:text-red-400 transition-all shadow-main group"
-              title="Odhlásit Protocol"
+              className="p-4 rounded-[20px] bg-surface-mid hover:bg-red-500/10 text-text-low hover:text-red-400 transition-all group"
+              title="Deactivate Session"
             >
               <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
             </button>

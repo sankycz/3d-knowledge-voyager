@@ -43,36 +43,44 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
         <Activity size={14} className="text-primary opacity-60 animate-pulse" />
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-10 space-y-3">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-20 space-y-4">
         {items.map((item, idx) => (
           <motion.button
             key={item.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.05, ease: [0.23, 1, 0.32, 1], duration: 0.8 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.04, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
             onClick={() => onSelect(item.id)}
-            className={`w-full text-left p-6 rounded-2xl transition-all relative group overflow-hidden ${
+            className={`w-full text-left p-6 rounded-[24px] transition-all relative group overflow-hidden ${
               selectedId === item.id 
-                ? "bg-white/5 shadow-[0_0_30px_rgba(0,0,0,0.3)]" 
-                : "hover:bg-white/[0.02]"
+                ? "bg-white/[0.07] shadow-[0_20px_40px_rgba(0,0,0,0.4)]" 
+                : "hover:bg-white/[0.03]"
             }`}
           >
-            {/* Minimal selection indicator */}
-            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full transition-all duration-500 scale-x-0 ${selectedId === item.id ? "scale-x-100" : "group-hover:scale-x-50 opacity-0 group-hover:opacity-30"}`} />
+            {/* Selection HUD Accent */}
+            <div className={`absolute top-0 left-0 bottom-0 w-1 bg-primary transition-transform duration-500 origin-left ${selectedId === item.id ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50"}`} />
             
-            <div className="relative z-10 flex flex-col gap-3 ml-2">
+            <div className="relative z-10 flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <span className="module-label group-hover:text-primary transition-colors">{item.source}</span>
-                {item.isAnalyzed && <Sparkles size={10} className="text-primary animate-pulse" />}
+                <span className={`text-[8px] font-black uppercase tracking-[0.2em] transition-colors ${selectedId === item.id ? "text-primary" : "text-text-low group-hover:text-text-mid"}`}>
+                  {item.source}
+                </span>
+                <div className="flex gap-2">
+                  {item.isAnalyzed && <Sparkles size={10} className="text-primary" />}
+                </div>
               </div>
               
-              <h3 className={`text-md font-medium leading-[1.3] transition-all duration-500 ${selectedId === item.id ? "text-white scale-[1.02]" : "text-white/60 group-hover:text-white"}`}>
+              <h3 className={`text-md font-medium leading-[1.4] transition-all duration-300 ${selectedId === item.id ? "text-white" : "text-white/60 group-hover:text-white/90"}`}>
                 {item.title}
               </h3>
               
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[9px] font-mono text-white/20 group-hover:text-white/40 transition-colors uppercase tracking-widest">{item.date || "REAL_TIME"}</span>
-                <ChevronRight size={14} className={`text-primary transition-all duration-500 transform ${selectedId === item.id ? "translate-x-0 opacity-100" : "-translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-40"}`} />
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-[9px] font-mono text-text-low group-hover:text-text-mid transition-colors uppercase tracking-[0.1em]">
+                  {item.date || "REAL_TIME_NODE"}
+                </span>
+                <div className={`p-1.5 rounded-full bg-white/5 transition-all duration-500 transform ${selectedId === item.id ? "translate-x-0 opacity-100 rotate-0" : "translate-x-4 opacity-0 -rotate-45 group-hover:translate-x-0 group-hover:opacity-100 group-hover:rotate-0"}`}>
+                  <ChevronRight size={12} className="text-primary" />
+                </div>
               </div>
             </div>
           </motion.button>
