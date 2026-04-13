@@ -87,17 +87,18 @@
   }
 }
 
+/* THE CELESTIAL LENS (Cyber-Glass 2.0) */
+@utility glass-panel {
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur)) saturate(190%);
+  border-radius: 40px;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  box-shadow: var(--ambient-shadow);
+}
+
 @layer components {
-  /* THE CELESTIAL LENS (Cyber-Glass 2.0) */
-  @utility glass-panel {
-    background: var(--glass-fill);
-    backdrop-filter: blur(var(--glass-blur)) saturate(190%);
-    border-radius: 40px;
-    position: relative;
-    overflow: hidden;
-    border: none;
-    box-shadow: var(--ambient-shadow);
-  }
 
   .voyager-module {
     @apply p-8 glass-panel transition-all duration-1000 cubic-bezier(0.23, 1, 0.32, 1);
