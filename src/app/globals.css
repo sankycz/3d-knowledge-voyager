@@ -17,36 +17,31 @@
   --color-surface-dim: #0e0e0e;
   --color-outline-variant: rgba(255, 255, 255, 0.03);
 
-  /* Cyber Blue Palette */
-  --color-accent-data: #a4e6ff;
-  --color-accent-synth: #dfb7ff;
-  --color-accent-bio: #b1ffce;
+  /* Typography Tones */
+  --color-text-high: #f1f5f9;
+  --color-text-mid: #94a3b8;
+  --color-text-low: #475569;
+  --color-text-lowest: #1e293b;
+
+  /* Obsidian Surface Tiers */
+  --color-surface-lowest: #050505;
+  --color-surface-low: #0a0a0a;
+  --color-surface-mid: #0e0e0e;
+  --color-surface-high: #141414;
+  --color-surface-highest: #1a1a1a;
+
+  /* Premium Atmospheric Tokens */
+  --glass-fill: rgba(8, 8, 8, 0.45);
+  --glass-blur: 48px;
+  --glow-primary: rgba(164, 230, 255, 0.15);
+  --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+  --border-low: rgba(255, 255, 255, 0.04);
 }
 
 @layer base {
   :root {
     --bg-void: #000000;
     --bg-deep: #050505;
-    
-    /* Typography Tones */
-    --text-high: #f1f5f9;
-    --text-mid: #94a3b8;
-    --text-low: #475569;
-    --text-lowest: #1e293b;
-    
-    /* Obsidian Surface Tiers (For tonal shifts instead of borders) */
-    --surface-lowest: #050505;
-    --surface-low: #0a0a0a;
-    --surface-mid: #0e0e0e;
-    --surface-high: #141414;
-    --surface-highest: #1a1a1a;
-    
-    /* Premium Atmospheric Tokens */
-    --glass-fill: rgba(8, 8, 8, 0.45);
-    --glass-blur: 48px;
-    --glow-primary: rgba(164, 230, 255, 0.15);
-    --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
-    --border-low: rgba(255, 255, 255, 0.04);
   }
 
   [data-theme='light'] {
@@ -55,15 +50,15 @@
     --color-accent-data: #0056cc;
     --color-accent-synth: #6d28d9;
     --color-accent-bio: #047857;
-    --text-high: #0f172a;
-    --text-mid: #475569;
-    --text-low: #94a3b8;
+    --color-text-high: #0f172a;
+    --color-text-mid: #475569;
+    --color-text-low: #94a3b8;
     
-    --surface-lowest: #f1f5f9;
-    --surface-low: #ffffff;
-    --surface-mid: #f8fafc;
-    --surface-high: #e2e8f0;
-    --surface-highest: #cbd5e1;
+    --color-surface-lowest: #f1f5f9;
+    --color-surface-low: #ffffff;
+    --color-surface-mid: #f8fafc;
+    --color-surface-high: #e2e8f0;
+    --color-surface-highest: #cbd5e1;
 
     --glass-fill: rgba(255, 255, 255, 0.85);
     --ambient-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.08);
@@ -71,7 +66,7 @@
   }
 
   body {
-    color: var(--text-high);
+    color: var(--color-text-high);
     background: var(--bg-void);
     font-family: var(--font-sans);
     overflow: hidden;
@@ -103,11 +98,11 @@
   .voyager-module {
     @apply p-8 glass-panel transition-all duration-1000;
     transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-    background: var(--surface-low);
+    background: var(--color-surface-low);
   }
 
   .voyager-module:hover {
-    background: color-mix(in srgb, var(--surface-mid), transparent 30%);
+    background: color-mix(in srgb, var(--color-surface-mid), transparent 30%);
     transform: translateY(-2px);
     box-shadow: 0 0 50px -10px var(--glow-primary);
   }
@@ -119,20 +114,20 @@
 
   /* Feed Column Tonal Shift */
   .feed-column {
-    background: color-mix(in srgb, var(--bg-void), var(--surface-low) 40%);
+    background: color-mix(in srgb, var(--bg-void), var(--color-surface-low) 40%);
   }
 
   /* Floating Navigation Island */
   .nav-island {
     @apply flex items-center gap-4 p-2 glass-panel rounded-full;
-    background: color-mix(in srgb, var(--surface-high), transparent 25%);
+    background: color-mix(in srgb, var(--color-surface-high), transparent 25%);
     box-shadow: 0 15px 50px -10px rgba(0, 0, 0, 0.6);
   }
 
   /* Editorial Typography Hooks */
   .editorial-headline {
     @apply font-display font-black uppercase leading-[0.85];
-    color: var(--text-high);
+    color: var(--color-text-high);
     letter-spacing: 0.05em;
     text-wrap: balance;
   }
@@ -150,8 +145,8 @@
     @apply px-4 py-2 rounded-full transition-all duration-300 flex items-center gap-2;
     @apply text-text-low;
     &:hover {
-      color: var(--text-high);
-      background: color-mix(in srgb, var(--text-high), transparent 93%);
+      color: var(--color-text-high);
+      background: color-mix(in srgb, var(--color-text-high), transparent 93%);
     }
   }
 
