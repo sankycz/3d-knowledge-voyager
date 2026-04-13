@@ -36,6 +36,11 @@
   --glow-primary: rgba(164, 230, 255, 0.15);
   --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
   --border-low: rgba(255, 255, 255, 0.04);
+
+  /* Accent Tones (Base/Dark) */
+  --color-accent-data: #4F9CF9;
+  --color-accent-synth: #8B5CF6;
+  --color-accent-bio: #10B981;
 }
 
 @layer base {
