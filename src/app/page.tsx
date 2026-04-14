@@ -162,7 +162,7 @@ export default function Home() {
         <motion.aside 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="w-[420px] h-full glass-panel flex flex-col p-10 pt-28 overflow-hidden"
+          className="w-[500px] h-full glass-panel flex flex-col p-10 pt-28 overflow-hidden"
         >
           <header className="mb-10">
             <span className="subheadline">Intelligence Feed</span>
@@ -183,7 +183,7 @@ export default function Home() {
           </div>
         </motion.aside>
 
-        {/* CENTER GAP: 3D Visualization Visible Here */}
+        {/* CENTER SECTION: 3D Visualization */}
         <div className="flex-1 flex flex-col items-center justify-start pt-32 pointer-events-none">
            <motion.div 
              initial={{ y: -20, opacity: 0 }}
@@ -200,62 +200,6 @@ export default function Home() {
              ))}
            </motion.div>
         </div>
-
-        {/* ISLAND 2: System Telemetry HUD */}
-        <motion.aside 
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="w-[420px] h-full flex flex-col gap-10 pt-28 overflow-hidden"
-        >
-          {/* Module: System Integrity */}
-          <div className="glass-panel p-10">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-text-low tracking-widest uppercase">System Integrity</span>
-                <span className="text-2xl font-display font-black text-primary">STABLE</span>
-              </div>
-              <Activity className="text-primary animate-pulse" size={24} />
-            </div>
-            
-            <div className="space-y-8">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-[9px] uppercase tracking-widest text-text-low">Neural Activity</span>
-                  <span className="text-[10px] font-mono font-bold text-primary">84.2 TPS</span>
-                </div>
-                <Sparkline data={[20, 45, 30, 60, 40, 80, 50, 90, 70]} color="var(--color-primary)" />
-              </div>
-              
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-[9px] uppercase tracking-widest text-text-low">Logic Throughput</span>
-                  <span className="text-[10px] font-mono font-bold text-secondary">2.4 GB/s</span>
-                </div>
-                <Sparkline data={[70, 40, 90, 50, 80, 40, 60, 30, 45]} color="var(--color-secondary)" />
-              </div>
-            </div>
-          </div>
-
-          {/* Module: Session Logs */}
-          <div className="glass-panel p-10 flex-1 flex flex-col overflow-hidden">
-             <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                   <Terminal size={14} className="text-tertiary" />
-                   <span className="module-label text-tertiary">SESSION_LOGS</span>
-                </div>
-                <div className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
-             </div>
-             
-             <div className="flex-1 font-mono text-[10px] space-y-3 overflow-y-auto no-scrollbar">
-               {logs.map((log, i) => (
-                 <div key={i} className={`flex gap-3 leading-relaxed ${i === 0 ? "text-primary" : "text-text-low/60"}`}>
-                   <span className="opacity-30">{i === 0 ? ">>" : " >"}</span>
-                   <span className={i === 0 ? "font-bold" : ""}>{log}</span>
-                 </div>
-               ))}
-             </div>
-          </div>
-        </motion.aside>
       </div>
 
       {/* MOBILE LAYOUT (Editorial Split) */}

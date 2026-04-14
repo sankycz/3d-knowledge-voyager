@@ -151,10 +151,10 @@ export default function NewsFeed({
         
         const extractSection = (fullText: string, tag: string, nextTags: string[]) => {
           const markerMap: Record<string, string> = {
-            "CORE": "[[VOYAGER_CORE]]",
-            "EXPLORATION": "[[VOYAGER_EXPLORATION]]",
-            "OUTLOOK": "[[VOYAGER_OUTLOOK]]",
-            "TIPS": "[[VOYAGER_TIPS]]"
+            "CORE": "###_VOYAGER_CORE_###",
+            "EXPLORATION": "###_VOYAGER_EXPLORATION_###",
+            "OUTLOOK": "###_VOYAGER_OUTLOOK_###",
+            "TIPS": "###_VOYAGER_TIPS_###"
           };
           
           const currentMarker = markerMap[tag];
@@ -168,7 +168,7 @@ export default function NewsFeed({
 
           // Find the earliest occurrence of any other section marker or END markers
           const allMarkers = Object.values(markerMap);
-          const endMarkers = ["[[VOYAGER_END]]", "VOYAGER_END", "---", "###"];
+          const endMarkers = ["###_VOYAGER_END_###", "[[VOYAGER_END]]", "VOYAGER_END", "---", "###"];
           
           const boundaries = [...allMarkers, ...endMarkers];
 
