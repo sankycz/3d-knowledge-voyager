@@ -24,50 +24,50 @@
   --color-text-lowest: #1e293b;
 
   /* Obsidian Surface Tiers */
-  --color-surface-lowest: #020202;
-  --color-surface-low: #050505;
-  --color-surface-mid: #0a0a0a;
-  --color-surface-high: #121212;
-  --color-surface-highest: #1a1a1a;
+  --color-surface-lowest: #010101;
+  --color-surface-low: #080808;
+  --color-surface-mid: #0f0f0f;
+  --color-surface-high: #181818;
+  --color-surface-highest: #222222;
 
   /* Premium Atmospheric Tokens */
-  --glass-fill: rgba(8, 8, 8, 0.45);
-  --glass-blur: 48px;
-  --glow-primary: rgba(164, 230, 255, 0.15);
-  --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
-  --border-low: rgba(255, 255, 255, 0.04);
+  --glass-fill: rgba(10, 10, 10, 0.45);
+  --glass-blur: 40px;
+  --glow-primary: rgba(162, 228, 253, 0.12);
+  --ambient-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.95);
+  --border-low: rgba(255, 255, 255, 0.05);
 
   /* Accent Tones (Base/Dark) */
-  --color-accent-data: #4F9CF9;
-  --color-accent-synth: #8B5CF6;
-  --color-accent-bio: #10B981;
+  --color-accent-data: #a2e4fd;
+  --color-accent-synth: #dfb7ff;
+  --color-accent-bio: #b1ffce;
 }
 
 @layer base {
   :root {
     --bg-void: #000000;
-    --bg-deep: #050505;
+    --bg-deep: #020202;
   }
 
   [data-theme='light'] {
     --bg-void: #f9fbfd;
     --bg-deep: #ffffff;
-    --color-accent-data: #0056cc;
-    --color-accent-synth: #6d28d9;
-    --color-accent-bio: #047857;
+    --color-accent-data: #0088cc;
+    --color-accent-synth: #8b5cf6;
+    --color-accent-bio: #10b981;
     --color-text-high: #0f172a;
     --color-text-mid: #475569;
-    --color-text-low: #94a3b8;
+    --color-text-low: #64748b;
     
     --color-surface-lowest: #f1f5f9;
     --color-surface-low: #ffffff;
     --color-surface-mid: #f8fafc;
-    --color-surface-high: #e2e8f0;
-    --color-surface-highest: #cbd5e1;
+    --color-surface-high: #f1f5f9;
+    --color-surface-highest: #e2e8f0;
 
     --glass-fill: rgba(255, 255, 255, 0.85);
-    --ambient-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.08);
-    --border-low: rgba(0, 0, 0, 0.04);
+    --ambient-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.1);
+    --border-low: rgba(0, 0, 0, 0.06);
   }
 
   body {
@@ -76,71 +76,88 @@
     font-family: var(--font-sans);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.015em;
     transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.03em;
-    line-height: 0.85;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
   }
 }
 
 /* THE CELESTIAL LENS (Cyber-Glass 2.0) */
 @utility glass-panel {
   background: var(--glass-fill);
-  backdrop-filter: blur(var(--glass-blur)) saturate(190%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   border-radius: 40px;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-low);
   box-shadow: 
     var(--ambient-shadow),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.01);
 }
 
 @utility glass-separator {
   height: 1px;
   width: 100%;
   background: linear-gradient(90deg, transparent, var(--color-outline-variant), transparent);
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 @utility depth-glow {
   background: radial-gradient(circle at center, var(--glow-primary) 0%, transparent 70%);
-  filter: blur(60px);
+  filter: blur(80px);
 }
 
 
 @layer components {
 
   .voyager-module {
-    @apply glass-panel transition-all duration-300;
+    @apply glass-panel transition-all duration-500;
     border: 1px solid var(--color-surface-high);
     background: var(--color-surface-low);
+    box-shadow: 
+      0 30px 60px -15px rgba(0,0,0,0.8),
+      inset 0 0 0 1px rgba(255,255,255,0.02);
   }
 
   .voyager-section {
-    @apply relative overflow-hidden rounded-3xl border border-white/5;
+    @apply relative overflow-hidden rounded-[2.5rem] border border-white/10;
     background: var(--color-surface-low);
-    box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5);
+    box-shadow: 
+      0 40px 100px -20px rgba(0,0,0,0.9),
+      inset 0 0 80px rgba(255,255,255,0.01);
   }
 
   .article-island {
-    @apply glass-panel hover:bg-surface-high/40 transition-all duration-500 cursor-pointer;
+    @apply relative overflow-hidden rounded-3xl transition-all duration-500 cursor-pointer;
     background: var(--color-surface-mid);
     border: 1px solid var(--color-surface-high);
+    box-shadow: 
+      0 10px 30px -10px rgba(0,0,0,0.5),
+      inset 0 0 0 1px rgba(255,255,255,0.02);
+    
+    &:hover {
+      background: var(--color-surface-high);
+      transform: translateY(-2px) scale(1.005);
+      border-color: var(--color-primary-container);
+      box-shadow: 
+        0 20px 40px -10px rgba(0,0,0,0.7),
+        0 0 30px -5px var(--glow-primary);
+    }
   }
 
   .glass-depth-stack {
-    @apply relative after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-black/20 after:blur-xl;
+    @apply relative after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-black/40 after:blur-2xl;
   }
 
   .voyager-module:hover {
-    background: color-mix(in srgb, var(--color-surface-mid), transparent 30%);
-    transform: translateY(-2px);
-    box-shadow: 0 0 50px -10px var(--glow-primary);
+    background: var(--color-surface-mid);
+    transform: translateY(-4px);
+    box-shadow: 0 40px 80px -20px var(--glow-primary);
   }
 
   /* Island Container Padding */

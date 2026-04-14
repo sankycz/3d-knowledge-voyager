@@ -157,31 +157,32 @@ export default function Home() {
       {/* MODULAR ISLAND ARCHITECTURE (Desktop Centered) */}
       <div className="hidden md:block absolute inset-0 z-10 transition-all duration-1000">
         
-        {/* AMBIENT 3D BACKGROUND LAYER */}
-        <div className="absolute inset-0 z-0">
-          <ThreeCanvas 
-            items={news} 
-            onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}
-            selectedId={selectedArticleId}
-            isScanning={isRefreshing}
-            theme={theme}
-          />
-        </div>
-
-        {/* FLOATING INTELLIGENCE HUB (Right-aligned island) */}
+        {/* CENTERED INTELLIGENCE HUB */}
         <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="absolute top-12 right-12 w-[480px] bottom-12 z-20"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-5xl bottom-24 z-20 px-8"
         >
           <div className="voyager-section h-full flex flex-col glass-depth-stack">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center">
-              <div>
-                <h1 className="editorial-headline text-3xl mb-1 text-primary">Intelligence</h1>
-                <p className="text-[10px] font-mono text-text-low tracking-widest uppercase">Node: Voyager_Alpha</p>
+            <div className="p-10 border-b border-white/5 flex justify-between items-center bg-surface-lowest/40 backdrop-blur-md">
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 rounded-2xl border border-primary/20 flex items-center justify-center text-primary bg-primary/5 shadow-[0_0_20px_rgba(162,228,253,0.1)]">
+                  <Activity size={24} />
+                </div>
+                <div>
+                  <h1 className="editorial-headline text-4xl mb-1 text-primary">Intelligence Hub</h1>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-mono text-text-low tracking-widest uppercase">Node: Voyager_Alpha</span>
+                    <div className="w-1 h-1 rounded-full bg-text-lowest" />
+                    <span className="text-[10px] font-mono text-text-low tracking-widest uppercase">Verified Connection</span>
+                  </div>
+                </div>
               </div>
-              <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary bg-primary/5">
-                <Activity size={18} />
+              <div className="flex gap-4">
+                <div className="px-4 py-2 rounded-full border border-white/5 bg-white/5 flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-text-mid">Live Feed</span>
+                </div>
               </div>
             </div>
             

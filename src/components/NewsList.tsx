@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Activity, Zap, Sparkles, ChevronRight } from "lucide-react";
+import { Activity, Zap, ChevronRight } from "lucide-react";
 
 interface NewsItem {
   id: string;
@@ -44,36 +44,63 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-        <div className="px-6 pb-20 space-y-2 pt-4">
-        {items.map((item, idx) => (
-          <div key={item.id} className="group/container">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.04, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
-            onClick={() => onSelect(item.id)}
-            className={`article-island p-6 mb-4 group cursor-pointer ${
-              selectedId === item.id ? "ring-2 ring-primary/40 bg-surface-high" : ""
-            }`}
-          >
-                  {item.date || "REAL_TIME_NODE"}
-                </span>
-                <div className={`p-1.5 rounded-full bg-white/5 transition-all duration-500 transform ${selectedId === item.id ? "translate-x-0 opacity-100 rotate-0" : "translate-x-4 opacity-0 -rotate-45 group-hover:translate-x-0 group-hover:opacity-100 group-hover:rotate-0"}`}>
-                  <ChevronRight size={12} className="text-primary" />
+        <div className="px-6 pb-20 space-y-4 pt-6">
+          {items.map((item, idx) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
+              onClick={() => onSelect(item.id)}
+              className={`article-island p-6 group ${
+                selectedId === item.id ? "ring-2 ring-primary/40 bg-surface-high" : ""
+              }`}
+            >
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+                      {item.source}
+                    </span>
+                    <h3 className="text-lg font-display font-bold leading-tight group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <div className={`p-2 rounded-full bg-white/5 transition-all duration-500 transform ${
+                    selectedId === item.id 
+                      ? "rotate-0 opacity-100" 
+                      : "-rotate-45 opacity-0 group-hover:rotate-0 group-hover:opacity-100"
+                  }`}>
+                    <ChevronRight size={14} className="text-primary" />
+                  </div>
+                </div>
+
+                <p className="text-sm text-text-mid line-clamp-2 font-light leading-relaxed">
+                  {item.summary}
+                </p>
+
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-[9px] font-mono text-text-low uppercase tracking-tighter">
+                    {item.date || "REAL_TIME_NODE"}
+                  </span>
+                  {item.isAnalyzed && (
+                    <div className="flex items-center gap-1.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+                      <Zap size={10} className="text-secondary" />
+                      <span className="text-[8px] font-black text-secondary uppercase tracking-widest">Analyzed</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          </motion.button>
-          {idx < items.length - 1 && <div className="glass-separator mx-8 my-2" />}
-        </div>
-      ))}
+            </motion.div>
+          ))}
 
-        {items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-32 opacity-20 text-center px-6">
-            <Zap size={24} className="mb-4 text-[var(--accent)]" />
-            <p className="text-[9px] font-black uppercase tracking-[0.3em]">No incoming transmissions.</p>
-          </div>
-        )}
+          {items.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-32 opacity-20 text-center px-6">
+              <Zap size={24} className="mb-4 text-primary" />
+              <p className="text-[9px] font-black uppercase tracking-[0.3em]">No incoming transmissions.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
