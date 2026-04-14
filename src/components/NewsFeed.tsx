@@ -140,7 +140,7 @@ export default function NewsFeed({
 
       if (res.body) {
         setLocalItems(prev => prev.map((it, idx) => 
-          idx === index ? { ...it, isLoading: false, isAnalyzed: true, core: "" } : it
+          idx === index ? { ...it, isAnalyzed: true } : it
         ));
 
         const reader = res.body.getReader();
@@ -166,13 +166,15 @@ export default function NewsFeed({
           const contentStart = startIndex + currentMarker.length;
           let contentEnd = fullText.length;
 
-          // Find the earliest occurrence of any other section marker or END markers
+          // Find the earliest occurrence of any other section marker or specific END markers
+          // Removed "###" from endMarkers to avoid cutting off markdown subheadings
           const allMarkers = Object.values(markerMap);
-          const endMarkers = ["###_VOYAGER_END_###", "[[VOYAGER_END]]", "VOYAGER_END", "---", "###"];
+          const endMarkers = ["###_VOYAGER_END_###", "[[VOYAGER_END]]", "VOYAGER_END", "---"];
           
           const boundaries = [...allMarkers, ...endMarkers];
 
           for (const boundary of boundaries) {
+            if (boundary === currentMarker) continue; // Don't stop at itself
             const bIndex = fullText.indexOf(boundary, contentStart);
             if (bIndex !== -1 && bIndex < contentEnd) {
               contentEnd = bIndex;
@@ -214,6 +216,14 @@ export default function NewsFeed({
             return next;
           });
         }
+        setLocalItems(prev => {
+          const next = prev.map((it, idx) => idx === index ? { ...it, isLoading: false } : it);
+          const finalItem = next[index];
+          if (activeArticle && activeArticle.id === finalItem.id) {
+            setActiveArticle(finalItem);
+          }
+          return next;
+        });
       }
     } catch (err) {
       console.error("Analysis Failed:", err);
@@ -425,21 +435,7 @@ export default function NewsFeed({
                   </div>
                 )}
 
-                {/* System Status / Confidence */}
-                <div className="p-8 rounded-[40px] bg-gradient-to-br from-white/[0.05] to-transparent flex flex-col gap-5">
-                  <div className="flex justify-between items-center">
-                    <span className="module-label">Reliability Index</span>
-                    <span className="editorial-headline text-lg text-primary">98.4%</span>
-                  </div>
-                  <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-primary shadow-[0_0_10px_var(--color-primary)]" 
-                      initial={{ width: 0 }} 
-                      animate={{ width: "98.4%" }} 
-                      transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }} 
-                    />
-                  </div>
-                </div>
+
 
                 {/* External Link */}
                 <div className="pt-6">
