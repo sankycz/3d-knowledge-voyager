@@ -288,7 +288,7 @@ export default function Home() {
       </div>
 
       {/* FLOATING PILL NAV */}
-      <div className="fixed bottom-10 md:bottom-auto md:top-10 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none">
+      <div className="fixed bottom-10 top-auto md:bottom-auto md:top-10 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none">
         <motion.nav 
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
