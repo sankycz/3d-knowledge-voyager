@@ -150,23 +150,29 @@ export default function Home() {
           theme={theme}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-void via-transparent to-void z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--glow-primary)_0%,transparent_70%)] z-10 pointer-events-none opacity-30" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--glow-primary)_0%,transparent_70%)] z-10 pointer-events-none opacity-20" />
       </div>
+
 
       {/* MODULAR ISLAND ARCHITECTURE (Desktop Centered) */}
       <div className="hidden md:flex h-full w-full relative z-10 p-10 items-start justify-center overflow-hidden pt-32">
         
         {/* CENTERED INTELLIGENCE HUB */}
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="w-full max-w-5xl h-[85vh] glass-panel flex flex-col p-12 overflow-hidden"
-        >
-          <header className="mb-10 flex justify-between items-end">
-            <div>
-              <span className="subheadline">Intelligence Feed</span>
-              <h1 className="editorial-headline text-5xl">Discovery Hub</h1>
-            </div>
+        <div className="relative w-full max-w-5xl group">
+          {/* DEPTH GLOW BEHIND HUB */}
+          <div className="absolute inset-0 depth-glow opacity-30 -z-10 scale-110 group-hover:opacity-50 transition-opacity duration-1000" />
+          
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-full h-[85vh] glass-panel flex flex-col p-12 overflow-hidden"
+          >
+            <header className="mb-10 flex justify-between items-end">
+              <div className="border-l-2 border-primary pl-6">
+                <span className="subheadline">Intelligence Feed</span>
+                <h1 className="editorial-headline text-5xl">Discovery Hub</h1>
+              </div>
+
             <div className="flex flex-col items-end gap-1 opacity-40 font-mono text-[10px] tracking-widest uppercase">
               <span>Sector: Core_Alpha</span>
               <span>Scanning: Active</span>

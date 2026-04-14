@@ -35,7 +35,7 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-8 py-8 flex items-center justify-between shrink-0">
+      <div className="sticky top-0 z-30 px-8 py-8 flex items-center justify-between bg-surface-mid/80 backdrop-blur-xl border-b border-white/5 shrink-0">
         <div className="flex flex-col">
           <span className="subheadline mb-1">Intelligence</span>
           <h2 className="editorial-headline text-lg">Discovery</h2>
@@ -43,9 +43,13 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
         <Activity size={14} className="text-primary opacity-60 animate-pulse" />
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-20 space-y-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+        <div className="px-6 pb-20 space-y-2 pt-4">
         {items.map((item, idx) => (
+          <div key={item.id} className="group/container">
           <motion.button
+
+
             key={item.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,7 +88,10 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
               </div>
             </div>
           </motion.button>
-        ))}
+          {idx < items.length - 1 && <div className="glass-separator mx-8 my-2" />}
+        </div>
+      ))}
+
         {items.length === 0 && (
           <div className="flex flex-col items-center justify-center py-32 opacity-20 text-center px-6">
             <Zap size={24} className="mb-4 text-[var(--accent)]" />

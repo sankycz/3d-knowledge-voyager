@@ -301,8 +301,9 @@ export default function NewsFeed({
             {/* Main Content Layout: Editorial Grid */}
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
               {/* Left Column: Visual & Core Analysis */}
-              <div className="flex-1 overflow-y-auto no-scrollbar bg-[var(--bg-void)]/30 scroll-smooth">
-                <div className="max-w-4xl mx-auto p-10 md:p-20 lg:p-32 space-y-24">
+              <div className="flex-1 overflow-y-auto no-scrollbar bg-surface-lowest/50 backdrop-blur-md scroll-smooth border-r border-white/5">
+                <div className="max-w-4xl mx-auto p-10 md:p-16 lg:p-24 space-y-24">
+
                   {/* Article Hero Section */}
                   <div className="space-y-12">
                     <div className="flex gap-2">
@@ -348,8 +349,11 @@ export default function NewsFeed({
                         )}
                       </div>
                     </section>
+                    
+                    <div className="glass-separator opacity-20" />
 
                     {(activeArticle.exploration || activeArticle.isLoading) && (
+
                       <section className="space-y-8 pt-16">
                         <div className="flex items-center gap-4">
                           <Cpu size={14} className="text-primary opacity-50" />
@@ -375,14 +379,16 @@ export default function NewsFeed({
               </div>
 
               {/* Right Column: Technical Sidebar */}
-              <aside className="w-full lg:w-[450px] overflow-y-auto no-scrollbar bg-void/30 backdrop-blur-3xl px-10 py-12 space-y-12">
+              <aside className="w-full lg:w-[450px] overflow-y-auto no-scrollbar bg-surface-low/80 backdrop-blur-3xl px-10 py-12 space-y-12">
+
                 {/* Outlook Module */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
                     <Zap size={14} className="text-primary" />
                     <span className="module-label">Forecasting</span>
                   </div>
-                  <div className="p-8 rounded-[40px] bg-white/[0.03] space-y-6">
+                  <div className="p-8 rounded-[40px] bg-white/[0.04] border border-white/5 shadow-inner space-y-6">
+
                     <p className="text-md font-medium text-white/80 leading-relaxed italic">
                       "{activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}"
                     </p>
@@ -405,11 +411,12 @@ export default function NewsFeed({
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
                       <Target size={14} className="text-primary" />
-                      <span className="module-label">Action Metrics</span>
-                    </div>
-                    <div className="space-y-5">
+                    <span className="module-label">Action Metrics</span>
+                  </div>
+                  <div className="space-y-4">
                       {activeArticle.tips.map((tip, i) => (
-                        <div key={i} className="flex gap-5 p-6 rounded-[40px] bg-white/[0.04] group hover:bg-white/[0.06] transition-all">
+                        <div key={i} className="flex gap-5 p-6 rounded-[32px] bg-white/[0.04] border border-white/5 group hover:bg-white/[0.06] transition-all">
+
                           <span className="text-primary font-mono text-[10px] font-black opacity-30 mt-1">0{i+1}</span>
                           <p className="text-[12px] text-white/50 group-hover:text-white/80 leading-relaxed transition-colors">{tip}</p>
                         </div>

@@ -94,9 +94,24 @@
   border-radius: 40px;
   position: relative;
   overflow: hidden;
-  border: none;
-  box-shadow: var(--ambient-shadow);
+  border: 1px solid var(--border-low);
+  box-shadow: 
+    var(--ambient-shadow),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
+
+@utility glass-separator {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--color-outline-variant), transparent);
+  opacity: 0.5;
+}
+
+@utility depth-glow {
+  background: radial-gradient(circle at center, var(--glow-primary) 0%, transparent 70%);
+  filter: blur(60px);
+}
+
 
 @layer components {
 
