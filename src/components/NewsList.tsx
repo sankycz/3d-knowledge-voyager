@@ -51,10 +51,10 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
             onClick={() => onSelect(item.id)}
-            className={`w-full text-left p-6 rounded-[24px] transition-all relative group overflow-hidden ${
+            className={`w-full text-left p-6 rounded-[40px] transition-all relative group overflow-hidden ${
               selectedId === item.id 
-                ? "bg-white/[0.07] shadow-[0_20px_40px_rgba(0,0,0,0.4)]" 
-                : "hover:bg-white/[0.03]"
+                ? "bg-white/[0.08] shadow-[var(--ambient-shadow)]" 
+                : "hover:bg-white/[0.04]"
             }`}
           >
             {/* Selection HUD Accent */}
@@ -66,11 +66,11 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
                   {item.source}
                 </span>
                 <div className="flex gap-2">
-                  {item.isAnalyzed && <Sparkles size={10} className="text-primary" />}
+                  {item.isAnalyzed && <Sparkles size={10} className="text-primary animate-pulse" />}
                 </div>
               </div>
               
-              <h3 className={`text-md font-medium leading-[1.4] transition-all duration-300 ${selectedId === item.id ? "text-white" : "text-white/60 group-hover:text-white/90"}`}>
+              <h3 className={`text-md font-medium leading-[1.4] transition-all duration-300 ${selectedId === item.id ? "text-[var(--color-text-high)]" : "text-[var(--color-text-mid)] group-hover:text-[var(--color-text-high)]"}`}>
                 {item.title}
               </h3>
               

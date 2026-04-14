@@ -315,7 +315,7 @@ export default function NewsFeed({
                     </h1>
 
                     {activeArticle.image && (
-                      <div className="aspect-[21/9] w-full rounded-2xl overflow-hidden border border-white/5 relative group">
+                      <div className="aspect-[21/9] w-full rounded-[40px] overflow-hidden border border-white/5 relative group">
                         <img 
                           src={activeArticle.image} 
                           className="w-full h-full object-cover brightness-75 group-hover:brightness-100 transition-all duration-700 hover:scale-105" 
@@ -382,7 +382,7 @@ export default function NewsFeed({
                     <Zap size={14} className="text-primary" />
                     <span className="module-label">Forecasting</span>
                   </div>
-                  <div className="p-8 rounded-[32px] bg-white/[0.03] space-y-6">
+                  <div className="p-8 rounded-[40px] bg-white/[0.03] space-y-6">
                     <p className="text-md font-medium text-white/80 leading-relaxed italic">
                       "{activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}"
                     </p>
@@ -409,7 +409,7 @@ export default function NewsFeed({
                     </div>
                     <div className="space-y-5">
                       {activeArticle.tips.map((tip, i) => (
-                        <div key={i} className="flex gap-5 p-6 rounded-[24px] bg-white/[0.04] group hover:bg-white/[0.06] transition-all">
+                        <div key={i} className="flex gap-5 p-6 rounded-[40px] bg-white/[0.04] group hover:bg-white/[0.06] transition-all">
                           <span className="text-primary font-mono text-[10px] font-black opacity-30 mt-1">0{i+1}</span>
                           <p className="text-[12px] text-white/50 group-hover:text-white/80 leading-relaxed transition-colors">{tip}</p>
                         </div>
@@ -419,7 +419,7 @@ export default function NewsFeed({
                 )}
 
                 {/* System Status / Confidence */}
-                <div className="p-8 rounded-[32px] bg-gradient-to-br from-white/[0.05] to-transparent flex flex-col gap-5">
+                <div className="p-8 rounded-[40px] bg-gradient-to-br from-white/[0.05] to-transparent flex flex-col gap-5">
                   <div className="flex justify-between items-center">
                     <span className="module-label">Reliability Index</span>
                     <span className="editorial-headline text-lg text-primary">98.4%</span>
@@ -440,7 +440,7 @@ export default function NewsFeed({
                     href={activeArticle.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full h-16 flex items-center justify-center gap-4 rounded-[32px] bg-primary text-void text-[12px] font-black tracking-[0.2em] uppercase hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_40px_rgba(164,230,255,0.2)]"
+                    className="w-full h-16 flex items-center justify-center gap-4 rounded-[40px] bg-primary text-void text-[12px] font-black tracking-[0.2em] uppercase hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_40px_rgba(164,230,255,0.2)]"
                   >
                     Explore Matrix
                     <ExternalLink size={16} />

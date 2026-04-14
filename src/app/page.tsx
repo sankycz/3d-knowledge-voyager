@@ -162,7 +162,7 @@ export default function Home() {
         <motion.aside 
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="w-[420px] h-full glass-panel flex flex-col p-10 overflow-hidden"
+          className="w-[420px] h-full glass-panel flex flex-col p-10 pt-28 overflow-hidden"
         >
           <header className="mb-10">
             <span className="subheadline">Intelligence Feed</span>
@@ -205,7 +205,7 @@ export default function Home() {
         <motion.aside 
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="w-[420px] h-full flex flex-col gap-10 overflow-hidden"
+          className="w-[420px] h-full flex flex-col gap-10 pt-28 overflow-hidden"
         >
           {/* Module: System Integrity */}
           <div className="glass-panel p-10">
@@ -259,7 +259,7 @@ export default function Home() {
       </div>
 
       {/* MOBILE LAYOUT (Editorial Split) */}
-      <div className="md:hidden relative z-10 w-full h-full flex flex-col overflow-hidden px-4 pt-24 pb-10 gap-4">
+      <div className="md:hidden relative z-10 w-full h-full flex flex-col overflow-hidden px-4 pt-12 pb-10 gap-4">
         <div className="h-[40vh] glass-panel overflow-hidden relative">
           <ThreeCanvas 
             items={news} 
@@ -288,9 +288,9 @@ export default function Home() {
       </div>
 
       {/* FLOATING PILL NAV */}
-      <div className="fixed top-10 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none">
+      <div className="fixed bottom-10 md:bottom-auto md:top-10 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none">
         <motion.nav 
-          initial={{ y: -50, opacity: 0 }}
+          initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="pointer-events-auto nav-island px-8 py-3"
         >
