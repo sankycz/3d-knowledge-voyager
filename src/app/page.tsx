@@ -75,7 +75,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
-  const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [logs, setLogs] = useState<string[]>(["SYSTÉM PŘIPRAVEN.", "TEPLOTA JÁDRA: 38°C", "ODEZVA: 12ms", "ŠIFROVÁNÍ: AKTIVNÍ"]);
   const [isMounted, setIsMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
