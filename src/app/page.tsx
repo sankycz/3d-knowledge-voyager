@@ -75,7 +75,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
-  const [graphColor, setGraphColor] = useState<string>("#a4e6ff"); // Data Blue default
+  const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [logs, setLogs] = useState<string[]>(["SYSTÉM PŘIPRAVEN.", "TEPLOTA JÁDRA: 38°C", "ODEZVA: 12ms", "ŠIFROVÁNÍ: AKTIVNÍ"]);
   const [isMounted, setIsMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -149,27 +149,32 @@ export default function Home() {
           selectedId={selectedArticleId}
           isScanning={isRefreshing}
           theme={theme}
-          graphColorOverride={graphColor}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-void via-transparent to-void z-10 pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--glow-primary)_0%,transparent_70%)] z-10 pointer-events-none opacity-30" />
       </div>
 
-      {/* MODULAR ISLAND ARCHITECTURE (Desktop) */}
-      <div className="hidden md:flex h-full w-full relative z-10 p-10 gap-10 overflow-hidden">
+      {/* MODULAR ISLAND ARCHITECTURE (Desktop Centered) */}
+      <div className="hidden md:flex h-full w-full relative z-10 p-10 items-start justify-center overflow-hidden pt-32">
         
-        {/* ISLAND 1: Intelligence Discovery */}
-        <motion.aside 
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="w-[500px] h-full glass-panel flex flex-col p-10 pt-28 overflow-hidden"
+        {/* CENTERED INTELLIGENCE HUB */}
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full max-w-5xl h-[85vh] glass-panel flex flex-col p-12 overflow-hidden"
         >
-          <header className="mb-10">
-            <span className="subheadline">Intelligence Feed</span>
-            <h1 className="editorial-headline text-4xl">Discovery</h1>
+          <header className="mb-10 flex justify-between items-end">
+            <div>
+              <span className="subheadline">Intelligence Feed</span>
+              <h1 className="editorial-headline text-5xl">Discovery Hub</h1>
+            </div>
+            <div className="flex flex-col items-end gap-1 opacity-40 font-mono text-[10px] tracking-widest uppercase">
+              <span>Sector: Core_Alpha</span>
+              <span>Scanning: Active</span>
+            </div>
           </header>
           
-          <div className="flex-1 overflow-hidden -mx-4">
+          <div className="flex-1 overflow-hidden -mx-6">
             <NewsList 
               items={filteredNews} 
               onSelect={(id) => {
@@ -181,25 +186,7 @@ export default function Home() {
               isLoading={isLoading}
             />
           </div>
-        </motion.aside>
-
-        {/* CENTER SECTION: 3D Visualization */}
-        <div className="flex-1 flex flex-col items-center justify-start pt-32 pointer-events-none">
-           <motion.div 
-             initial={{ y: -20, opacity: 0 }}
-             animate={{ y: 0, opacity: 1 }}
-             className="flex items-center gap-3 pointer-events-auto px-5 py-2 glass-panel"
-           >
-             {["#a4e6ff", "#dfb7ff", "#00fca1", "#ffab7b"].map((c) => (
-               <button 
-                 key={c}
-                 onClick={() => setGraphColor(c)}
-                 className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-150 ${graphColor === c ? "ring-2 ring-white scale-125" : "opacity-40 hover:opacity-100"}`}
-                 style={{ backgroundColor: c }}
-               />
-             ))}
-           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
       {/* MOBILE LAYOUT (Editorial Split) */}
@@ -211,7 +198,6 @@ export default function Home() {
             selectedId={selectedArticleId}
             isScanning={isRefreshing}
             theme={theme}
-            graphColorOverride={graphColor}
           />
         </div>
 

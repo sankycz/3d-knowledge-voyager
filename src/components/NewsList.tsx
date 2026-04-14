@@ -51,7 +51,7 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
             onClick={() => onSelect(item.id)}
-            className={`w-full text-left p-6 rounded-[40px] transition-all relative group overflow-hidden ${
+            className={`w-full text-left p-8 rounded-[40px] transition-all relative group overflow-hidden ${
               selectedId === item.id 
                 ? "bg-white/[0.08] shadow-[var(--ambient-shadow)]" 
                 : "hover:bg-white/[0.04]"
