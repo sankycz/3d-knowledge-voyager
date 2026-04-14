@@ -161,7 +161,7 @@ export default function Home() {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-5xl bottom-24 z-20 px-8"
+          className="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-[1240px] bottom-24 z-20 px-12"
         >
           <div className="voyager-section h-full flex flex-col glass-depth-stack">
             <div className="p-10 border-b border-white/5 flex justify-between items-center bg-surface-lowest/40 backdrop-blur-md">

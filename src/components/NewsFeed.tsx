@@ -167,17 +167,23 @@ export default function NewsFeed({
           let contentEnd = fullText.length;
 
           // Find the earliest occurrence of any other section marker or specific END markers
-          // Removed "###" from endMarkers to avoid cutting off markdown subheadings
           const allMarkers = Object.values(markerMap);
           const endMarkers = ["###_VOYAGER_END_###", "[[VOYAGER_END]]", "VOYAGER_END", "---"];
           
           const boundaries = [...allMarkers, ...endMarkers];
 
           for (const boundary of boundaries) {
-            if (boundary === currentMarker) continue; // Don't stop at itself
+            if (boundary === currentMarker) continue;
+            
+            // Search for the boundary, but also check for markdown-prefixed versions
             const bIndex = fullText.indexOf(boundary, contentStart);
-            if (bIndex !== -1 && bIndex < contentEnd) {
-              contentEnd = bIndex;
+            const altBoundary = boundary.replace("###", "##"); // Catch if model uses different header levels
+            const altIndex = fullText.indexOf(altBoundary, contentStart);
+            
+            const bestIndex = (bIndex !== -1 && altIndex !== -1) ? Math.min(bIndex, altIndex) : (bIndex !== -1 ? bIndex : altIndex);
+
+            if (bestIndex !== -1 && bestIndex < contentEnd) {
+              contentEnd = bestIndex;
             }
           }
 
@@ -400,19 +406,8 @@ export default function NewsFeed({
                   <div className="p-8 rounded-[40px] bg-white/[0.04] border border-white/5 shadow-inner space-y-6">
 
                     <p className="text-md font-medium text-white/80 leading-relaxed italic">
-                      "{activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}"
+                      {activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}
                     </p>
-                    <div className="flex gap-1.5 h-4 items-end">
-                      {[0.4, 0.7, 0.3, 0.9, 0.5, 0.8].map((h, i) => (
-                        <div key={i} className="flex-1 bg-primary/10 rounded-full relative overflow-hidden">
-                          <motion.div 
-                            className="absolute bottom-0 left-0 w-full bg-primary/40" 
-                            animate={{ height: `${h * 100}%` }}
-                            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: i * 0.2 }}
-                          />
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
 

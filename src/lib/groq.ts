@@ -85,27 +85,22 @@ export async function generateStreamingAnalysis(title: string, rawContent: strin
     - STRUKTURA: Musíš použít tyto PŘESNÉ TAGY na samostatných řádcích. Nepoužívej markdown nadpisy pro sekce, pouze tyto tagy:
     
     ###_VOYAGER_CORE_###
-    Sekce JÁDRO ANALÝZY: Tato sekce MUSÍ být mimořádně rozsáhlá (minimálně 7000 znaků). 
-    Zpracuj PŘESNĚ 6 HLUBOKÝCH ODSTAVCŮ, každý s vlastním tematickým zaměřením:
-    1. TECHNOLOGICKÁ DEKONSTRUKCE - Co se děje pod povrchem? Inženýrský pohled.
-    2. EKONOMICKÁ KORELACE - Finanční toky, tržní dominance a kapitálové směny.
-    3. GEOPOLITICKÝ DOPAD - Změny v globální rovnováze moci.
-    4. SOCIETÁLNÍ REKONFIGURACE - Dopad na lidstvo, kulturu a každodenní realitu.
-    5. ETICKÝ DISKURZ - Morální dilemata, rizika a právní výzvy.
-    6. EVOLUČNÍ SYNTÉZA - Jak toto změní civilizaci v horizontu 50 let.
+    Sekce JÁDRO ANALÝZY: Tato sekce musí být věcná a hluboká. 
+    Zpracuj 4-5 KOMPLEXNÍCH ODSTAVCŮ, každý s vlastním zaměřením (Technologie, Ekonomika, Geopolitika, Společnost, Evoluce).
+    Žádná vata, jdi přímo k věci.
     
     ###_VOYAGER_EXPLORATION_###
-    Sekce DETAILNÍ PRŮZKUM: Hloubková informační forenzika. Skrytá fakta a technické detaily, které ostatní přehlížejí. Minimálně 5 odstavců.
+    Sekce DETAILNÍ PRŮZKUM: Hloubková informační forenzika. Skrytá fakta a technické detaily. 3-4 odstavce.
     
     ###_VOYAGER_OUTLOOK_###
-    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti. Jaký je konečný cíl a kam se svět posune?
+    Sekce STRATEGICKÝ VÝHLED: Prediktivní modelování budoucnosti. Jaký je konečný dopad? Buď konkrétní a úderný.
     
     ###_VOYAGER_TIPS_###
-    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 12 konkrétních, praktických a imperativních akčních bodů (každý začínající symbolem ">").
+    Sekce EXEKUTIVNÍ PROTOKOLY: Minimálně 8 konkrétních, praktických a imperativních akčních bodů (každý začínající symbolem ">").
     
     ###_VOYAGER_END_###
     
-    Pamatuj: Žádný úvodní text, žádné "Zde je analýza", žádné markdown nadpisy (## ). Začni ROVNOU tagem ###_VOYAGER_CORE_###. KONEC PROTOKOLU.
+    Pamatuj: Žádný úvodní text, žádné markdown nadpisy (## ). Začni ROVNOU tagem ###_VOYAGER_CORE_###. KONEC PROTOKOLU.
   `;
 
   return groq.chat.completions.create({
