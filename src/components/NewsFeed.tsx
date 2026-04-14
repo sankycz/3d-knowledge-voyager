@@ -258,7 +258,7 @@ export default function NewsFeed({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.98, opacity: 0, y: 40 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1700px] glass-panel flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden"
+            className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1700px] voyager-section flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden bg-surface-lowest border-white/10"
           >
             {/* Intel Ribbon */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
@@ -301,7 +301,7 @@ export default function NewsFeed({
             {/* Main Content Layout: Editorial Grid */}
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
               {/* Left Column: Visual & Core Analysis */}
-              <div className="flex-1 overflow-y-auto no-scrollbar bg-surface-lowest/50 backdrop-blur-md scroll-smooth border-r border-white/5">
+              <div className="flex-1 overflow-y-auto no-scrollbar bg-surface-low/60 backdrop-blur-xl scroll-smooth border-r border-white/5">
                 <div className="max-w-4xl mx-auto p-10 md:p-16 lg:p-24 space-y-24">
 
                   {/* Article Hero Section */}
@@ -378,11 +378,11 @@ export default function NewsFeed({
                 </div>
               </div>
 
-              {/* Right Column: Technical Sidebar */}
-              <aside className="w-full lg:w-[450px] overflow-y-auto no-scrollbar bg-surface-low/80 backdrop-blur-3xl px-10 py-12 space-y-12">
-
-                {/* Outlook Module */}
-                <div className="space-y-6">
+              {/* Right Sidebar: Forecasting & Data Widgets */}
+              <aside className="w-full lg:w-[480px] h-full overflow-y-auto bg-surface-mid/80 backdrop-blur-3xl border-l border-white/5 p-8 md:p-12 space-y-12">
+                
+                {/* Visual Analysis Marker */}
+                <div className="voyager-module p-10 flex flex-col gap-6 group mb-12">
                   <div className="flex items-center gap-3">
                     <Zap size={14} className="text-primary" />
                     <span className="module-label">Forecasting</span>

@@ -155,48 +155,10 @@ export default function Home() {
 
 
       {/* MODULAR ISLAND ARCHITECTURE (Desktop Centered) */}
-      <div className="hidden md:flex h-full w-full relative z-10 p-10 items-start justify-center overflow-hidden pt-32">
+      <div className="hidden md:block absolute inset-0 z-10 transition-all duration-1000">
         
-        {/* CENTERED INTELLIGENCE HUB */}
-        <div className="relative w-full max-w-5xl group">
-          {/* DEPTH GLOW BEHIND HUB */}
-          <div className="absolute inset-0 depth-glow opacity-30 -z-10 scale-110 group-hover:opacity-50 transition-opacity duration-1000" />
-          
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="w-full h-[85vh] glass-panel flex flex-col p-12 overflow-hidden"
-          >
-            <header className="mb-10 flex justify-between items-end">
-              <div className="border-l-2 border-primary pl-6">
-                <span className="subheadline">Intelligence Feed</span>
-                <h1 className="editorial-headline text-5xl">Discovery Hub</h1>
-              </div>
-
-            <div className="flex flex-col items-end gap-1 opacity-40 font-mono text-[10px] tracking-widest uppercase">
-              <span>Sector: Core_Alpha</span>
-              <span>Scanning: Active</span>
-            </div>
-          </header>
-          
-          <div className="flex-1 overflow-hidden -mx-6">
-            <NewsList 
-              items={filteredNews} 
-              onSelect={(id) => {
-                setSelectedArticleId(id);
-                setIsPanelOpen(true);
-                addLog(`ZAMĚŘENO: PAKET_${id.slice(0,6).toUpperCase()}`);
-              }}
-              selectedId={selectedArticleId}
-              isLoading={isLoading}
-            />
-          </div>
-        </motion.div>
-      </div>
-
-      {/* MOBILE LAYOUT (Editorial Split) */}
-      <div className="md:hidden relative z-10 w-full h-full flex flex-col overflow-hidden px-4 pt-12 pb-10 gap-4">
-        <div className="h-[40vh] glass-panel overflow-hidden relative">
+        {/* AMBIENT 3D BACKGROUND LAYER */}
+        <div className="absolute inset-0 z-0">
           <ThreeCanvas 
             items={news} 
             onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}
@@ -206,12 +168,56 @@ export default function Home() {
           />
         </div>
 
-        <div className="flex-1 glass-panel flex flex-col overflow-hidden p-6">
-          <header className="mb-6 flex justify-between items-end">
-             <h1 className="editorial-headline text-3xl">Voyager</h1>
-             <span className="text-[8px] font-mono text-text-low mb-1">UNIT_01</span>
+        {/* FLOATING INTELLIGENCE HUB (Right-aligned island) */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute top-12 right-12 w-[480px] bottom-12 z-20"
+        >
+          <div className="voyager-section h-full flex flex-col glass-depth-stack">
+            <div className="p-8 border-b border-white/5 flex justify-between items-center">
+              <div>
+                <h1 className="editorial-headline text-3xl mb-1 text-primary">Intelligence</h1>
+                <p className="text-[10px] font-mono text-text-low tracking-widest uppercase">Node: Voyager_Alpha</p>
+              </div>
+              <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary bg-primary/5">
+                <Activity size={18} />
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-hidden">
+              <NewsList 
+                items={filteredNews} 
+                onSelect={(id) => {
+                  setSelectedArticleId(id);
+                  setIsPanelOpen(true);
+                }}
+                selectedId={selectedArticleId}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* MOBILE LAYOUT (Editorial Split) */}
+      <div className="md:hidden relative z-10 w-full h-full flex flex-col overflow-hidden px-4 pt-12 pb-10 gap-4">
+        <div className="h-[35vh] voyager-section overflow-hidden relative">
+          <ThreeCanvas 
+            items={news} 
+            onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}
+            selectedId={selectedArticleId}
+            isScanning={isRefreshing}
+            theme={theme}
+          />
+        </div>
+
+        <div className="flex-1 voyager-section flex flex-col overflow-hidden glass-depth-stack">
+          <header className="p-6 border-b border-white/5 flex justify-between items-end">
+             <h1 className="editorial-headline text-2xl text-primary">Feed</h1>
+             <span className="text-[8px] font-mono text-text-low mb-1 tracking-widest">LIVE_INTEL</span>
           </header>
-          <div className="flex-1 overflow-hidden -mx-2">
+          <div className="flex-1 overflow-hidden">
             <NewsList 
               items={filteredNews} 
               onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}

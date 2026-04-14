@@ -24,10 +24,10 @@
   --color-text-lowest: #1e293b;
 
   /* Obsidian Surface Tiers */
-  --color-surface-lowest: #050505;
-  --color-surface-low: #0a0a0a;
-  --color-surface-mid: #0e0e0e;
-  --color-surface-high: #141414;
+  --color-surface-lowest: #020202;
+  --color-surface-low: #050505;
+  --color-surface-mid: #0a0a0a;
+  --color-surface-high: #121212;
   --color-surface-highest: #1a1a1a;
 
   /* Premium Atmospheric Tokens */
@@ -116,9 +116,25 @@
 @layer components {
 
   .voyager-module {
-    @apply p-8 glass-panel transition-all duration-1000;
-    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+    @apply glass-panel transition-all duration-300;
+    border: 1px solid var(--color-surface-high);
     background: var(--color-surface-low);
+  }
+
+  .voyager-section {
+    @apply relative overflow-hidden rounded-3xl border border-white/5;
+    background: var(--color-surface-low);
+    box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5);
+  }
+
+  .article-island {
+    @apply glass-panel hover:bg-surface-high/40 transition-all duration-500 cursor-pointer;
+    background: var(--color-surface-mid);
+    border: 1px solid var(--color-surface-high);
+  }
+
+  .glass-depth-stack {
+    @apply relative after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-black/20 after:blur-xl;
   }
 
   .voyager-module:hover {
