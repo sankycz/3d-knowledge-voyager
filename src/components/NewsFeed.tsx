@@ -268,7 +268,11 @@ export default function NewsFeed({
             className="absolute inset-0 bg-[var(--bg-void)]/90 backdrop-blur-3xl" 
             onClick={onClose} 
           />
-          
+          <motion.div
+            initial={{ y: 20, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 20, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1780px] voyager-section flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden bg-background"
           >
             {/* Intel Ribbon */}
