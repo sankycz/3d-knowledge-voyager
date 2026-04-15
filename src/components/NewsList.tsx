@@ -35,16 +35,8 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="sticky top-0 z-30 px-8 py-8 flex items-center justify-between bg-surface-mid/80 backdrop-blur-xl border-b border-white/5 shrink-0">
-        <div className="flex flex-col">
-          <span className="subheadline mb-1">Intelligence</span>
-          <h2 className="editorial-headline text-lg">Discovery</h2>
-        </div>
-        <Activity size={14} className="text-primary opacity-60 animate-pulse" />
-      </div>
-
       <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-        <div className="px-6 pb-20 space-y-4 pt-6">
+        <div className="px-6 pb-20 space-y-4 pt-4">
           {items.map((item, idx) => (
             <motion.div
               key={item.id}
@@ -52,17 +44,20 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05, ease: [0.23, 1, 0.32, 1], duration: 0.6 }}
               onClick={() => onSelect(item.id)}
-              className={`article-island p-6 group ${
-                selectedId === item.id ? "ring-2 ring-primary/40 bg-surface-high" : ""
+              className={`article-island p-8 group relative ${
+                selectedId === item.id ? "bg-surface-high shadow-[0_20px_50px_rgba(0,0,0,0.3)]" : ""
               }`}
             >
+              {selectedId === item.id && (
+                <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-primary rounded-r-full" />
+              )}
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 mb-2 block font-mono">
                       {item.source}
                     </span>
-                    <h3 className="text-lg font-display font-bold leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-display font-medium leading-tight group-hover:text-primary transition-colors pr-8">
                       {item.title}
                     </h3>
                   </div>
@@ -75,12 +70,12 @@ export default function NewsList({ items, onSelect, selectedId, isLoading }: New
                   </div>
                 </div>
 
-                <p className="text-sm text-text-mid line-clamp-2 font-light leading-relaxed">
+                <p className="text-[13px] text-text-mid line-clamp-2 font-regular leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
                   {item.summary}
                 </p>
 
                 <div className="flex items-center justify-between pt-2">
-                  <span className="text-[9px] font-mono text-text-low uppercase tracking-tighter">
+                  <span className="text-[10px] font-mono text-text-lowest uppercase tracking-[0.15em]">
                     {item.date || "REAL_TIME_NODE"}
                   </span>
                   {item.isAnalyzed && (

@@ -1,46 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: var(--font-space-grotesk), sans-serif;
-  --font-sans: var(--font-manrope), sans-serif;
+  --font-display: "Space Grotesk", var(--font-space-grotesk), sans-serif;
+  --font-sans: "Manrope", var(--font-manrope), sans-serif;
   --font-mono: var(--font-jetbrains-mono), monospace;
   
-  /* The Void Palette */
-  --color-primary: #a2e4fd;
+  /* The Obsidian Palette (Cyber-Glass 2.0) */
+  --color-primary: #a4e6ff;
   --color-primary-container: #68a9c1;
-  --color-secondary: #dfb7ff;
-  --color-secondary-container: #593876;
-  --color-tertiary: #b1ffce;
+  --color-secondary: #16c0fd;
+  --color-secondary-container: #006688;
+  --color-tertiary: #89a5ff;
+  --color-tertiary-container: #7696fd;
   --color-background: #0e0e0e;
   --color-surface: #0e0e0e;
   --color-on-surface: #ffffff;
   --color-surface-dim: #0e0e0e;
   --color-outline-variant: rgba(255, 255, 255, 0.03);
 
-  /* Typography Tones */
-  --color-text-high: #f1f5f9;
-  --color-text-mid: #94a3b8;
-  --color-text-low: #475569;
-  --color-text-lowest: #1e293b;
+  /* Typography Tones (Intellectual Contrast) */
+  --color-text-high: #ffffff;
+  --color-text-mid: #adaaaa;
+  --color-text-low: #767575;
+  --color-text-lowest: #484847;
 
-  /* Obsidian Surface Tiers */
-  --color-surface-lowest: #010101;
-  --color-surface-low: #080808;
-  --color-surface-mid: #0f0f0f;
-  --color-surface-high: #181818;
-  --color-surface-highest: #222222;
+  /* Obsidian Surface Tiers (Depth via Color, not Borders) */
+  --color-surface-lowest: #000000;
+  --color-surface-low: #131313;
+  --color-surface-mid: #1a1919;
+  --color-surface-high: #201f1f;
+  --color-surface-highest: #262626;
 
   /* Premium Atmospheric Tokens */
-  --glass-fill: rgba(10, 10, 10, 0.45);
-  --glass-blur: 40px;
-  --glow-primary: rgba(162, 228, 253, 0.12);
-  --ambient-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.95);
-  --border-low: rgba(255, 255, 255, 0.05);
+  --glass-fill: rgba(38, 38, 38, 0.4);
+  --glass-blur: 20px;
+  --glow-primary: rgba(164, 230, 255, 0.12);
+  --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.95);
+  --border-low: rgba(255, 255, 255, 0.03);
 
-  /* Accent Tones (Base/Dark) */
-  --color-accent-data: #a2e4fd;
-  --color-accent-synth: #dfb7ff;
-  --color-accent-bio: #b1ffce;
+  /* Spacing Scale (Luxurious Breathability) */
+  --spacing-editorial: 4rem;
 }
 
 @layer base {
@@ -71,122 +70,83 @@
   }
 
   body {
-    color: var(--color-text-high);
-    background: var(--bg-void);
+    color: var(--color-text-mid);
+    background: var(--color-background);
     font-family: var(--font-sans);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
     transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.04em;
-    line-height: 0.9;
+    letter-spacing: -0.02em;
+    line-height: normal;
+    color: var(--color-text-high);
   }
 }
 
-/* THE CELESTIAL LENS (Cyber-Glass 2.0) */
+/* THE ETHEREAL ARCHIVIST (Cyber-Glass 2.0) */
 @utility glass-panel {
   background: var(--glass-fill);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur));
   border-radius: 40px;
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--border-low);
-  box-shadow: 
-    var(--ambient-shadow),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.01);
+  border: none; /* No-Line Rule */
+  box-shadow: var(--ambient-shadow);
 }
 
 @utility glass-separator {
   height: 1px;
   width: 100%;
   background: linear-gradient(90deg, transparent, var(--color-outline-variant), transparent);
-  opacity: 0.4;
+  opacity: 0.2;
 }
 
 @utility depth-glow {
   background: radial-gradient(circle at center, var(--glow-primary) 0%, transparent 70%);
-  filter: blur(80px);
+  filter: blur(60px);
 }
 
 
 @layer components {
 
   .voyager-module {
-    @apply glass-panel transition-all duration-500;
-    border: 1px solid var(--color-surface-high);
+    @apply transition-all duration-700;
     background: var(--color-surface-low);
-    box-shadow: 
-      0 30px 60px -15px rgba(0,0,0,0.8),
-      inset 0 0 0 1px rgba(255,255,255,0.02);
+    border-radius: 2.5rem;
+    box-shadow: var(--ambient-shadow);
   }
 
   .voyager-section {
-    @apply relative overflow-hidden rounded-[2.5rem] border border-white/10;
+    @apply relative overflow-hidden rounded-[40px];
     background: var(--color-surface-low);
-    box-shadow: 
-      0 40px 100px -20px rgba(0,0,0,0.9),
-      inset 0 0 80px rgba(255,255,255,0.01);
+    box-shadow: var(--ambient-shadow);
   }
 
   .article-island {
     @apply relative overflow-hidden rounded-3xl transition-all duration-500 cursor-pointer;
     background: var(--color-surface-mid);
-    border: 1px solid var(--color-surface-high);
-    box-shadow: 
-      0 10px 30px -10px rgba(0,0,0,0.5),
-      inset 0 0 0 1px rgba(255,255,255,0.02);
+    padding: 2rem;
     
     &:hover {
       background: var(--color-surface-high);
-      transform: translateY(-2px) scale(1.005);
-      border-color: var(--color-primary-container);
-      box-shadow: 
-        0 20px 40px -10px rgba(0,0,0,0.7),
-        0 0 30px -5px var(--glow-primary);
+      transform: scale(1.002);
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
     }
-  }
-
-  .glass-depth-stack {
-    @apply relative after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-black/40 after:blur-2xl;
-  }
-
-  .voyager-module:hover {
-    background: var(--color-surface-mid);
-    transform: translateY(-4px);
-    box-shadow: 0 40px 80px -20px var(--glow-primary);
-  }
-
-  /* Island Container Padding */
-  .island-container {
-    @apply p-6 flex flex-col h-full overflow-hidden;
-  }
-
-  /* Feed Column Tonal Shift */
-  .feed-column {
-    background: color-mix(in srgb, var(--bg-void), var(--color-surface-low) 40%);
-  }
-
-  /* Floating Navigation Island */
-  .nav-island {
-    @apply flex items-center gap-4 p-2 glass-panel rounded-full;
-    background: color-mix(in srgb, var(--color-surface-high), transparent 25%);
-    box-shadow: 0 15px 50px -10px rgba(0, 0, 0, 0.6);
   }
 
   /* Editorial Typography Hooks */
   .editorial-headline {
-    @apply font-display font-black uppercase leading-[0.85];
+    @apply font-display font-bold uppercase leading-tight;
     color: var(--color-text-high);
     letter-spacing: 0.05em;
-    text-wrap: balance;
   }
 
   .subheadline {
-    @apply text-[10px] font-bold uppercase tracking-[0.5em] text-accent-data mb-4 block opacity-80;
+    @apply text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-4 block opacity-80;
   }
 
   .module-label {
@@ -195,11 +155,11 @@
 
   /* Navigation Pills */
   .nav-pill {
-    @apply px-4 py-2 rounded-full transition-all duration-300 flex items-center gap-2;
-    @apply text-text-low;
+    @apply px-5 py-2.5 rounded-full transition-all duration-500 flex items-center gap-2;
+    @apply text-text-low bg-white/[0.02];
     &:hover {
       color: var(--color-text-high);
-      background: color-mix(in srgb, var(--color-text-high), transparent 93%);
+      background: var(--color-surface-highest);
     }
   }
 

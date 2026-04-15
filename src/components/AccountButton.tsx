@@ -31,21 +31,21 @@ export default function AccountButton() {
         {!user ? (
           <motion.button 
             key="login"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             onClick={() => signIn()}
-            className="group relative flex items-center gap-4 px-8 py-3 rounded-[20px] bg-surface-mid hover:bg-surface-high transition-all shadow-xl overflow-hidden"
+            className="group relative flex items-center gap-6 px-10 py-4 rounded-[24px] bg-surface-low/80 hover:bg-surface-mid transition-all shadow-2xl overflow-hidden border-none backdrop-blur-md"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            <div className="relative flex items-center justify-center p-2 rounded-xl bg-surface-high group-hover:bg-primary/10 transition-colors">
+            <div className="relative flex items-center justify-center p-3 rounded-2xl bg-surface-high group-hover:bg-primary/20 transition-all duration-500">
               <GoogleIcon />
             </div>
             
-            <div className="flex flex-col items-start leading-none">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white group-hover:text-primary transition-colors">Sign In</span>
-              <span className="text-[8px] font-mono text-text-low mt-1.5 tracking-widest uppercase">System_Auth</span>
+            <div className="flex flex-col items-start leading-none gap-2">
+              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white group-hover:text-primary transition-colors">Access Portal</span>
+              <span className="text-[9px] font-mono text-text-lowest tracking-[0.1em] uppercase opacity-60">System_Auth_Required</span>
             </div>
             
             <ShieldAlert size={14} className="text-text-low group-hover:text-primary transition-colors ml-2" />
@@ -57,29 +57,29 @@ export default function AccountButton() {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-4"
           >
-            <div className="flex items-center gap-4 bg-surface-mid px-6 py-3 rounded-[20px] shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-5 bg-surface-low/60 px-8 py-4 rounded-[24px] shadow-2xl relative overflow-hidden group backdrop-blur-md">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               
               {user.photoURL ? (
-                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-white/5 shadow-lg relative z-10" />
+                <img src={user.photoURL} alt="Avatar" className="w-10 h-10 rounded-full shadow-2xl relative z-10 brightness-90 group-hover:brightness-110 transition-all border-none" />
               ) : (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary border border-primary/20 relative z-10">
-                  <User size={16} />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary relative z-10 border-none">
+                  <User size={18} />
                 </div>
               )}
               
-              <div className="flex flex-col relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-white leading-none">{user.displayName?.split(" ")[0] || "OPERATOR"}</span>
-                  <ShieldCheck size={10} className="text-primary" />
+              <div className="flex flex-col relative z-10 gap-1.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] font-black uppercase tracking-[0.2em] text-on-surface leading-none">{user.displayName?.split(" ")[0] || "OPERATOR"}</span>
+                  <ShieldCheck size={12} className="text-primary opacity-80" />
                 </div>
-                <span className="text-[8px] font-mono text-text-low uppercase tracking-widest mt-1">Level_05</span>
+                <span className="text-[9px] font-mono text-text-lowest uppercase tracking-[0.4em] opacity-40">LvL_05_Clearance</span>
               </div>
             </div>
 
             <button 
               onClick={() => signOut()}
-              className="p-4 rounded-[20px] bg-surface-mid hover:bg-red-500/10 text-text-low hover:text-red-400 transition-all group"
+              className="w-14 h-14 rounded-full bg-surface-low/40 hover:bg-red-500/10 text-text-low hover:text-red-400 transition-all group flex items-center justify-center border-none backdrop-blur-sm"
               title="Deactivate Session"
             >
               <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />

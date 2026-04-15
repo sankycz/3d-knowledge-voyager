@@ -5,12 +5,12 @@ import { Zap } from "lucide-react";
 export default function SkeletonCard({ index }: { index: number }) {
   return (
     <div 
-      className="relative cyber-glass rounded-[32px] p-6 border border-white/5 animate-shimmer"
+      className="relative cyber-glass rounded-[32px] p-6 animate-shimmer"
       style={{ animationDelay: `${index * 0.15}s` }}
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="bg-white/5 w-16 h-4 rounded-full border border-white/5"></div>
-        <div className="bg-white/5 w-20 h-3 rounded-full border border-white/5"></div>
+        <div className="bg-white/5 w-16 h-4 rounded-full"></div>
+        <div className="bg-white/5 w-20 h-3 rounded-full"></div>
       </div>
       
       {/* Title Skeletons */}

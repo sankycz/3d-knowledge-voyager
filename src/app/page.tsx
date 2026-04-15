@@ -14,6 +14,15 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
+import { Space_Grotesk, Manrope } from "next/font/google";
+import TopNav from "@/components/TopNav";
+import SideNav from "@/components/SideNav";
+import SystemHUD from "@/components/SystemHUD";
+import ConsoleLog from "@/components/ConsoleLog";
+import FloatingPrompt from "@/components/FloatingPrompt";
+
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 
@@ -134,9 +143,9 @@ export default function Home() {
   if (!isMounted) return null;
 
   return (
-    <main className={`relative w-full h-screen overflow-hidden text-on-surface font-sans selection:bg-primary/30 selection:text-on-surface transition-colors duration-700 bg-void ${isRefreshing ? "saturate-[200%]" : ""}`}>
+    <main className={`relative w-full h-screen overflow-hidden text-on-surface ${manrope.variable} ${spaceGrotesk.variable} font-sans selection:bg-primary/30 selection:text-on-surface transition-colors duration-700 bg-background ${isRefreshing ? "saturate-[200%]" : ""}`}>
       
-      {/* 3D BACKGROUND LAYER */}
+      {/* 3D BACKGROUND LAYER (Full Screen) */}
       <div className="absolute inset-0 z-0 opacity-40">
         <ThreeCanvas 
           items={news} 
@@ -149,122 +158,65 @@ export default function Home() {
           isScanning={isRefreshing}
           theme={theme}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-void via-transparent to-void z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,var(--glow-primary)_0%,transparent_70%)] z-10 pointer-events-none opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10 pointer-events-none" />
       </div>
 
+      <TopNav />
+      <SideNav />
 
-      {/* MODULAR ISLAND ARCHITECTURE (Desktop Centered) */}
-      <div className="hidden md:block absolute inset-0 z-10 transition-all duration-1000">
+      {/* 12-COLUMN GRID LAYOUT (Cyber-Glass 2.0) */}
+      <div className="ml-0 md:ml-64 pt-24 px-4 md:px-8 pb-32 md:pb-12 grid grid-cols-1 md:grid-cols-12 gap-8 min-h-screen relative z-10">
         
-        {/* CENTERED INTELLIGENCE HUB */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-[1240px] bottom-24 z-20 px-12"
-        >
-          <div className="voyager-section h-full flex flex-col glass-depth-stack">
-            <div className="p-10 border-b border-white/5 flex justify-between items-center bg-surface-lowest/40 backdrop-blur-md">
-              <div className="flex items-center gap-6">
-                <div className="w-12 h-12 rounded-2xl border border-primary/20 flex items-center justify-center text-primary bg-primary/5 shadow-[0_0_20px_rgba(162,228,253,0.1)]">
-                  <Activity size={24} />
-                </div>
-                <div>
-                  <h1 className="editorial-headline text-4xl mb-1 text-primary">Intelligence Hub</h1>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-text-low tracking-widest uppercase">Node: Voyager_Alpha</span>
-                    <div className="w-1 h-1 rounded-full bg-text-lowest" />
-                    <span className="text-[10px] font-mono text-text-low tracking-widest uppercase">Verified Connection</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="px-4 py-2 rounded-full border border-white/5 bg-white/5 flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-text-mid">Live Feed</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-hidden">
-              <NewsList 
-                items={filteredNews} 
-                onSelect={(id) => {
-                  setSelectedArticleId(id);
-                  setIsPanelOpen(true);
-                }}
-                selectedId={selectedArticleId}
-                isLoading={isLoading}
-              />
-            </div>
+        {/* LEFT COLUMN: NEURAL FEED (3 Cols) */}
+        <section className="col-span-1 md:col-span-3 flex flex-col gap-8 h-auto md:h-[calc(100vh-180px)]">
+          <div className="space-y-2 px-6">
+            <h2 className="editorial-headline text-2xl md:text-3xl font-bold tracking-tight text-on-surface">Neural Feed</h2>
+            <p className="text-[10px] font-mono text-text-low tracking-widest uppercase">Real-time AI knowledge synthesis</p>
           </div>
-        </motion.div>
-      </div>
-
-      {/* MOBILE LAYOUT (Editorial Split) */}
-      <div className="md:hidden relative z-10 w-full h-full flex flex-col overflow-hidden px-4 pt-12 pb-10 gap-4">
-        <div className="h-[35vh] voyager-section overflow-hidden relative">
-          <ThreeCanvas 
-            items={news} 
-            onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}
-            selectedId={selectedArticleId}
-            isScanning={isRefreshing}
-            theme={theme}
-          />
-        </div>
-
-        <div className="flex-1 voyager-section flex flex-col overflow-hidden glass-depth-stack">
-          <header className="p-6 border-b border-white/5 flex justify-between items-end">
-             <h1 className="editorial-headline text-2xl text-primary">Feed</h1>
-             <span className="text-[8px] font-mono text-text-low mb-1 tracking-widest">LIVE_INTEL</span>
-          </header>
-          <div className="flex-1 overflow-hidden">
+          
+          <div className="flex-1 overflow-hidden voyager-section bg-surface-low/20 backdrop-blur-sm shadow-none min-h-[400px]">
             <NewsList 
               items={filteredNews} 
-              onSelect={(id) => { setSelectedArticleId(id); setIsPanelOpen(true); }}
+              onSelect={(id) => {
+                setSelectedArticleId(id);
+                setIsPanelOpen(true);
+              }}
               selectedId={selectedArticleId}
               isLoading={isLoading}
             />
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* FLOATING PILL NAV */}
-      <div className="fixed bottom-10 top-auto md:bottom-auto md:top-10 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none">
-        <motion.nav 
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="pointer-events-auto nav-island px-8 py-3"
-        >
-          <div className="flex items-center gap-4 pr-6 border-r border-white/5">
-            <div className="w-2 h-2 rounded-full bg-secondary shadow-[0_0_10px_var(--color-secondary)] animate-pulse" />
-            <span className="editorial-headline text-xs tracking-[0.2em] opacity-80">Archivist</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => user && setShowArchivesOnly(!showArchivesOnly)}
-              className={`nav-pill ${showArchivesOnly ? "nav-pill-active" : ""}`}
-            >
-              <Bookmark size={16} fill={showArchivesOnly ? "currentColor" : "none"} />
-            </button>
-            
-            <button
-              onClick={() => fetchNews(false)}
-              className={`nav-pill ${isRefreshing ? "text-primary scale-110" : ""}`}
-            >
-              <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-            </button>
- 
-            <button onClick={toggleTheme} className="nav-pill">
-              {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
-            </button>
-            <div className="ml-1 scale-90">
-              <AccountButton />
+        {/* CENTER COLUMN: VISUALIZATION NUCLEUS (6 Cols) */}
+        <section className="col-span-1 md:col-span-6 relative flex flex-col items-center justify-center min-h-[300px] md:min-h-[716px]">
+          {/* Central Focus Element (Optional overlay or logic can go here) */}
+          <div className="text-center max-w-md mt-auto mb-10 md:mb-20 pointer-events-none">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-text-low mb-4">Neural Visualization Active</p>
+            <div className="flex flex-wrap gap-4 items-center justify-center pointer-events-auto">
+              <button 
+                onClick={() => fetchNews(false)}
+                className="px-6 md:px-8 py-3 glass-panel bg-primary/5 hover:bg-primary/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300"
+              >
+                Refresh Nexus
+              </button>
+              <button 
+                onClick={toggleTheme}
+                className="px-6 md:px-8 py-3 glass-panel bg-white/5 hover:bg-white/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300"
+              >
+                {theme === 'dark' ? 'Solar Mode' : 'Lunar Mode'}
+              </button>
             </div>
           </div>
-        </motion.nav>
+        </section>
+
+        {/* RIGHT COLUMN: SYSTEM HUD (3 Cols) */}
+        <section className="col-span-1 md:col-span-3 flex flex-col gap-6 h-auto md:h-[calc(100vh-180px)]">
+          <SystemHUD />
+          <ConsoleLog />
+        </section>
       </div>
+
+      <FloatingPrompt />
 
       {/* Intelligence Report Modal */}
       <AnimatePresence>

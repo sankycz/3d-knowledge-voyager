@@ -269,47 +269,42 @@ export default function NewsFeed({
             onClick={onClose} 
           />
           
-          <motion.div
-            initial={{ scale: 0.98, opacity: 0, y: 40 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.98, opacity: 0, y: 40 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1700px] voyager-section flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden bg-surface-lowest border-white/10"
+            className="relative w-full h-full md:h-[95vh] md:w-[95vw] max-w-[1780px] voyager-section flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden bg-background"
           >
             {/* Intel Ribbon */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
             
             {/* Header: Editorial Navigation */}
-            <header className="flex items-center justify-between px-10 py-6 bg-void/20 backdrop-blur-xl z-20">
-              <div className="flex items-center gap-10">
+            <header className="flex items-center justify-between px-14 py-10 bg-surface-low/40 backdrop-blur-2xl z-20">
+              <div className="flex items-center gap-14">
                 <div className="flex flex-col">
-                  <span className="subheadline mb-1">Intelligence Report</span>
-                  <span className="editorial-headline text-lg tracking-[0.2em]">ID_VOYAGER_{activeArticle.id.slice(0, 8).toUpperCase()}</span>
+                  <span className="subheadline mb-2 text-primary/60">Intelligence Report</span>
+                  <span className="editorial-headline text-2xl tracking-[0.2em]">ID_VOYAGER_{activeArticle.id.slice(0, 8).toUpperCase()}</span>
                 </div>
-                <div className="hidden sm:flex flex-col opacity-40">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{activeArticle.source}</span>
-                  <span className="text-[9px] font-mono text-white/50 mt-1 uppercase">Clearance_Alpha</span>
+                <div className="hidden sm:flex flex-col opacity-30 ml-14">
+                  <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] leading-none mb-2">{activeArticle.source}</span>
+                  <span className="text-[9px] font-mono text-white/50 uppercase">Clearance_Alpha</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <button 
                   onClick={() => speak(`${activeArticle.title}. ${activeArticle.summary}`)}
-                  className={`nav-pill ${isSpeaking ? "nav-pill-active" : ""}`}
+                  className={`nav-pill w-14 h-14 border-none bg-white/5 hover:bg-white/10 ${isSpeaking ? "bg-primary text-background" : ""}`}
                 >
-                  {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                  {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
                 <button 
                   onClick={() => handleSave(activeArticle)} 
-                  className={`nav-pill ${savedIds.includes(activeArticle.id) ? "nav-pill-active" : ""}`}
+                  className={`nav-pill w-14 h-14 border-none bg-white/5 hover:bg-white/10 ${savedIds.includes(activeArticle.id) ? "bg-primary text-background" : ""}`}
                 >
-                  <Bookmark size={16} fill={savedIds.includes(activeArticle.id) ? "currentColor" : "none"} />
+                  <Bookmark size={18} fill={savedIds.includes(activeArticle.id) ? "currentColor" : "none"} />
                 </button>
                 <button 
                   onClick={onClose} 
-                  className="nav-pill"
+                  className="nav-pill w-14 h-14 border-none bg-white/5 hover:bg-white/10"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
             </header>
@@ -317,22 +312,22 @@ export default function NewsFeed({
             {/* Main Content Layout: Editorial Grid */}
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
               {/* Left Column: Visual & Core Analysis */}
-              <div className="flex-1 overflow-y-auto no-scrollbar bg-surface-low/60 backdrop-blur-xl scroll-smooth border-r border-white/5">
-                <div className="max-w-4xl mx-auto p-10 md:p-16 lg:p-24 space-y-24">
+              <div className="flex-1 overflow-y-auto no-scrollbar bg-surface-low/30 backdrop-blur-xl scroll-smooth">
+                <div className="max-w-5xl mx-auto p-12 md:p-20 lg:p-32 space-y-32">
 
                   {/* Article Hero Section */}
                   <div className="space-y-12">
-                    <div className="flex gap-2">
-                      <span className="px-2 py-0.5 rounded bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[8px] font-black tracking-widest uppercase">Verified</span>
-                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[var(--text-low)] text-[8px] font-black tracking-widest uppercase">{activeArticle.date || "Real-time"}</span>
+                    <div className="flex gap-4">
+                      <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black tracking-[0.2em] uppercase">Verified Dispatch</span>
+                      <span className="px-3 py-1 rounded-full bg-white/5 text-text-lowest text-[10px] font-black tracking-[0.2em] uppercase">{activeArticle.date || "Real-time Node"}</span>
                     </div>
                     
-                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-display font-medium tracking-tight leading-[1.1] text-[var(--text-high)]">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-medium tracking-tight leading-[1] text-on-surface">
                       {activeArticle.title}
                     </h1>
 
                     {activeArticle.image && (
-                      <div className="aspect-[21/9] w-full rounded-[40px] overflow-hidden border border-white/5 relative group">
+                      <div className="aspect-[21/9] w-full rounded-[40px] overflow-hidden relative group">
                         <img 
                           src={activeArticle.image} 
                           className="w-full h-full object-cover brightness-75 group-hover:brightness-100 transition-all duration-700 hover:scale-105" 
@@ -350,15 +345,15 @@ export default function NewsFeed({
                         <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--color-primary)]" />
                         <span className="module-label">Executive Intelligence</span>
                       </div>
-                      <div className="text-lg md:text-2xl text-white/70 leading-relaxed font-light space-y-10">
+                      <div className="text-xl md:text-3xl text-text-mid leading-relaxed font-regular space-y-12">
                         {activeArticle.isLoading && !activeArticle.core ? (
-                          <div className="flex flex-col items-center py-12 gap-4">
-                            <Loader2 className="animate-spin text-[var(--accent)] opacity-50" size={32} />
-                            <span className="text-[10px] font-mono tracking-widest text-[var(--text-low)] uppercase">Decrypting stream...</span>
+                          <div className="flex flex-col items-center py-20 gap-6">
+                            <Loader2 className="animate-spin text-primary opacity-40" size={48} />
+                            <span className="text-[12px] font-mono tracking-[0.4em] text-text-lowest uppercase">Decrypting transmission signal...</span>
                           </div>
                         ) : (
                           (activeArticle.core || activeArticle.summary)?.split('\n\n').map((p, i) => (
-                            <p key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                            <p key={i} className="animate-fade-in opacity-90 hover:opacity-100 transition-opacity" style={{ animationDelay: `${i * 0.1}s` }}>
                               <DecryptionText text={p} delay={i * 0.1} isStreaming={activeArticle.isLoading} />
                             </p>
                           ))
@@ -375,14 +370,14 @@ export default function NewsFeed({
                           <Cpu size={14} className="text-primary opacity-50" />
                           <span className="module-label">Deep Context Analysis</span>
                         </div>
-                        <div className="text-md text-white/50 leading-relaxed font-light space-y-10">
+                        <div className="text-lg text-text-low leading-relaxed font-regular space-y-10">
                           {activeArticle.isLoading && !activeArticle.exploration ? (
-                            <div className="h-48 flex items-center justify-center bg-white/[0.02] rounded-[40px]">
-                              <span className="module-label opacity-40 animate-pulse">Running heuristic scan...</span>
+                            <div className="h-64 flex items-center justify-center bg-white/[0.02] rounded-[48px]">
+                              <span className="module-label opacity-40 animate-pulse tracking-[0.5em]">Running heuristic deeper scan...</span>
                             </div>
                           ) : (
                             activeArticle.exploration?.split('\n\n').map((p, i) => (
-                              <p key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.15}s` }}>
+                              <p key={i} className="animate-fade-in opacity-70 hover:opacity-90 transition-opacity" style={{ animationDelay: `${i * 0.15}s` }}>
                                 <DecryptionText text={p} delay={i * 0.2} isStreaming={activeArticle.isLoading} />
                               </p>
                             ))
@@ -395,7 +390,7 @@ export default function NewsFeed({
               </div>
 
               {/* Right Sidebar: Forecasting & Data Widgets */}
-              <aside className="w-full lg:w-[480px] h-full overflow-y-auto bg-surface-mid/80 backdrop-blur-3xl border-l border-white/5 p-8 md:p-12 space-y-12">
+              <aside className="w-full lg:w-[560px] h-full overflow-y-auto bg-surface-mid/80 backdrop-blur-3xl p-12 lg:p-16 space-y-16">
                 
                 {/* Visual Analysis Marker */}
                 <div className="voyager-module p-10 flex flex-col gap-6 group mb-12">
@@ -403,7 +398,7 @@ export default function NewsFeed({
                     <Zap size={14} className="text-primary" />
                     <span className="module-label">Forecasting</span>
                   </div>
-                  <div className="p-8 rounded-[40px] bg-white/[0.04] border border-white/5 shadow-inner space-y-6">
+                  <div className="p-8 rounded-[40px] bg-white/[0.04] shadow-inner space-y-6">
 
                     <p className="text-md font-medium text-white/80 leading-relaxed italic">
                       {activeArticle.outlook || (activeArticle.isLoading ? "Synthesizing future delta..." : "Predicting impact...")}
@@ -420,7 +415,7 @@ export default function NewsFeed({
                   </div>
                   <div className="space-y-4">
                       {activeArticle.tips.map((tip, i) => (
-                        <div key={i} className="flex gap-5 p-6 rounded-[32px] bg-white/[0.04] border border-white/5 group hover:bg-white/[0.06] transition-all">
+                        <div key={i} className="flex gap-5 p-6 rounded-[32px] bg-white/[0.04] group hover:bg-white/[0.06] transition-all">
 
                           <span className="text-primary font-mono text-[10px] font-black opacity-30 mt-1">0{i+1}</span>
                           <p className="text-[12px] text-white/50 group-hover:text-white/80 leading-relaxed transition-colors">{tip}</p>
@@ -433,15 +428,15 @@ export default function NewsFeed({
 
 
                 {/* External Link */}
-                <div className="pt-6">
+                <div className="pt-10">
                   <a 
                     href={activeArticle.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full h-16 flex items-center justify-center gap-4 rounded-[40px] bg-primary text-void text-[12px] font-black tracking-[0.2em] uppercase hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_40px_rgba(164,230,255,0.2)]"
+                    className="w-full h-20 flex items-center justify-center gap-6 rounded-[48px] bg-primary text-background text-[14px] font-black tracking-[0.3em] uppercase hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_25px_60px_rgba(164,230,255,0.25)]"
                   >
-                    Explore Matrix
-                    <ExternalLink size={16} />
+                    Bridge to Source
+                    <ExternalLink size={20} />
                   </a>
                 </div>
               </aside>
