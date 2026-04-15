@@ -5,7 +5,7 @@ import {
   Globe, 
   Terminal as TerminalIcon, 
   Library, 
-  Sensors,
+  Signal,
   HelpCircle,
   LogOut,
   Plus
@@ -21,7 +21,7 @@ export default function SideNav() {
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl bg-surface-highest overflow-hidden p-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
             <img 
-              src="/Users/sankycz/.gemini/antigravity/brain/d52ef4ad-f7f7-40c9-8fd3-249539940e6f/voyager_avatar_1776257947522.png" 
+              src="/voyager-avatar.png" 
               alt="Voyager Explorer"
               className="w-full h-full rounded-[14px] object-cover"
             />
@@ -38,7 +38,7 @@ export default function SideNav() {
         <SideLink icon={<Globe size={18} />} label="Cosmos" />
         <SideLink icon={<TerminalIcon size={18} />} label="Terminal" />
         <SideLink icon={<Library size={18} />} label="Library" />
-        <SideLink icon={<Sensors size={18} />} label="Signals" />
+        <SideLink icon={<Signal size={18} />} label="Signals" />
       </nav>
 
       <div className="mt-auto flex flex-col gap-4">
