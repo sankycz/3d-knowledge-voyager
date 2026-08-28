@@ -10,7 +10,7 @@ export function useTrackLanes() {
 
   useEffect(() => {
     const stored = loadLanes();
-    setLanes(stored && stored.length > 0 ? stored : defaultLanes(3));
+    setLanes(stored && stored.length > 0 ? stored : defaultLanes());
     hydrated.current = true;
   }, []);
 
@@ -25,10 +25,11 @@ export function useTrackLanes() {
       const lane: TrackLane = {
         id: `lane-${index + 1}-${Date.now().toString(36)}`,
         name: name ?? `Kolej ${index + 1}`,
-        bandTop: 0,
-        bandBottom: 1,
-        gateX: 0.5,
-        leftToRightIsArrival: true,
+        x1: 0.3,
+        y1: 0.55,
+        x2: 0.7,
+        y2: 0.45,
+        normalIsArrival: true,
         departures: 0,
         arrivals: 0,
         dots: [],

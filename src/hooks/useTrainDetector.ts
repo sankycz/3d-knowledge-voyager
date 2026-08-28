@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { CrossingKind, DetectedBox, TrackLane, TrackedObject } from "@/lib/types";
+import { laneSide, nearestLane } from "@/lib/geometry";
 
 export type ModelStatus = "idle" | "loading" | "ready" | "error";
 
@@ -30,8 +31,8 @@ interface UseTrainDetectorOptions {
   scriptsReady: boolean;
   scoreThreshold?: number;
   onCrossing: (laneId: string, kind: CrossingKind, point: { x: number; y: number }) => void;
-  /** When true, every observed train's y-center is appended here for lane auto-detection. */
-  calibrationSink?: number[] | null;
+  /** When true, every observed train's centroid is appended here for lane auto-detection. */
+  calibrationSink?: { x: number; y: number }[] | null;
 }
 
 const STALE_MS = 2500;
@@ -107,19 +108,17 @@ export function useTrainDetector({
       const lanes = lanesRef.current ?? [];
       const prev = obj.centroids[obj.centroids.length - 2];
       const curr = obj.centroids[obj.centroids.length - 1];
-      const lane = lanes.find((l) => curr.y >= l.bandTop && curr.y <= l.bandBottom);
+      const lane = nearestLane(lanes, curr.x, curr.y);
       if (!lane) return;
-      const gate = lane.gateX;
-      let kind: CrossingKind | null = null;
-      if (prev.x < gate && curr.x >= gate) {
-        kind = lane.leftToRightIsArrival ? "arrival" : "departure";
-      } else if (prev.x > gate && curr.x <= gate) {
-        kind = lane.leftToRightIsArrival ? "departure" : "arrival";
-      }
-      if (kind) {
-        obj.countedForLane = lane.id;
-        onCrossingRef.current(lane.id, kind, curr);
-      }
+
+      const prevSide = laneSide(lane, prev.x, prev.y);
+      const currSide = laneSide(lane, curr.x, curr.y);
+      if (Math.sign(prevSide) === Math.sign(currSide)) return;
+
+      const crossedToPositive = currSide > prevSide;
+      const kind: CrossingKind = crossedToPositive === lane.normalIsArrival ? "arrival" : "departure";
+      obj.countedForLane = lane.id;
+      onCrossingRef.current(lane.id, kind, curr);
     }
 
     const loop = async (t: number) => {
@@ -162,7 +161,7 @@ export function useTrainDetector({
       for (const box of boxes) {
         const cx = box.x + box.width / 2;
         const cy = box.y + box.height / 2;
-        if (calibrationSinkRef.current) calibrationSinkRef.current.push(cy);
+        if (calibrationSinkRef.current) calibrationSinkRef.current.push({ x: cx, y: cy });
 
         let bestId: string | null = null;
         let bestDist = Infinity;

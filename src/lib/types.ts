@@ -9,13 +9,17 @@ export interface DotEvent {
 export interface TrackLane {
   id: string;
   name: string;
-  /** Normalized vertical band of the frame this lane occupies, 0 = top, 1 = bottom. */
-  bandTop: number;
-  bandBottom: number;
-  /** Normalized x position (0-1) of the counting gate line inside the band. */
-  gateX: number;
-  /** When true, crossing the gate left-to-right counts as an arrival; otherwise a departure. */
-  leftToRightIsArrival: boolean;
+  /** Endpoints of the line drawn along the track, normalized 0-1, also used as the counting gate. */
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  /**
+   * A train crosses the line moving from the segment's "negative" side to
+   * its "positive" side (per the 2D cross product of the segment direction)
+   * — when true that crossing counts as an arrival, otherwise a departure.
+   */
+  normalIsArrival: boolean;
   departures: number;
   arrivals: number;
   /** Capped, most-recent-last history of crossings for this lane. */

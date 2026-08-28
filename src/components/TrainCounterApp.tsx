@@ -1,13 +1,15 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Plus, RotateCcw, ScanLine, Trash2, Video, VideoOff } from "lucide-react";
 import { useTrackLanes } from "@/hooks/useTrackLanes";
 import { useScreenCapture } from "@/hooks/useScreenCapture";
 import { useTrainDetector } from "@/hooks/useTrainDetector";
-import { clusterLaneBands } from "@/lib/laneClustering";
+import { clusterLaneLines } from "@/lib/laneClustering";
 import { CrossingKind, DetectedBox, TrackLane } from "@/lib/types";
+
+const HANDLE_HIT_RADIUS = 0.025;
 
 const YOUTUBE_VIDEO_ID = "tmlE1ct0cYk";
 const CALIBRATION_MS = 20000;
@@ -29,7 +31,8 @@ export default function TrainCounterApp() {
   const lanesRef = useRef<TrackLane[]>(lanes);
   const liveBoxesRef = useRef<DetectedBox[]>([]);
   const transientDotsRef = useRef<TransientDot[]>([]);
-  const calibrationSamplesRef = useRef<number[] | null>(null);
+  const calibrationSamplesRef = useRef<{ x: number; y: number }[] | null>(null);
+  const dragRef = useRef<{ laneId: string; end: 1 | 2 } | null>(null);
 
   useEffect(() => {
     lanesRef.current = lanes;
@@ -82,28 +85,29 @@ export default function TrainCounterApp() {
         const samples = calibrationSamplesRef.current ?? [];
         calibrationSamplesRef.current = null;
         setCalibrating(false);
-        const bands = clusterLaneBands(samples);
-        if (bands.length === 0) {
+        const fitted = clusterLaneLines(samples);
+        if (fitted.length === 0) {
           setNotice("Během kalibrace nebyl rozpoznán žádný vlak. Zkuste to znovu, nebo koleje přidejte ručně.");
           return;
         }
         const existing = lanesRef.current;
-        const next: TrackLane[] = bands.map((band, i) => {
+        const next: TrackLane[] = fitted.map((line, i) => {
           const prior = existing[i];
           return {
             id: prior?.id ?? `lane-${i + 1}-${Date.now().toString(36)}`,
             name: prior?.name ?? `Kolej ${i + 1}`,
-            bandTop: band.bandTop,
-            bandBottom: band.bandBottom,
-            gateX: prior?.gateX ?? 0.5,
-            leftToRightIsArrival: prior?.leftToRightIsArrival ?? true,
+            x1: line.x1,
+            y1: line.y1,
+            x2: line.x2,
+            y2: line.y2,
+            normalIsArrival: prior?.normalIsArrival ?? true,
             departures: prior?.departures ?? 0,
             arrivals: prior?.arrivals ?? 0,
             dots: prior?.dots ?? [],
           };
         });
         replaceLanes(next);
-        setNotice(`Rozpoznáno ${next.length} kolejí podle pohybu vlaků. Hranice a bránu lze doladit ručně.`);
+        setNotice(`Rozpoznáno ${next.length} kolejí podle pohybu vlaků. Přetažením konců je lze doladit.`);
       }
     }, 200);
     return () => clearInterval(interval);
@@ -140,11 +144,12 @@ export default function TrainCounterApp() {
       ctx.clearRect(0, 0, w, h);
 
       for (const lane of lanesRef.current) {
-        const top = lane.bandTop * h;
-        const bottom = lane.bandBottom * h;
-        const mid = (top + bottom) / 2;
+        const x1 = lane.x1 * w;
+        const y1 = lane.y1 * h;
+        const x2 = lane.x2 * w;
+        const y2 = lane.y2 * h;
 
-        // Recognized track: a bold dotted line down the middle of the band.
+        // Recognized track: a bold dotted line along the actual rail, however it's angled.
         ctx.save();
         ctx.strokeStyle = "#a4e6ff";
         ctx.lineWidth = 4 * dpr;
@@ -153,33 +158,25 @@ export default function TrainCounterApp() {
         ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
         ctx.shadowBlur = 4 * dpr;
         ctx.beginPath();
-        ctx.moveTo(0, mid);
-        ctx.lineTo(w, mid);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
         ctx.restore();
 
-        // Band boundaries, dotted, fainter.
+        // Draggable endpoint handles.
         ctx.save();
-        ctx.strokeStyle = "rgba(164, 230, 255, 0.7)";
-        ctx.lineWidth = 2 * dpr;
-        ctx.setLineDash([2 * dpr, 8 * dpr]);
-        for (const y of [top, bottom]) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        // Counting gate, dashed, distinct color so it reads separately from the track line.
-        ctx.save();
+        ctx.fillStyle = "#0e0e0e";
         ctx.strokeStyle = "#fbbf24";
         ctx.lineWidth = 2 * dpr;
-        ctx.setLineDash([6 * dpr, 6 * dpr]);
-        ctx.beginPath();
-        ctx.moveTo(lane.gateX * w, top);
-        ctx.lineTo(lane.gateX * w, bottom);
-        ctx.stroke();
+        for (const [hx, hy] of [
+          [x1, y1],
+          [x2, y2],
+        ]) {
+          ctx.beginPath();
+          ctx.arc(hx, hy, 6 * dpr, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
         ctx.restore();
 
         // Label with a background chip so it's legible over any footage.
@@ -189,11 +186,13 @@ export default function TrainCounterApp() {
         const paddingX = 6 * dpr;
         const textWidth = ctx.measureText(label).width;
         const chipHeight = 20 * dpr;
+        const labelX = Math.min(x1, x2);
+        const labelY = (y1 + y2) / 2;
         ctx.fillStyle = "rgba(14, 14, 14, 0.75)";
-        ctx.fillRect(6 * dpr, mid - chipHeight / 2, textWidth + paddingX * 2, chipHeight);
+        ctx.fillRect(labelX, labelY - chipHeight / 2, textWidth + paddingX * 2, chipHeight);
         ctx.fillStyle = "#a4e6ff";
         ctx.textBaseline = "middle";
-        ctx.fillText(label, 6 * dpr + paddingX, mid);
+        ctx.fillText(label, labelX + paddingX, labelY);
         ctx.restore();
       }
 
@@ -234,6 +233,49 @@ export default function TrainCounterApp() {
       cancelAnimationFrame(rafId);
       observer.disconnect();
     };
+  }, []);
+
+  const pointToNormalized = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    };
+  }, []);
+
+  const handlePointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLCanvasElement>) => {
+      const { x, y } = pointToNormalized(e);
+      for (const lane of lanesRef.current) {
+        for (const end of [1, 2] as const) {
+          const hx = end === 1 ? lane.x1 : lane.x2;
+          const hy = end === 1 ? lane.y1 : lane.y2;
+          if (Math.hypot(hx - x, hy - y) <= HANDLE_HIT_RADIUS) {
+            dragRef.current = { laneId: lane.id, end };
+            e.currentTarget.setPointerCapture(e.pointerId);
+            return;
+          }
+        }
+      }
+    },
+    [pointToNormalized]
+  );
+
+  const handlePointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLCanvasElement>) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      const { x, y } = pointToNormalized(e);
+      const cx = Math.min(1, Math.max(0, x));
+      const cy = Math.min(1, Math.max(0, y));
+      updateLane(drag.laneId, drag.end === 1 ? { x1: cx, y1: cy } : { x2: cx, y2: cy });
+    },
+    [pointToNormalized, updateLane]
+  );
+
+  const handlePointerUp = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (dragRef.current) e.currentTarget.releasePointerCapture(e.pointerId);
+    dragRef.current = null;
   }, []);
 
   const modelLabel =
@@ -333,12 +375,20 @@ export default function TrainCounterApp() {
               allowFullScreen
             />
             <video ref={videoRef} muted playsInline className="absolute inset-0 z-0 h-full w-full object-contain opacity-0" />
-            <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 z-10 h-full w-full cursor-crosshair touch-none"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            />
           </div>
           <p className="mt-3 text-xs text-[var(--color-text-low)]">
             Tip: po kliknutí na „Spustit sdílení obrazovky“ vyberte v dialogu prohlížeče <strong>tuto kartu</strong>, aby šlo
-            analyzovat přímo vestavěné video výše. Pokud se ve videu objeví reklama, rozpoznávání se na tu dobu jednoduše
-            zastaví a samo pokračuje, jakmile se vrátí živý záběr.
+            analyzovat přímo vestavěné video výše. Žluté koncové body u každé tečkované koleje jde tažením myší přesunout
+            přesně na skutečnou kolej. Pokud se ve videu objeví reklama, rozpoznávání se na tu dobu jednoduše zastaví a samo
+            pokračuje, jakmile se vrátí živý záběr.
           </p>
         </div>
 
@@ -370,7 +420,7 @@ export default function TrainCounterApp() {
                 key={lane.id}
                 lane={lane}
                 onRename={(name) => renameLane(lane.id, name)}
-                onFlipDirection={() => updateLane(lane.id, { leftToRightIsArrival: !lane.leftToRightIsArrival })}
+                onFlipDirection={() => updateLane(lane.id, { normalIsArrival: !lane.normalIsArrival })}
                 onRemove={() => removeLane(lane.id)}
                 onReset={() => resetLane(lane.id)}
               />
