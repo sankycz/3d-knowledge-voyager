@@ -7,7 +7,7 @@ import { useTrackLanes } from "@/hooks/useTrackLanes";
 import { useScreenCapture } from "@/hooks/useScreenCapture";
 import { useTrainDetector } from "@/hooks/useTrainDetector";
 import { clusterLaneBands } from "@/lib/laneClustering";
-import { CrossingKind, TrackLane } from "@/lib/types";
+import { CrossingKind, DetectedBox, TrackLane } from "@/lib/types";
 
 const YOUTUBE_VIDEO_ID = "tmlE1ct0cYk";
 const CALIBRATION_MS = 20000;
@@ -27,7 +27,7 @@ export default function TrainCounterApp() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lanesRef = useRef<TrackLane[]>(lanes);
-  const liveBoxesRef = useRef<{ x: number; y: number; width: number; height: number }[]>([]);
+  const liveBoxesRef = useRef<DetectedBox[]>([]);
   const transientDotsRef = useRef<TransientDot[]>([]);
   const calibrationSamplesRef = useRef<number[] | null>(null);
 
@@ -142,31 +142,77 @@ export default function TrainCounterApp() {
       for (const lane of lanesRef.current) {
         const top = lane.bandTop * h;
         const bottom = lane.bandBottom * h;
-        ctx.strokeStyle = "rgba(164, 230, 255, 0.35)";
-        ctx.lineWidth = 1;
+        const mid = (top + bottom) / 2;
+
+        // Recognized track: a bold dotted line down the middle of the band.
+        ctx.save();
+        ctx.strokeStyle = "#a4e6ff";
+        ctx.lineWidth = 4 * dpr;
+        ctx.lineCap = "round";
+        ctx.setLineDash([1, 14 * dpr]);
+        ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+        ctx.shadowBlur = 4 * dpr;
         ctx.beginPath();
-        ctx.moveTo(0, top);
-        ctx.lineTo(w, top);
+        ctx.moveTo(0, mid);
+        ctx.lineTo(w, mid);
         ctx.stroke();
+        ctx.restore();
 
-        ctx.fillStyle = "rgba(164, 230, 255, 0.85)";
-        ctx.font = "12px var(--font-sans, sans-serif)";
-        ctx.fillText(lane.name, 8, top + 16);
+        // Band boundaries, dotted, fainter.
+        ctx.save();
+        ctx.strokeStyle = "rgba(164, 230, 255, 0.7)";
+        ctx.lineWidth = 2 * dpr;
+        ctx.setLineDash([2 * dpr, 8 * dpr]);
+        for (const y of [top, bottom]) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+        ctx.restore();
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.setLineDash([6, 6]);
+        // Counting gate, dashed, distinct color so it reads separately from the track line.
+        ctx.save();
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = 2 * dpr;
+        ctx.setLineDash([6 * dpr, 6 * dpr]);
         ctx.beginPath();
         ctx.moveTo(lane.gateX * w, top);
         ctx.lineTo(lane.gateX * w, bottom);
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Label with a background chip so it's legible over any footage.
+        ctx.save();
+        ctx.font = `${Math.round(13 * dpr)}px system-ui, sans-serif`;
+        const label = lane.name;
+        const paddingX = 6 * dpr;
+        const textWidth = ctx.measureText(label).width;
+        const chipHeight = 20 * dpr;
+        ctx.fillStyle = "rgba(14, 14, 14, 0.75)";
+        ctx.fillRect(6 * dpr, mid - chipHeight / 2, textWidth + paddingX * 2, chipHeight);
+        ctx.fillStyle = "#a4e6ff";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, 6 * dpr + paddingX, mid);
+        ctx.restore();
       }
 
-      ctx.strokeStyle = "rgba(74, 222, 128, 0.8)";
-      ctx.lineWidth = 2;
+      ctx.save();
+      ctx.strokeStyle = "#facc15";
+      ctx.lineWidth = 3 * dpr;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+      ctx.shadowBlur = 3 * dpr;
       for (const box of liveBoxesRef.current) {
-        ctx.strokeRect(box.x * w, box.y * h, box.width * w, box.height * h);
+        const bx = box.x * w;
+        const by = box.y * h;
+        const bw = box.width * w;
+        const bh = box.height * h;
+        ctx.strokeRect(bx, by, bw, bh);
+        ctx.font = `${Math.round(12 * dpr)}px system-ui, sans-serif`;
+        ctx.fillStyle = "#facc15";
+        ctx.fillText(`vlak ${Math.round(box.score * 100)}%`, bx, Math.max(by - 4 * dpr, 10 * dpr));
       }
+      ctx.restore();
 
       const now = Date.now();
       const life = 1800;
@@ -280,14 +326,14 @@ export default function TrainCounterApp() {
 
           <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-3xl bg-black">
             <iframe
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 z-0 h-full w-full"
               src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1`}
               title="Živý přenos vlakové kamery"
               allow="autoplay; encrypted-media"
               allowFullScreen
             />
-            <video ref={videoRef} muted playsInline className="absolute inset-0 h-full w-full object-contain opacity-0" />
-            <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />
+            <video ref={videoRef} muted playsInline className="absolute inset-0 z-0 h-full w-full object-contain opacity-0" />
+            <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
           </div>
           <p className="mt-3 text-xs text-[var(--color-text-low)]">
             Tip: po kliknutí na „Spustit sdílení obrazovky“ vyberte v dialogu prohlížeče <strong>tuto kartu</strong>, aby šlo
