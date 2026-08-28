@@ -1,29 +1,22 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
-import { AuthProvider } from "@/components/AuthProvider";
-import { ThemeProvider } from "@/components/ThemeContext";
+import { Space_Grotesk, Manrope } from "next/font/google";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Knowledge Voyager | AI News Intelligence",
-  description: "3D interaktivní zpravodajská platforma pro 21. století. Objevujte AI novinky v imerzivním prostoru.",
+  title: "Počítadlo vlakových souprav",
+  description: "Sledování a počítání odjíždějících a přijíždějících vlakových souprav na jednotlivých kolejích.",
 };
 
 export default function RootLayout({
@@ -32,18 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="cs"
-      suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans transition-colors duration-500">
-      <ThemeProvider>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-      </ThemeProvider>
-    </body>
+    <html lang="cs" className={`${spaceGrotesk.variable} ${manrope.variable} antialiased`}>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

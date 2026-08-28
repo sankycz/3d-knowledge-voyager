@@ -3,83 +3,29 @@
 @theme {
   --font-display: "Space Grotesk", var(--font-space-grotesk), sans-serif;
   --font-sans: "Manrope", var(--font-manrope), sans-serif;
-  --font-mono: var(--font-jetbrains-mono), monospace;
-  
-  /* The Obsidian Palette (Cyber-Glass 2.0) */
-  --color-primary: #a4e6ff;
-  --color-primary-container: #68a9c1;
-  --color-secondary: #16c0fd;
-  --color-secondary-container: #006688;
-  --color-tertiary: #89a5ff;
-  --color-tertiary-container: #7696fd;
-  --color-background: #0e0e0e;
-  --color-surface: #0e0e0e;
-  --color-on-surface: #ffffff;
-  --color-surface-dim: #0e0e0e;
-  --color-outline-variant: rgba(255, 255, 255, 0.03);
 
-  /* Typography Tones (Intellectual Contrast) */
+  --color-primary: #a4e6ff;
+  --color-secondary: #16c0fd;
+  --color-background: #0e0e0e;
+
   --color-text-high: #ffffff;
   --color-text-mid: #adaaaa;
   --color-text-low: #767575;
   --color-text-lowest: #484847;
 
-  /* Obsidian Surface Tiers (Depth via Color, not Borders) */
-  --color-surface-lowest: #000000;
-  --color-surface-low: #131313;
-  --color-surface-mid: #1a1919;
-  --color-surface-high: #201f1f;
-  --color-surface-highest: #262626;
-
-  /* Premium Atmospheric Tokens */
-  --glass-fill: rgba(38, 38, 38, 0.4);
-  --glass-blur: 20px;
-  --glow-primary: rgba(164, 230, 255, 0.12);
   --ambient-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.95);
-  --border-low: rgba(255, 255, 255, 0.03);
-
-  /* Spacing Scale (Luxurious Breathability) */
-  --spacing-editorial: 4rem;
 }
 
 @layer base {
-  :root {
-    --bg-void: #000000;
-    --bg-deep: #020202;
-  }
-
-  [data-theme='light'] {
-    --bg-void: #f9fbfd;
-    --bg-deep: #ffffff;
-    --color-accent-data: #0088cc;
-    --color-accent-synth: #8b5cf6;
-    --color-accent-bio: #10b981;
-    --color-text-high: #0f172a;
-    --color-text-mid: #475569;
-    --color-text-low: #64748b;
-    
-    --color-surface-lowest: #f1f5f9;
-    --color-surface-low: #ffffff;
-    --color-surface-mid: #f8fafc;
-    --color-surface-high: #f1f5f9;
-    --color-surface-highest: #e2e8f0;
-
-    --glass-fill: rgba(255, 255, 255, 0.85);
-    --ambient-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.1);
-    --border-low: rgba(0, 0, 0, 0.06);
-  }
-
   body {
     color: var(--color-text-mid);
     background: var(--color-background);
     font-family: var(--font-sans);
-    overflow: hidden;
     -webkit-font-smoothing: antialiased;
     letter-spacing: -0.01em;
-    transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  h1, h2, h3, h4, .font-display {
+  h1, h2, .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     line-height: normal;
@@ -87,90 +33,21 @@
   }
 }
 
-/* THE ETHEREAL ARCHIVIST (Cyber-Glass 2.0) */
-@utility glass-panel {
-  background: var(--glass-fill);
-  backdrop-filter: blur(var(--glass-blur));
-  border-radius: 40px;
-  position: relative;
-  overflow: hidden;
-  border: none; /* No-Line Rule */
-  box-shadow: var(--ambient-shadow);
-}
-
-@utility glass-separator {
-  height: 1px;
-  width: 100%;
-  background: linear-gradient(90deg, transparent, var(--color-outline-variant), transparent);
-  opacity: 0.2;
-}
-
-@utility depth-glow {
-  background: radial-gradient(circle at center, var(--glow-primary) 0%, transparent 70%);
-  filter: blur(60px);
-}
-
-
 @layer components {
-
-  .voyager-module {
-    @apply transition-all duration-700;
-    background: var(--color-surface-low);
-    border-radius: 2.5rem;
-    box-shadow: var(--ambient-shadow);
-  }
-
   .voyager-section {
-    @apply relative overflow-hidden rounded-[40px];
-    background: var(--color-surface-low);
+    @apply relative overflow-hidden rounded-[32px];
+    background: #131313;
     box-shadow: var(--ambient-shadow);
   }
 
-  .article-island {
-    @apply relative overflow-hidden rounded-3xl transition-all duration-500 cursor-pointer;
-    background: var(--color-surface-mid);
-    padding: 2rem;
-    
-    &:hover {
-      background: var(--color-surface-high);
-      transform: scale(1.002);
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-    }
-  }
-
-  /* Editorial Typography Hooks */
   .editorial-headline {
-    @apply font-display font-bold uppercase leading-tight;
+    @apply font-display font-bold;
     color: var(--color-text-high);
-    letter-spacing: 0.05em;
-  }
-
-  .subheadline {
-    @apply text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-4 block opacity-80;
   }
 
   .module-label {
-    @apply text-[9px] font-black uppercase tracking-[0.2em] text-text-low;
+    @apply text-[10px] font-black uppercase tracking-[0.3em] text-[var(--color-text-low)];
   }
-
-  /* Navigation Pills */
-  .nav-pill {
-    @apply px-5 py-2.5 rounded-full transition-all duration-500 flex items-center gap-2;
-    @apply text-text-low bg-white/[0.02];
-    &:hover {
-      color: var(--color-text-high);
-      background: var(--color-surface-highest);
-    }
-  }
-
-  .nav-pill-active {
-    @apply text-primary bg-primary/10;
-  }
-}
-
-/* Animations & Transitions */
-.grid-transition {
-  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -179,13 +56,4 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-@keyframes dash {
-  from { stroke-dashoffset: 100; }
-  to { stroke-dashoffset: 0; }
-}
-
-.animate-dash {
-  animation: dash 2s linear infinite;
 }
