@@ -115,8 +115,14 @@ export function useTrainDetector({
       const currSide = laneSide(lane, curr.x, curr.y);
       if (Math.sign(prevSide) === Math.sign(currSide)) return;
 
-      const crossedToPositive = currSide > prevSide;
-      const kind: CrossingKind = crossedToPositive === lane.normalIsArrival ? "arrival" : "departure";
+      // This camera looks down at the station: overall downward drift since
+      // the train was first picked up means it's pulling away (departure),
+      // upward drift means it's pulling in toward the platforms (arrival).
+      const first = obj.centroids[0];
+      const movingDown = curr.y >= first.y;
+      let kind: CrossingKind = movingDown ? "departure" : "arrival";
+      if (lane.invertDirection) kind = kind === "departure" ? "arrival" : "departure";
+
       obj.countedForLane = lane.id;
       onCrossingRef.current(lane.id, kind, curr);
     }

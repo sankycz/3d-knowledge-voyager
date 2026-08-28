@@ -100,7 +100,7 @@ export default function TrainCounterApp() {
             y1: line.y1,
             x2: line.x2,
             y2: line.y2,
-            normalIsArrival: prior?.normalIsArrival ?? true,
+            invertDirection: prior?.invertDirection ?? false,
             departures: prior?.departures ?? 0,
             arrivals: prior?.arrivals ?? 0,
             dots: prior?.dots ?? [],
@@ -420,7 +420,7 @@ export default function TrainCounterApp() {
                 key={lane.id}
                 lane={lane}
                 onRename={(name) => renameLane(lane.id, name)}
-                onFlipDirection={() => updateLane(lane.id, { normalIsArrival: !lane.normalIsArrival })}
+                onFlipDirection={() => updateLane(lane.id, { invertDirection: !lane.invertDirection })}
                 onRemove={() => removeLane(lane.id)}
                 onReset={() => resetLane(lane.id)}
               />

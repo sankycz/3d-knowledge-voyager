@@ -45,10 +45,10 @@ export function saveLanes(lanes: TrackLane[]) {
  */
 export function defaultLanes(): TrackLane[] {
   const seeds: Omit<TrackLane, "id" | "departures" | "arrivals" | "dots">[] = [
-    { name: "Kolej 1", x1: 0.18, y1: 0.47, x2: 0.62, y2: 0.44, normalIsArrival: true },
-    { name: "Kolej 2", x1: 0.63, y1: 0.34, x2: 0.97, y2: 0.29, normalIsArrival: true },
-    { name: "Kolej 3", x1: 0.63, y1: 0.47, x2: 0.97, y2: 0.4, normalIsArrival: true },
-    { name: "Kolej 4", x1: 0.63, y1: 0.59, x2: 0.97, y2: 0.5, normalIsArrival: true },
+    { name: "Kolej 1", x1: 0.18, y1: 0.47, x2: 0.62, y2: 0.44, invertDirection: false },
+    { name: "Kolej 2", x1: 0.63, y1: 0.34, x2: 0.97, y2: 0.29, invertDirection: false },
+    { name: "Kolej 3", x1: 0.63, y1: 0.47, x2: 0.97, y2: 0.4, invertDirection: false },
+    { name: "Kolej 4", x1: 0.63, y1: 0.59, x2: 0.97, y2: 0.5, invertDirection: false },
   ];
   return seeds.map((seed, i) => ({
     ...seed,

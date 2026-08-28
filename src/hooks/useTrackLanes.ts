@@ -29,7 +29,7 @@ export function useTrackLanes() {
         y1: 0.55,
         x2: 0.7,
         y2: 0.45,
-        normalIsArrival: true,
+        invertDirection: false,
         departures: 0,
         arrivals: 0,
         dots: [],

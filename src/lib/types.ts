@@ -15,11 +15,12 @@ export interface TrackLane {
   x2: number;
   y2: number;
   /**
-   * A train crosses the line moving from the segment's "negative" side to
-   * its "positive" side (per the 2D cross product of the segment direction)
-   * — when true that crossing counts as an arrival, otherwise a departure.
+   * This camera looks down at the station from above: trains moving toward
+   * the bottom of the frame are pulling away (departure), trains moving
+   * toward the top are pulling in (arrival). Set true to flip that rule for
+   * one lane whose track runs the other way.
    */
-  normalIsArrival: boolean;
+  invertDirection: boolean;
   departures: number;
   arrivals: number;
   /** Capped, most-recent-last history of crossings for this lane. */
