@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - claude/train-counter-tracks-w4cig2
   workflow_dispatch:
 
 permissions:
